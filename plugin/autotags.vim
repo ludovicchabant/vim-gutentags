@@ -113,6 +113,10 @@ endfunction
 function! s:get_tagfile_for(path) abort
     let l:path = s:stripslash(a:path)
     let l:previous_path = ""
+    let l:markers = g:autotags_project_root[:]
+    if exists('g:ctrlp_root_markers')
+        let l:markers += g:ctrlp_root_markers
+    endif
     while l:path != l:previous_path
         for root in g:autotags_project_root
             if getftype(l:path . '/' . root) != ""
