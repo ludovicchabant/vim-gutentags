@@ -37,7 +37,7 @@
 1. Introduction                                 *autotags-intro*
 
 Autotags is a plugin that takes care of the much needed management of tags
-files in VIM. It will (re)generate tag files as you work while staying
+files in Vim. It will (re)generate tag files as you work while staying
 completely out of your way. It will even do its best to keep those tag files
 out of your way too. It has no dependencies and just works.
 
@@ -61,11 +61,11 @@ Also, Autotags is clever enough to not stumble upon itself by triggering
 multiple ctags processes if you save files to fast, or your project is really
 big.
 
-There are some similar VIM plugins out there ("vim-tags", "vim-autotag",
+There are some similar Vim plugins out there ("vim-tags", "vim-autotag",
 "vim-automatic-ctags", etc.). They all fail on one or more of the requirements
 I set for myself with Autotags:
 
-* No other dependency than running VIM: no Python, Ruby, or whatever.
+* No other dependency than running Vim: no Python, Ruby, or whatever.
 * Cross-platform: should work on at least Mac and Windows.
 * Incremental tags generation: don't re-generate the whole project all the
   time. This may be fine for small projects, but it doesn't scale.
