@@ -17,7 +17,7 @@ endif
 let g:loaded_autotags = 1
 
 if !exists('g:autotags_trace')
-    let g:autotags_trace = 1
+    let g:autotags_trace = 0
 endif
 
 if !exists('g:autotags_fake')
@@ -44,6 +44,22 @@ if !exists('g:autotags_project_root')
     let g:autotags_project_root = []
 endif
 let g:autotags_project_root += ['.git', '.hg', '.bzr', '_darcs']
+
+if !exists('g:autotags_exclude')
+    let g:autotags_exclude = []
+endif
+
+if !exists('g:autotags_generate_on_missing')
+    let g:autotags_generate_on_missing = 1
+endif
+
+if !exists('g:autotags_generate_on_write')
+    let g:autotags_generate_on_write = 1
+endif
+
+if !exists('g:autotags_auto_set_tags')
+    let g:autotags_auto_set_tags = 1
+endif
 
 " }}}
 
@@ -111,25 +127,43 @@ endfunction
 
 " Setup autotags for the current buffer.
 function! s:setup_autotags() abort
-    call s:trace("Scanning buffer '" . bufname('%') . "' for autotags setup...")
-    if exists('b:autotags_file')
+    if exists('b:autotags_file') && !g:autotags_debug
+        " This buffer already has autotags support.
         return
     endif
+
+    " Try and file what tags file we should manage.
+    call s:trace("Scanning buffer '" . bufname('%') . "' for autotags setup...")
     try
         let b:autotags_file = s:get_tagfile_for(expand('%:h'))
     catch /^autotags\:/
+        call s:trace("Can't figure out what tag file to use... no autotags support.")
         return
     endtry
 
+    " We know what tags file to manage! Now set things up.
     call s:trace("Setting autotags for buffer '" . bufname('%') . "' with tagfile: " . b:autotags_file)
 
+    " Set the tags file for Vim to use.
+    if g:autotags_auto_set_tags
+        execute 'setlocal tags^=' . b:autotags_file
+    endif
+
+    " Autocommands for updating the tags on save.
     let l:bn = bufnr('%')
     execute 'augroup autotags_buffer_' . l:bn
     execute '  autocmd!'
-    execute '  autocmd BufWritePost <buffer=' . l:bn . '> if g:autotags_enabled|call s:update_tags(0, 1)|endif'
+    execute '  autocmd BufWritePost <buffer=' . l:bn . '> call s:write_triggered_update_tags()'
     execute 'augroup end'
 
+    " Miscellaneous commands.
     command! -buffer -bang AutotagsUpdate :call s:manual_update_tags(<bang>0)
+
+    " If the tags file doesn't exist, start generating it now.
+    if g:autotags_generate_on_missing && !filereadable(b:autotags_file)
+        call s:trace("Generating missing tags file: " . b:autotags_file)
+        call s:update_tags(1, 0)
+    endif
 endfunction
 
 augroup autotags_detect
@@ -148,6 +182,7 @@ if has('win32')
 endif
 
 let s:update_queue = []
+let s:maybe_in_progress = []
 
 " Get how to execute an external command depending on debug settings.
 function! s:get_execute_cmd() abort
@@ -162,9 +197,25 @@ function! s:get_execute_cmd() abort
     endif
 endfunction
 
+" Get the suffix for how to execute an external command.
+function! s:get_execute_cmd_suffix() abort
+    if has('win32')
+        return ''
+    else
+        return ' &'
+    endif
+endfunction
+
 " (Re)Generate the tags file for the current buffer's file.
 function! s:manual_update_tags(bang) abort
     call s:update_tags(a:bang, 0)
+endfunction
+
+" (Re)Generate the tags file for a buffer that just go saved.
+function! s:write_triggered_update_tags() abort
+    if g:autotags_enabled && g:autotags_generate_on_write
+        call s:update_tags(0, 1)
+    endif
 endfunction
 
 " Update the tags file for the current buffer's file.
@@ -180,7 +231,6 @@ endfunction
 " is specified, it will go to the autotags-defined file.
 function! s:update_tags(write_mode, queue_mode, ...) abort
     " Figure out where to save.
-    let l:tags_file = 0
     if a:0 == 1
         let l:tags_file = a:1
     else
@@ -214,22 +264,38 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
     try
         " Build the command line.
         let l:cmd = s:get_execute_cmd() . s:runner_exe
-        let l:cmd .= ' --exe "' . g:autotags_executable . '"'
-        let l:cmd .= ' --tags "' . fnamemodify(l:tags_file, ':t') . '"'
+        let l:cmd .= ' -e "' . g:autotags_executable . '"'
+        let l:cmd .= ' -t "' . fnamemodify(l:tags_file, ':t') . '"'
         if a:write_mode == 0 && filereadable(l:tags_file)
             " CTags specifies paths relative to the tags file with a `./`
             " prefix, so we need to specify the same prefix otherwise it will
             " think those are different files and we'll end up with duplicate
             " entries.
             let l:rel_path = s:normalizepath('./' . expand('%:.'))
-            let l:cmd .= ' --source "' . l:rel_path . '"'
+            let l:cmd .= ' -s "' . l:rel_path . '"'
         endif
+        for ign in split(&wildignore, ',')
+            let l:cmd .= ' -x ' . ign
+        endfor
+        for exc in g:autotags_exclude
+            let l:cmd .= ' -x ' . exc
+        endfor
         if g:autotags_trace
-            let l:cmd .= ' --log "' . fnamemodify(l:tags_file, ':t') . '.log"'
+            if has('win32')
+                let l:cmd .= ' -l "' . fnamemodify(l:tags_file, ':t') . '.log"'
+            else
+                let l:cmd .= ' > "' . fnamemodify(l:tags_file, ':t') . '.log"'
+            endif
         endif
+        let l:cmd .= s:get_execute_cmd_suffix()
+
+        " Run the background process.
         call s:trace("Running: " . l:cmd)
         call s:trace("In:      " . l:work_dir)
         if !g:autotags_fake
+            " Flag this tags file as being in progress
+            call add(s:maybe_in_progress, fnamemodify(l:tags_file, ':p'))
+
             if !g:autotags_trace
                 silent execute l:cmd
             else
@@ -257,7 +323,7 @@ command! -bang -nargs=1 -complete=file AutotagsGenerate :call s:generate_tags(<b
 
 " }}}
 
-" Toggles {{{
+" Toggles and Miscellaneous Commands {{{
 
 command! AutotagsToggleEnabled :let g:autotags_enabled=!g:autotags_enabled
 command! AutotagsToggleTrace   :call autotags#trace()
@@ -306,6 +372,62 @@ function! autotags#fake(...)
         echom "autotags: Now running autotags for real."
     endif
     echom ""
+endfunction
+
+function! autotags#inprogress()
+    echom "autotags: generations in progress:"
+    for mip in s:maybe_in_progress
+        echom mip
+    endfor
+    echom ""
+endfunction
+
+" }}}
+
+" Statusline Functions {{{
+
+" Prints whether a tag file is being generated right now for the current
+" buffer in the status line.
+"
+" Arguments can be passed:
+" - args 1 and 2 are the prefix and suffix, respectively, of whatever output,
+"   if any, is going to be produced.
+"   (defaults to empty strings)
+" - arg 3 is the text to be shown if tags are currently being generated.
+"   (defaults to 'TAGS')
+"
+function! autotags#statusline(...) abort
+    if !exists('b:autotags_file')
+        " This buffer doesn't have autotags.
+        return ''
+    endif
+
+    " Figure out what the user is customizing.
+    let l:gen_msg = 'TAGS'
+    if a:0 >= 0
+        let l:gen_msg = a:1
+    endif
+
+    " To make this function as fast as possible, we first check whether the
+    " current buffer's tags file is 'maybe' being generated. This provides a
+    " nice and quick bail out for 99.9% of cases before we need to this the
+    " file-system to check the lock file.
+    let l:abs_tag_file = fnamemodify(b:autotags_file, ':p')
+    let l:found = index(s:maybe_in_progress, l:abs_tag_file)
+    if l:found < 0
+        return ''
+    endif
+    " It's maybe generating! Check if the lock file is still there.
+    if !filereadable(l:abs_tag_file . '.lock')
+        call remove(s:maybe_in_progress, l:found)
+        return ''
+    endif
+    " It's still there! So probably `ctags` is still running...
+    " (although there's a chance it crashed, or the script had a problem, and
+    " the lock file has been left behind... we could try and run some
+    " additional checks here to see if it's legitimately running, and
+    " otherwise delete the lock file... maybe in the future...)
+    return l:gen_msg
 endfunction
 
 " }}}

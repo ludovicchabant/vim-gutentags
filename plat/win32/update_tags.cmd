@@ -13,26 +13,26 @@ set LOG_FILE=
 
 :ParseArgs
 if [%1]==[] goto :DoneParseArgs
-if [%1]==[--exe] (
+if [%1]==[-e] (
     set CTAGS_EXE=%~2
     shift
     goto :LoopParseArgs
 )
-if [%1]==[--tags] (
+if [%1]==[-t] (
     set TAGS_FILE=%~2
     shift
     goto :LoopParseArgs
 )
-if [%1]==[--source] (
+if [%1]==[-s] (
     set UPDATED_SOURCE=%~2
     shift
     goto :LoopParseArgs
 )
-if [%1]==[--pause] (
+if [%1]==[-p] (
     set PAUSE_BEFORE_EXIT=1
     goto :LoopParseArgs
 )
-if [%1]==[--log] (
+if [%1]==[-l] (
     set LOG_FILE=%~2
     shift
     goto :LoopParseArgs
@@ -91,8 +91,9 @@ rem ==========================================
 echo Usage:
 echo    %~n0 ^<options^>
 echo.
-echo    --exe [exe=ctags]:  The ctags executable to run
-echo    --tags [file=tags]: The path to the ctags file to update
-echo    --source [file=]:   The path to the source file that needs updating
+echo    -e [exe=ctags]: The ctags executable to run
+echo    -t [file=tags]: The path to the ctags file to update
+echo    -s [file=]:     The path to the source file that needs updating
+echo    -l [log=]:      The log file to output to
 echo.
 
