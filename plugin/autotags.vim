@@ -335,8 +335,11 @@ command! -bang -nargs=1 -complete=file AutotagsGenerate :call s:generate_tags(<b
 
 command! AutotagsToggleEnabled :let g:autotags_enabled=!g:autotags_enabled
 command! AutotagsToggleTrace   :call autotags#trace()
-command! AutotagsToggleFake    :call autotags#fake()
 command! AutotagsUnlock        :call delete(b:autotags_file . '.lock')
+
+if g:autotags_debug
+    command! AutotagsToggleFake    :call autotags#fake()
+endif
 
 " }}}
 
