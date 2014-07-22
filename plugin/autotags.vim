@@ -288,7 +288,11 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
             if has('win32')
                 let l:cmd .= ' -l "' . fnamemodify(l:tags_file, ':t') . '.log"'
             else
-                let l:cmd .= ' > "' . fnamemodify(l:tags_file, ':t') . '.log"'
+                let l:cmd .= ' > "' . fnamemodify(l:tags_file, ':t') . '.log" 2>&1'
+            endif
+        else
+            if !has('win32')
+                let l:cmd .= ' > /dev/null 2>&1'
             endif
         endif
         let l:cmd .= s:get_execute_cmd_suffix()
