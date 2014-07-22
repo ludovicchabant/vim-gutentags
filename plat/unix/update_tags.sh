@@ -54,7 +54,7 @@ if [[ "$1" -ne "" ]]; then
 fi
 
 echo "Locking tags file..."
-echo "locked" > "$TAGS_FILE.lock"
+echo $$ > "$TAGS_FILE.lock"
 
 if [[ -f "$TAGS_FILE" ]]; then
     if [[ "$UPDATED_SOURCE" != "" ]]; then
