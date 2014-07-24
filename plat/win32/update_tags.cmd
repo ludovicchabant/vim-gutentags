@@ -6,6 +6,7 @@ rem            PARSE ARGUMENTS
 rem ==========================================
 
 set CTAGS_EXE=ctags
+set CTAGS_ARGS=
 set TAGS_FILE=tags
 set UPDATED_SOURCE=
 set PAUSE_BEFORE_EXIT=0
@@ -15,6 +16,11 @@ set LOG_FILE=
 if [%1]==[] goto :DoneParseArgs
 if [%1]==[-e] (
     set CTAGS_EXE=%~2
+    shift
+    goto :LoopParseArgs
+)
+if [%1]==[-x] (
+    set CTAGS_ARGS=%CTAGS_ARGS% --exclude=%2
     shift
     goto :LoopParseArgs
 )

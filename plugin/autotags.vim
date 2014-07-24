@@ -28,6 +28,10 @@ if !exists('g:autotags_background_update')
     let g:autotags_background_update = 1
 endif
 
+if !exists('g:autotags_pause_after_update')
+    let g:autotags_pause_after_update = 0
+endif
+
 if !exists('g:autotags_enabled')
     let g:autotags_enabled = 1
 endif
@@ -284,6 +288,9 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
         for exc in g:autotags_exclude
             let l:cmd .= ' -x ' . exc
         endfor
+        if g:autotags_pause_after_update
+            let l:cmd .= ' -p'
+        endif
         if g:autotags_trace
             if has('win32')
                 let l:cmd .= ' -l "' . fnamemodify(l:tags_file, ':t') . '.log"'
