@@ -22,7 +22,7 @@ ShowUsage() {
 }
 
 
-while getopts "h?e:x:t:s:l:" opt; do
+while getopts "h?e:x:t:s:" opt; do
     case $opt in 
         h|\?)
             ShowUsage
