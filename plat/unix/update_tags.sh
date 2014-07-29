@@ -59,16 +59,19 @@ echo $$ > "$TAGS_FILE.lock"
 if [[ -f "$TAGS_FILE" ]]; then
     if [[ "$UPDATED_SOURCE" != "" ]]; then
         echo "Removing references to: $UPDATED_SOURCE"
-        echo "grep -v $UPDATED_SOURCE \"$TAGS_FILE\" > \"$TAGS_FILE.filter\""
-        grep -v $UPDATED_SOURCE "$TAGS_FILE" > "$TAGS_FILE.filter"
-        mv "$TAGS_FILE.filter" "$TAGS_FILE"
+        echo "grep -v $UPDATED_SOURCE \"$TAGS_FILE\" > \"$TAGS_FILE.temp\""
+        grep -v $UPDATED_SOURCE "$TAGS_FILE" > "$TAGS_FILE.temp"
         CTAGS_ARGS="$CTAGS_ARGS --append $UPDATED_SOURCE"
     fi
 fi
 
 echo "Running ctags"
-echo "$CTAGS_EXE -R -f \"$TAGS_FILE\" $CTAGS_ARGS"
-$CTAGS_EXE -R -f "$TAGS_FILE" $CTAGS_ARGS
+echo "$CTAGS_EXE -R -f \"$TAGS_FILE.temp\" $CTAGS_ARGS"
+$CTAGS_EXE -R -f "$TAGS_FILE.temp" $CTAGS_ARGS
+
+echo "Replacing tags file"
+echo "mv -f \"$TAGS_FILE.temp\" \"$TAGS_FILE\""
+mv -f "$TAGS_FILE.temp" "$TAGS_FILE"
 
 echo "Unlocking tags file..."
 rm -f "$TAGS_FILE.lock"

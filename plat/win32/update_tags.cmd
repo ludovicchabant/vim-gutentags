@@ -66,17 +66,19 @@ echo locked > "%TAGS_FILE%.lock"
 if exist "%TAGS_FILE%" (
     if not [%UPDATED_SOURCE%]==[] (
         echo Removing references to: %UPDATED_SOURCE% >> %LOG_FILE%
-        echo type "%TAGS_FILE%" ^| findstr /V /C:"%UPDATED_SOURCE%" ^> "%TAGS_FILE%.filter" >> %LOG_FILE%
-        findstr /V /C:"%UPDATED_SOURCE%" "%TAGS_FILE%" > "%TAGS_FILE%.filter"
-        echo move /Y "%TAGS_FILE%.filter" "%TAGS_FILE%" >> %LOG_FILE%
-        move /Y "%TAGS_FILE%.filter" "%TAGS_FILE%"
+        echo type "%TAGS_FILE%" ^| findstr /V /C:"%UPDATED_SOURCE%" ^> "%TAGS_FILE%.temp" >> %LOG_FILE%
+        findstr /V /C:"%UPDATED_SOURCE%" "%TAGS_FILE%" > "%TAGS_FILE%.temp"
         set CTAGS_ARGS=--append %UPDATED_SOURCE%
     )
 )
 
 echo Running ctags >> %LOG_FILE%
-echo "%CTAGS_EXE%" -R -f "%TAGS_FILE%" %CTAGS_ARGS% >> %LOG_FILE%
-"%CTAGS_EXE%" -R -f "%TAGS_FILE%" %CTAGS_ARGS%
+echo "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% >> %LOG_FILE%
+"%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS%
+
+echo Replacing tags file >> %LOG_FILE%
+echo move /Y "%TAGS_FILE%.temp" "%TAGS_FILE%" >> %LOG_FILE%
+move /Y "%TAGS_FILE%.temp" "%TAGS_FILE%" >NUL 2>&1
 
 echo Unlocking tags file... >> %LOG_FILE%
 del /F "%TAGS_FILE%.lock"
