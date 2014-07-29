@@ -205,7 +205,7 @@ if has('win32')
 endif
 
 let s:update_queue = []
-let s:maybe_in_progress = []
+let s:maybe_in_progress = {}
 
 " Get how to execute an external command depending on debug settings.
 function! s:get_execute_cmd() abort
@@ -319,18 +319,19 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
         endif
         let l:cmd .= s:get_execute_cmd_suffix()
 
-        " Run the background process.
         call s:trace("Running: " . l:cmd)
         call s:trace("In:      " . l:work_dir)
         if !g:autotags_fake
-            " Flag this tags file as being in progress
-            call add(s:maybe_in_progress, fnamemodify(l:tags_file, ':p'))
-
+            " Run the background process.
             if !g:autotags_trace
                 silent execute l:cmd
             else
                 execute l:cmd
             endif
+            
+            " Flag this tags file as being in progress
+            let l:full_tags_file = fnamemodify(l:tags_file, ':p')
+            let s:maybe_in_progress[l:full_tags_file] = localtime()
         else
             call s:trace("(fake... not actually running)")
         endif
@@ -409,7 +410,7 @@ endfunction
 
 function! autotags#inprogress()
     echom "autotags: generations in progress:"
-    for mip in s:maybe_in_progress
+    for mip in keys(s:maybe_in_progress)
         echom mip
     endfor
     echom ""
@@ -428,7 +429,7 @@ endfunction
 "   (defaults to empty strings)
 " - arg 3 is the text to be shown if tags are currently being generated.
 "   (defaults to 'TAGS')
-"
+
 function! autotags#statusline(...) abort
     if !exists('b:autotags_file')
         " This buffer doesn't have autotags.
@@ -446,13 +447,17 @@ function! autotags#statusline(...) abort
     " nice and quick bail out for 99.9% of cases before we need to this the
     " file-system to check the lock file.
     let l:abs_tag_file = fnamemodify(b:autotags_file, ':p')
-    let l:found = index(s:maybe_in_progress, l:abs_tag_file)
-    if l:found < 0
+    let l:timestamp = get(s:maybe_in_progress, l:abs_tag_file)
+    if l:timestamp == 0
         return ''
     endif
-    " It's maybe generating! Check if the lock file is still there.
-    if !filereadable(l:abs_tag_file . '.lock')
-        call remove(s:maybe_in_progress, l:found)
+    " It's maybe generating! Check if the lock file is still there... but
+    " don't do it too soon after the script was originally launched, because
+    " there can be a race condition where we get here just before the script
+    " had a chance to write the lock file.
+    if (localtime() - l:timestamp) > 1 &&
+                \!filereadable(l:abs_tag_file . '.lock')
+        call remove(s:maybe_in_progress, l:abs_tag_file)
         return ''
     endif
     " It's still there! So probably `ctags` is still running...
