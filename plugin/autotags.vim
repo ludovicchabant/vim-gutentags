@@ -53,6 +53,10 @@ if !exists('g:autotags_exclude')
     let g:autotags_exclude = []
 endif
 
+if !exists('g:autotags_generate_on_new')
+    let g:autotags_generate_on_new = 1
+endif
+
 if !exists('g:autotags_generate_on_missing')
     let g:autotags_generate_on_missing = 1
 endif
@@ -112,6 +116,8 @@ endfunction
 
 " Autotags Setup {{{
 
+let s:known_tagfiles = []
+
 " Finds the tag file path for the given current directory
 " (typically the directory of the file being edited)
 function! s:get_tagfile_for(path) abort
@@ -140,7 +146,7 @@ function! s:setup_autotags() abort
         return
     endif
 
-    " Try and file what tags file we should manage.
+    " Try and find what tags file we should manage.
     call s:trace("Scanning buffer '" . bufname('%') . "' for autotags setup...")
     try
         let b:autotags_file = s:get_tagfile_for(expand('%:h'))
@@ -167,10 +173,19 @@ function! s:setup_autotags() abort
     " Miscellaneous commands.
     command! -buffer -bang AutotagsUpdate :call s:manual_update_tags(<bang>0)
 
-    " If the tags file doesn't exist, start generating it now.
-    if g:autotags_generate_on_missing && !filereadable(b:autotags_file)
-        call s:trace("Generating missing tags file: " . b:autotags_file)
-        call s:update_tags(1, 0)
+    " Add this tags file to the known tags files if it wasn't there already.
+    let l:found = index(s:known_tagfiles, b:autotags_file)
+    if l:found < 0
+        call add(s:known_tagfiles, b:autotags_file)
+
+        " Generate this new file depending on settings and stuff.
+        if g:autotags_generate_on_missing && !filereadable(b:autotags_file)
+            call s:trace("Generating missing tags file: " . b:autotags_file)
+            call s:update_tags(1, 0)
+        elseif g:autotags_generate_on_new
+            call s:trace("Generating tags file: " . b:autotags_file)
+            call s:update_tags(1, 0)
+        endif
     endif
 endfunction
 
