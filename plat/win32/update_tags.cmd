@@ -43,6 +43,11 @@ if [%1]==[-l] (
     shift
     goto :LoopParseArgs
 )
+if [%1]==[-o] (
+    set CTAGS_ARGS=%CTAGS_ARGS% --options=%2
+    shift
+    goto :LoopParseArgs
+)
 echo Invalid Argument: %1
 goto :Usage
 
@@ -57,7 +62,6 @@ rem ==========================================
 rem               GENERATE TAGS
 rem ==========================================
 
-set CTAGS_ARGS=
 if [%LOG_FILE%]==[] set LOG_FILE=CON
 
 echo Locking tags file... > %LOG_FILE%
@@ -68,7 +72,7 @@ if exist "%TAGS_FILE%" (
         echo Removing references to: %UPDATED_SOURCE% >> %LOG_FILE%
         echo type "%TAGS_FILE%" ^| findstr /V /C:"%UPDATED_SOURCE%" ^> "%TAGS_FILE%.temp" >> %LOG_FILE%
         findstr /V /C:"%UPDATED_SOURCE%" "%TAGS_FILE%" > "%TAGS_FILE%.temp"
-        set CTAGS_ARGS=--append %UPDATED_SOURCE%
+        set CTAGS_ARGS=%CTAGS_ARGS% --append %UPDATED_SOURCE%
     )
 )
 
@@ -103,5 +107,6 @@ echo    -e [exe=ctags]: The ctags executable to run
 echo    -t [file=tags]: The path to the ctags file to update
 echo    -s [file=]:     The path to the source file that needs updating
 echo    -l [log=]:      The log file to output to
+echo    -o [options=]:  An options file to read additional options from
 echo.
 

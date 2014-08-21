@@ -18,6 +18,7 @@ ShowUsage() {
     echo "    -t [file=tags]: The path to the ctags file to update"
     echo "    -s [file=]:     The path to the source file that needs updating"
     echo "    -x [pattern=]:  A pattern of files to exclude"
+    echo "    -o [options=]:  An options file to read additional options from" 
     echo ""
 }
 
@@ -42,6 +43,9 @@ while getopts "h?e:x:t:s:" opt; do
             ;;
         p)
             PAUSE_BEFORE_EXIT=1
+            ;;
+        o)
+            CTAGS_ARGS="$CTAGS_ARGS --options=$OPTARG"
             ;;
     esac
 done

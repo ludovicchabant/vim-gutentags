@@ -49,6 +49,10 @@ if !exists('g:autotags_project_root')
 endif
 let g:autotags_project_root += ['.git', '.hg', '.bzr', '_darcs']
 
+if !exists('g:autotags_options_file')
+    let g:autotags_options_file = ''
+endif
+
 if !exists('g:autotags_exclude')
     let g:autotags_exclude = []
 endif
@@ -305,6 +309,9 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
         endfor
         if g:autotags_pause_after_update
             let l:cmd .= ' -p'
+        endif
+        if len(g:autotags_options_file)
+            let l:cmd .= ' -o "' . g:autotags_options_file . '"'
         endif
         if g:autotags_trace
             if has('win32')
