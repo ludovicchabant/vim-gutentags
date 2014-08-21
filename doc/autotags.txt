@@ -248,6 +248,14 @@ g:autotags_exclude
                         Patterns defined in 'wildignore' will also be given as
                         exclude patterns to the `ctags` executable.
 
+                                                *autotags_options_file*
+g:autotags_options_file
+                        The path to an options file that will be passed to
+                        the `ctags` executable with the `--options` option.
+                        In general you can put options in a `$HOME/.ctags`
+                        file, but this lets you specify a custom file
+                        specifically for Vim/Autotags.
+
                                                 *autotags_auto_set_tags*
 g:autotags_auto_set_tags
                         If set to 1, Autotags will automatically prepend
