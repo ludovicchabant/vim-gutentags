@@ -50,19 +50,19 @@ I set for myself with Autotags:
 
 * No other dependency than running Vim: no Python, Ruby, or whatever.
 * Cross-platform: should work on at least Mac and Windows.
-* Incremental tags generation: don't re-generate the whole project all the
-  time. This may be fine for small projects, but it doesn't scale.
-* External process management: if the ctags process is taking a long time,
-  don't run another one because I saved the file again.
-* Keep the tag file consistent: don't just append the current file's tags to
-  the tag file, otherwise you will still "see" tags for deleted or renamed
-  classes and functions.
+* Incremental tags generation: don't re-generate the whole project all the time.
+  This may be fine for small projects, but it doesn't scale.
+* External process management: if the ctags process is taking a long time, don't
+  run another one because I saved the file again.
+* Keep the tag file consistent: don't just append the current file's tags to the
+  tag file, otherwise you will still "see" tags for deleted or renamed classes
+  and functions.
 * Automatically create the tag file: you open something from a freshly forked
-  project, it should start indexing it automatically, just in Sublime Text or
-  Visual Studio or any other IDE.
+  project, it should start indexing it automatically, just like in Sublime Text
+  or Visual Studio or any other IDE.
 
 I hope Autotags will bring you as much closure as me regarding tag files. I know
-I don't want to think about it, and probably neither do you.
+I don't want to have to think about it, and probably neither do you.
 
 
 [ctrlp]: https://github.com/kien/ctrlp.vim
