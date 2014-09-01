@@ -300,6 +300,12 @@ g:autotags_background_update
                         until the process is complete.
                         Defaults to 1.
 
+                                                *autotags_cache_dir*
+g:autotags_cache_dir
+                        Specifies a directory in which to create all the tags
+                        files, instead of writing them at the root of each
+                        project. This is handy to keep tags files from
+                        polluting many directories all across your computer.
 
 
  vim:tw=78:et:ft=help:norl:
