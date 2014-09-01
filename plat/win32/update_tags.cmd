@@ -8,6 +8,7 @@ rem ==========================================
 set CTAGS_EXE=ctags
 set CTAGS_ARGS=
 set TAGS_FILE=tags
+set PROJECT_ROOT=
 set UPDATED_SOURCE=
 set PAUSE_BEFORE_EXIT=0
 set LOG_FILE=
@@ -26,6 +27,11 @@ if [%1]==[-x] (
 )
 if [%1]==[-t] (
     set TAGS_FILE=%~2
+    shift
+    goto :LoopParseArgs
+)
+if [%1]==[-p] (
+    set PROJECT_ROOT=%~2
     shift
     goto :LoopParseArgs
 )
@@ -77,8 +83,8 @@ if exist "%TAGS_FILE%" (
 )
 
 echo Running ctags >> %LOG_FILE%
-echo "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% >> %LOG_FILE%
-"%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS%
+echo "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% %PROJECT_ROOT% >> %LOG_FILE%
+"%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% %PROJECT_ROOT%
 
 echo Replacing tags file >> %LOG_FILE%
 echo move /Y "%TAGS_FILE%.temp" "%TAGS_FILE%" >> %LOG_FILE%
@@ -105,6 +111,7 @@ echo    %~n0 ^<options^>
 echo.
 echo    -e [exe=ctags]: The ctags executable to run
 echo    -t [file=tags]: The path to the ctags file to update
+echo    -p [dir=]:      The path to the project root
 echo    -s [file=]:     The path to the source file that needs updating
 echo    -l [log=]:      The log file to output to
 echo    -o [options=]:  An options file to read additional options from

@@ -73,6 +73,16 @@ if !exists('g:autotags_auto_set_tags')
     let g:autotags_auto_set_tags = 1
 endif
 
+if !exists('g:autotags_cache_dir')
+    let g:autotags_cache_dir = ''
+else
+    let g:autotags_cache_dir = s:stripslash(g:autotags_cache_dir)
+endif
+
+if g:autotags_cache_dir != '' && !isdirectory(g:autotags_cache_dir)
+    call mkdir(g:autotags_cache_dir, 'p')
+endif
+
 " }}}
 
 " Utilities {{{
@@ -122,9 +132,9 @@ endfunction
 
 let s:known_tagfiles = []
 
-" Finds the tag file path for the given current directory
-" (typically the directory of the file being edited)
-function! s:get_tagfile_for(path) abort
+" Finds the first directory with a project marker by walking up from the given
+" file path.
+function! s:get_project_root(path) abort
     let l:path = s:stripslash(a:path)
     let l:previous_path = ""
     let l:markers = g:autotags_project_root[:]
@@ -134,13 +144,27 @@ function! s:get_tagfile_for(path) abort
     while l:path != l:previous_path
         for root in g:autotags_project_root
             if getftype(l:path . '/' . root) != ""
-                return simplify(fnamemodify(l:path, ':p') . g:autotags_tagfile)
+                return simplify(fnamemodify(l:path, ':p'))
             endif
         endfor
         let l:previous_path = l:path
         let l:path = fnamemodify(l:path, ':h')
     endwhile
     call s:throw("Can't figure out what tag file to use for: " . a:path)
+endfunction
+
+" Get the tag filename for a given project root.
+function! s:get_tagfile(root_dir) abort
+    let l:tag_path = s:stripslash(a:root_dir) . '/' . g:autotags_tagfile
+    if g:autotags_cache_dir != ""
+        " Put the tag file in the cache dir instead of inside the
+        " projet root.
+        let l:tag_path = g:autotags_cache_dir . '/' .
+                    \tr(l:tag_path, '\/:', '---')
+        let l:tag_path = substitute(l:tag_path, '/\-', '/', '')
+    endif
+    let l:tag_path = s:normalizepath(l:tag_path)
+    return l:tag_path
 endfunction
 
 " Setup autotags for the current buffer.
@@ -153,7 +177,8 @@ function! s:setup_autotags() abort
     " Try and find what tags file we should manage.
     call s:trace("Scanning buffer '" . bufname('%') . "' for autotags setup...")
     try
-        let b:autotags_file = s:get_tagfile_for(expand('%:h'))
+        let b:autotags_root = s:get_project_root(expand('%:h'))
+        let b:autotags_file = s:get_tagfile(b:autotags_root)
     catch /^autotags\:/
         call s:trace("Can't figure out what tag file to use... no autotags support.")
         return
@@ -260,8 +285,10 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
     " Figure out where to save.
     if a:0 == 1
         let l:tags_file = a:1
+        let l:proj_dir = fnamemodify(a:1, ':h')
     else
         let l:tags_file = b:autotags_file
+        let l:proj_dir = b:autotags_root
     endif
     
     " Check that there's not already an update in progress.
@@ -292,14 +319,11 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
         " Build the command line.
         let l:cmd = s:get_execute_cmd() . s:runner_exe
         let l:cmd .= ' -e "' . g:autotags_executable . '"'
-        let l:cmd .= ' -t "' . fnamemodify(l:tags_file, ':t') . '"'
+        let l:cmd .= ' -t "' . l:tags_file . '"'
+        let l:cmd .= ' -p "' . l:proj_dir . '"'
         if a:write_mode == 0 && filereadable(l:tags_file)
-            " CTags specifies paths relative to the tags file with a `./`
-            " prefix, so we need to specify the same prefix otherwise it will
-            " think those are different files and we'll end up with duplicate
-            " entries.
-            let l:rel_path = s:normalizepath('./' . expand('%:.'))
-            let l:cmd .= ' -s "' . l:rel_path . '"'
+            let l:full_path = expand('%:p')
+            let l:cmd .= ' -s "' . l:full_path . '"'
         endif
         for ign in split(&wildignore, ',')
             let l:cmd .= ' -x ' . ign
@@ -315,9 +339,9 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
         endif
         if g:autotags_trace
             if has('win32')
-                let l:cmd .= ' -l "' . fnamemodify(l:tags_file, ':t') . '.log"'
+                let l:cmd .= ' -l "' . l:tags_file . '.log"'
             else
-                let l:cmd .= ' > "' . fnamemodify(l:tags_file, ':t') . '.log" 2>&1'
+                let l:cmd .= ' > "' . l:tags_file . '.log" 2>&1'
             endif
         else
             if !has('win32')

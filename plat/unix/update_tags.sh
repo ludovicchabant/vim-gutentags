@@ -6,6 +6,7 @@ PROG_NAME=$0
 CTAGS_EXE=ctags
 CTAGS_ARGS=
 TAGS_FILE=tags
+PROJECT_ROOT=
 UPDATED_SOURCE=
 PAUSE_BEFORE_EXIT=0
 
@@ -16,6 +17,7 @@ ShowUsage() {
     echo ""
     echo "    -e [exe=ctags]: The ctags executable to run"
     echo "    -t [file=tags]: The path to the ctags file to update"
+    echo "    -p [dir=]:      The path to the project root"
     echo "    -s [file=]:     The path to the source file that needs updating"
     echo "    -x [pattern=]:  A pattern of files to exclude"
     echo "    -o [options=]:  An options file to read additional options from" 
@@ -23,7 +25,7 @@ ShowUsage() {
 }
 
 
-while getopts "h?e:x:t:s:" opt; do
+while getopts "h?e:x:t:p:s:" opt; do
     case $opt in 
         h|\?)
             ShowUsage
@@ -37,6 +39,9 @@ while getopts "h?e:x:t:s:" opt; do
             ;;
         t)
             TAGS_FILE=$OPTARG
+            ;;
+        p)
+            PROJECT_ROOT=$OPTARG
             ;;
         s)
             UPDATED_SOURCE=$OPTARG
@@ -70,8 +75,8 @@ if [[ -f "$TAGS_FILE" ]]; then
 fi
 
 echo "Running ctags"
-echo "$CTAGS_EXE -R -f \"$TAGS_FILE.temp\" $CTAGS_ARGS"
-$CTAGS_EXE -R -f "$TAGS_FILE.temp" $CTAGS_ARGS
+echo "$CTAGS_EXE -R -f \"$TAGS_FILE.temp\" $CTAGS_ARGS $PROJECT_ROOT"
+$CTAGS_EXE -R -f "$TAGS_FILE.temp" $CTAGS_ARGS $PROJECT_ROOT
 
 echo "Replacing tags file"
 echo "mv -f \"$TAGS_FILE.temp\" \"$TAGS_FILE\""
