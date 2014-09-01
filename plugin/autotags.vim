@@ -76,7 +76,7 @@ endif
 if !exists('g:autotags_cache_dir')
     let g:autotags_cache_dir = ''
 else
-    let g:autotags_cache_dir = s:stripslash(g:autotags_cache_dir)
+    let g:autotags_cache_dir = fnamemodify(g:autotags_cache_dir, ':s?[/\\]$??')
 endif
 
 if g:autotags_cache_dir != '' && !isdirectory(g:autotags_cache_dir)
