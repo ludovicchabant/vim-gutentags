@@ -469,7 +469,7 @@ function! gutentags#statusline(...) abort
 
     " Figure out what the user is customizing.
     let l:gen_msg = 'TAGS'
-    if a:0 >= 0
+    if a:0 > 0
         let l:gen_msg = a:1
     endif
 
