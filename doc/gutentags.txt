@@ -1,4 +1,4 @@
-*autotags.txt*  Automatic ctags management for VIM
+*gutentags.txt*  Automatic ctags management for VIM
 
       ___           ___                         ___     
      /\  \         /\  \                       /\  \    
@@ -26,44 +26,44 @@
                 AUTOTAGS REFERENCE MANUAL
                     by Ludovic Chabant
 
-                                                *autotags*
+                                                *gutentags*
 
-1. Introduction             |autotags-intro|
-2. Commands                 |autotags-commands|
-3. Status Line              |autotags-status-line|
-4. Global Settings          |autotags-settings|
+1. Introduction             |gutentags-intro|
+2. Commands                 |gutentags-commands|
+3. Status Line              |gutentags-status-line|
+4. Global Settings          |gutentags-settings|
 
 =============================================================================
-1. Introduction                                 *autotags-intro*
+1. Introduction                                 *gutentags-intro*
 
-Autotags is a plugin that takes care of the much needed management of tags
+Gutentags is a plugin that takes care of the much needed management of tags
 files in Vim. It will (re)generate tag files as you work while staying
 completely out of your way. It will even do its best to keep those tag files
 out of your way too. It has no dependencies and just works.
 
-In order to generate tag files, Autotags will have to figure out what's in
+In order to generate tag files, Gutentags will have to figure out what's in
 your project. To do this, it will locate well-known project root markers like
 SCM folders (.git, .hg, etc.), any custom tags you define (with
-|autotags_project_root|), and even things you may have defined already with
+|gutentags_project_root|), and even things you may have defined already with
 other plugins, like CtrlP.
 
-If the current file you're editing is found to be in such a project, Autotags
+If the current file you're editing is found to be in such a project, Gutentags
 will make sure the tag file for that project is up to date. Then, as you work
 in files in that project, it will partially re-generate the tag file. Every
 time you save, it will silently, in the background, update the tags for that
 file.
 
-Usually, ctags can only append tags to an existing tag file, so Autotags
+Usually, ctags can only append tags to an existing tag file, so Gutentags
 removes the tags for the current file first, to make sure the tag file is
 always consistent with the source code.
 
-Also, Autotags is clever enough to not stumble upon itself by triggering
+Also, Gutentags is clever enough to not stumble upon itself by triggering
 multiple ctags processes if you save files to fast, or your project is really
 big.
 
 There are some similar Vim plugins out there ("vim-tags", "vim-autotag",
 "vim-automatic-ctags", etc.). They all fail on one or more of the requirements
-I set for myself with Autotags:
+I set for myself with Gutentags:
 
 * No other dependency than running Vim: no Python, Ruby, or whatever.
 * Cross-platform: should work on at least Mac and Windows.
@@ -80,228 +80,228 @@ I set for myself with Autotags:
 
 
 =============================================================================
-2. Commands                                     *autotags-commands*
+2. Commands                                     *gutentags-commands*
 
-                                                *autotags-global-commands*
+                                                *gutentags-global-commands*
 The following commands are always available, whatever buffer you currently
 have open:
 
-                                                *:AutotagsGenerate*
-:AutotagsGenerate {tagsfile}
+                                                *:GutentagsGenerate*
+:GutentagsGenerate {tagsfile}
                         Generates a tag file named {tagsfile}. Tags will be
                         generated for all the files in the same directory as
                         {tagsfile} and below (i.e. recursive from {tagsfile}'s
                         own directory).
 
 
-                                                *autotags-project-commands*
+                                                *gutentags-project-commands*
 The following commands are only available in buffers that have been found to
-belong to a project that should be managed by Autotags. See
-|autotags_project_root| for how Autotags figures out the project a file
+belong to a project that should be managed by Gutentags. See
+|gutentags_project_root| for how Gutentags figures out the project a file
 belongs to. When not project is found (i.e. the file is not under any of the
-known project markers), Autotags is disabled for that buffer, and the
+known project markers), Gutentags is disabled for that buffer, and the
 following commands and remarks don't apply.
 
-The tag file that Autotags creates and manages will be named after
-|autotags_tagfile|, relative to the project's root directory. When Autotags
+The tag file that Gutentags creates and manages will be named after
+|gutentags_tagfile|, relative to the project's root directory. When Gutentags
 finds a valid project root, it will prepend the tag file's path to 'tags',
-unless |autotags_auto_set_tags| is set to 0. This is to make sure Vim will use
+unless |gutentags_auto_set_tags| is set to 0. This is to make sure Vim will use
 that file first.
 
-If a file managed by Autotags is opened and no tag file already exists,
-Autotags will start generating it right away in the background, unless 
-|autotags_generate_on_missing| is set to 0. If you have a large project, you
-may want to know when Autotags is generating tags: see
-|autotags-status-line| to display an indicator in your status line.
+If a file managed by Gutentags is opened and no tag file already exists,
+Gutentags will start generating it right away in the background, unless 
+|gutentags_generate_on_missing| is set to 0. If you have a large project, you
+may want to know when Gutentags is generating tags: see
+|gutentags-status-line| to display an indicator in your status line.
 
-When a file managed by Autotags is saved, the tag file will be incrementally
+When a file managed by Gutentags is saved, the tag file will be incrementally
 updated, i.e. references to the recently saved file are removed, and that file
 is re-parsed for tags, with the result being merged into the tag file. This
 makes the tag file 100% consistent with the latest changes. This doesn't
-happen however if |autotags_generate_on_write| is set to 0, in which case you
-have to run |AutotagsUpdate| manually.
+happen however if |gutentags_generate_on_write| is set to 0, in which case you
+have to run |GutentagsUpdate| manually.
 
 
-                                                *:AutotagsUpdate*
-:AutotagsUpdate
+                                                *:GutentagsUpdate*
+:GutentagsUpdate
                         Forces an update of the current tag file with the
                         current buffer. If tags are already being generated,
                         you will be notified and the command will abort.
 
-:AutotagsUpdate!
-                        Like |AutotagsUpdate|, but updates the current tags
+:GutentagsUpdate!
+                        Like |GutentagsUpdate|, but updates the current tags
                         file with the whole project instead of just the
                         current buffer.
 
 
 Some debugging/troubleshooting commands are also available.
 
-                                                *:AutotagsToggleEnabled*
-:AutotagsToggleEnabled
-                        Disables and re-enables Autotags.
-                        When Autotags is disabled, it won't update your tag
+                                                *:GutentagsToggleEnabled*
+:GutentagsToggleEnabled
+                        Disables and re-enables Gutentags.
+                        When Gutentags is disabled, it won't update your tag
                         file when you save a buffer. It will however still
                         look for project markers as you open new buffers so
                         that they can start working again when you re-enable
-                        Autotags.
+                        Gutentags.
 
-                                                *AutotagsToggleTrace*
-:AutotagsToggleTrace
-                        If you want to keep an eye on what Autotags is doing,
+                                                *GutentagsToggleTrace*
+:GutentagsToggleTrace
+                        If you want to keep an eye on what Gutentags is doing,
                         you can enable tracing. This will show messages every
-                        time Autotags does something. It can get annoying
+                        time Gutentags does something. It can get annoying
                         quickly, since it will require you to press a key to
                         dismiss those messages, but it can be useful to
                         troubleshoot a problem.
                         In addition to messages in Vim, it will also make
-                        Autotags redirect the output of the tag generation
+                        Gutentags redirect the output of the tag generation
                         script to a `.log` file in the project root.
 
-                                                *:AutotagsUnlock*
-:AutotagsUnlock
-                        Autotags uses a `.lock` file to know when tag
+                                                *:GutentagsUnlock*
+:GutentagsUnlock
+                        Gutentags uses a `.lock` file to know when tag
                         generation is running. If something goes wrong with
                         that process, that lock file could be left behind. You
                         could just remove it manually from the root of your
-                        project, but you can also run |:AutotagsUnlock| so
+                        project, but you can also run |:GutentagsUnlock| so
                         that Vim does it for you.
                         If you find that you need to use this more than a
                         couple times ever, there's probably a bug with
-                        Autotags, or something otherwise wrong or unexpected
+                        Gutentags, or something otherwise wrong or unexpected
                         with your system. Please file a bug.
 
 =============================================================================
-3.  Status Line                                 *autotags-status-line*
+3.  Status Line                                 *gutentags-status-line*
 
 Tag file generation can take a while if you're working on a project big
 enough. In that case, you may want to know when `ctags` is running, so you
 have a heads up if some of the tags aren't recognized yet.
 
-                                                *autotags#statusline()*
+                                                *gutentags#statusline()*
 You can display and indicator of tag generation progress in your |status-line|
 with the following function: >
-        :set statusline+=%{autotags#statusline()}
+        :set statusline+=%{gutentags#statusline()}
 
-This won't print anything unless Autotags figures that `ctags` is running in
+This won't print anything unless Gutentags figures that `ctags` is running in
 the background. This is done by checking a `.lock` file next to the tag file,
 but there's also some optimization before that to not slow down Vim. Note that
 the `.lock` file can sometimes be left around incorrectly by the background
-process, and you may need to clean it up. See |:AutotagsUnlock|.
+process, and you may need to clean it up. See |:GutentagsUnlock|.
 
-When Autotags thinks `ctags` is still running, it will print the string
+When Gutentags thinks `ctags` is still running, it will print the string
 "TAGS" by default. You can customize it: >
-        :set statusline+=%{autotags#statusline('[Generating...]')}
+        :set statusline+=%{gutentags#statusline('[Generating...]')}
 
 This will print the string "[Generating...]" when tags are being generated.
 
 
 =============================================================================
-4. Global Settings                              *autotags-settings*
+4. Global Settings                              *gutentags-settings*
 
 The following settings can be defined in your |vimrc| to change the default
-behaviour of Autotags.
+behaviour of Gutentags.
 
-                                                *autotags_enabled*
-g:autotags_enabled
-                        Defines whether Autotags should be enabled. When
-                        disabled, Autotags will still scan for project root
+                                                *gutentags_enabled*
+g:gutentags_enabled
+                        Defines whether Gutentags should be enabled. When
+                        disabled, Gutentags will still scan for project root
                         markers when opening buffers. This is so that when you
-                        re-enable Autotags, you won't have some buffers
+                        re-enable Gutentags, you won't have some buffers
                         mysteriously working while others (those open last)
                         don't.
                         Defaults to 1.
 
-                                                *autotags_executable*
-g:autotags_executable
+                                                *gutentags_executable*
+g:gutentags_executable
                         Specifies the ctags executable to launch.
                         Defaults to `ctags`.
 
-                                                *autotags_tagfile*
-g:autotags_tagfile
+                                                *gutentags_tagfile*
+g:gutentags_tagfile
                         Specifies the name of the tag file to create. This
                         will be appended to the project's root. See
-                        |autotags_project_root| for how Autotags locates the
+                        |gutentags_project_root| for how Gutentags locates the
                         project.
                         Defaults to `tags`.
 
-                                                *autotags_project_root*
-g:autotags_project_root
-                        When a buffer is loaded, Autotags will figure out if
+                                                *gutentags_project_root*
+g:gutentags_project_root
+                        When a buffer is loaded, Gutentags will figure out if
                         it's part of a project that should have tags managed
                         automatically. To do this, it looks for "root markers"
                         in the current file's directory and its parent
                         directories. If it finds any of those markers,
-                        Autotags will be enabled for the project, and a tags
-                        file named after |autotags_tagfile| will be created at
+                        Gutentags will be enabled for the project, and a tags
+                        file named after |gutentags_tagfile| will be created at
                         the project root.
                         Defaults to `[]` (an empty |List|).
                         A list of default markers will always be appended to
                         the user-defined ones: ['.git', '.hg', '.bzr',
                         '_darcs'].
 
-                                                *autotags_exclude*
-g:autotags_exclude
+                                                *gutentags_exclude*
+g:gutentags_exclude
                         A list of file patterns to pass to the
-                        |autotags_executable| so that they will be excluded
+                        |gutentags_executable| so that they will be excluded
                         from parsing for the tags generation.
                         Defaults to `[]` (an empty |List|).
                         Patterns defined in 'wildignore' will also be given as
                         exclude patterns to the `ctags` executable.
 
-                                                *autotags_options_file*
-g:autotags_options_file
+                                                *gutentags_options_file*
+g:gutentags_options_file
                         The path to an options file that will be passed to
                         the `ctags` executable with the `--options` option.
                         In general you can put options in a `$HOME/.ctags`
                         file, but this lets you specify a custom file
-                        specifically for Vim/Autotags.
+                        specifically for Vim/Gutentags.
 
-                                                *autotags_auto_set_tags*
-g:autotags_auto_set_tags
-                        If set to 1, Autotags will automatically prepend
+                                                *gutentags_auto_set_tags*
+g:gutentags_auto_set_tags
+                        If set to 1, Gutentags will automatically prepend
                         'tags' with the exact path to the tag file for the
-                        current project. See |autotags_project_root| for how
-                        Autotags locates the project.
-                        When set to 0, Autotags doesn't change 'tags', and
+                        current project. See |gutentags_project_root| for how
+                        Gutentags locates the project.
+                        When set to 0, Gutentags doesn't change 'tags', and
                         this means that whatever tag file it generates may
                         not be picked up by Vim. See |tagfiles()| to know what
                         tag files Vim knows about.
                         Defaults to 1.
 
-                                                *autotags_generate_on_missing*
-g:autotags_generate_on_missing
-                        If set to 1, Autotags will start generating an initial
+                                                *gutentags_generate_on_missing*
+g:gutentags_generate_on_missing
+                        If set to 1, Gutentags will start generating an initial
                         tag file if a file is open in a project where no tags
-                        file is found. See |autotags_project_root| for how
-                        Autotags locates the project.
-                        When set to 0, Autotags will only generate the first
+                        file is found. See |gutentags_project_root| for how
+                        Gutentags locates the project.
+                        When set to 0, Gutentags will only generate the first
                         time the file is saved (if
-                        |autotags_generate_on_write| is set to 1), or when
-                        |AutotagsUpdate| or |AutotagsGenerate| is run.
+                        |gutentags_generate_on_write| is set to 1), or when
+                        |GutentagsUpdate| or |GutentagsGenerate| is run.
                         Defaults to 1.
 
-                                                *autotags_generate_on_write*
-g:autotags_generate_on_write
-                        If set to 1, Autotags will update the current
+                                                *gutentags_generate_on_write*
+g:gutentags_generate_on_write
+                        If set to 1, Gutentags will update the current
                         project's tag file when a file inside that project is
-                        saved. See |autotags_project_root| for how Autotags
+                        saved. See |gutentags_project_root| for how Gutentags
                         locates the project.
-                        When set to 0, Autotags won't do anything on save.
+                        When set to 0, Gutentags won't do anything on save.
                         This means that the project's tag file won't reflect
                         the latest changes, and you will have to run
-                        |AutotagsUpdate| manually.
+                        |GutentagsUpdate| manually.
                         Defaults to 1.
 
-                                                *autotags_background_update*
-g:autotags_background_update
+                                                *gutentags_background_update*
+g:gutentags_background_update
                         Specifies whether the process that updates the tags
                         file should be run in the background or in the
                         foreground. If run in the foreground, Vim will block
                         until the process is complete.
                         Defaults to 1.
 
-                                                *autotags_cache_dir*
-g:autotags_cache_dir
+                                                *gutentags_cache_dir*
+g:gutentags_cache_dir
                         Specifies a directory in which to create all the tags
                         files, instead of writing them at the root of each
                         project. This is handy to keep tags files from
