@@ -1,86 +1,86 @@
-" autotags.vim - Automatic ctags management for Vim
+" gutentags.vim - Automatic ctags management for Vim
 " Maintainer:   Ludovic Chabant <http://ludovic.chabant.com>
 " Version:      0.0.1
 
 " Globals {{{
 
-if !exists('g:autotags_debug')
-    let g:autotags_debug = 0
+if !exists('g:gutentags_debug')
+    let g:gutentags_debug = 0
 endif
 
-if (exists('g:loaded_autotags') || &cp) && !g:autotags_debug
+if (exists('g:loaded_gutentags') || &cp) && !g:gutentags_debug
     finish
 endif
-if (exists('g:loaded_autotags') && g:autotags_debug)
-    echom "Reloaded autotags."
+if (exists('g:loaded_gutentags') && g:gutentags_debug)
+    echom "Reloaded gutentags."
 endif
-let g:loaded_autotags = 1
+let g:loaded_gutentags = 1
 
-if !exists('g:autotags_trace')
-    let g:autotags_trace = 0
-endif
-
-if !exists('g:autotags_fake')
-    let g:autotags_fake = 0
+if !exists('g:gutentags_trace')
+    let g:gutentags_trace = 0
 endif
 
-if !exists('g:autotags_background_update')
-    let g:autotags_background_update = 1
+if !exists('g:gutentags_fake')
+    let g:gutentags_fake = 0
 endif
 
-if !exists('g:autotags_pause_after_update')
-    let g:autotags_pause_after_update = 0
+if !exists('g:gutentags_background_update')
+    let g:gutentags_background_update = 1
 endif
 
-if !exists('g:autotags_enabled')
-    let g:autotags_enabled = 1
+if !exists('g:gutentags_pause_after_update')
+    let g:gutentags_pause_after_update = 0
 endif
 
-if !exists('g:autotags_executable')
-    let g:autotags_executable = 'ctags'
+if !exists('g:gutentags_enabled')
+    let g:gutentags_enabled = 1
 endif
 
-if !exists('g:autotags_tagfile')
-    let g:autotags_tagfile = 'tags'
+if !exists('g:gutentags_executable')
+    let g:gutentags_executable = 'ctags'
 endif
 
-if !exists('g:autotags_project_root')
-    let g:autotags_project_root = []
-endif
-let g:autotags_project_root += ['.git', '.hg', '.bzr', '_darcs']
-
-if !exists('g:autotags_options_file')
-    let g:autotags_options_file = ''
+if !exists('g:gutentags_tagfile')
+    let g:gutentags_tagfile = 'tags'
 endif
 
-if !exists('g:autotags_exclude')
-    let g:autotags_exclude = []
+if !exists('g:gutentags_project_root')
+    let g:gutentags_project_root = []
+endif
+let g:gutentags_project_root += ['.git', '.hg', '.bzr', '_darcs']
+
+if !exists('g:gutentags_options_file')
+    let g:gutentags_options_file = ''
 endif
 
-if !exists('g:autotags_generate_on_new')
-    let g:autotags_generate_on_new = 1
+if !exists('g:gutentags_exclude')
+    let g:gutentags_exclude = []
 endif
 
-if !exists('g:autotags_generate_on_missing')
-    let g:autotags_generate_on_missing = 1
+if !exists('g:gutentags_generate_on_new')
+    let g:gutentags_generate_on_new = 1
 endif
 
-if !exists('g:autotags_generate_on_write')
-    let g:autotags_generate_on_write = 1
+if !exists('g:gutentags_generate_on_missing')
+    let g:gutentags_generate_on_missing = 1
 endif
 
-if !exists('g:autotags_auto_set_tags')
-    let g:autotags_auto_set_tags = 1
+if !exists('g:gutentags_generate_on_write')
+    let g:gutentags_generate_on_write = 1
 endif
 
-if !exists('g:autotags_cache_dir')
-    let g:autotags_cache_dir = ''
+if !exists('g:gutentags_auto_set_tags')
+    let g:gutentags_auto_set_tags = 1
+endif
+
+if !exists('g:gutentags_cache_dir')
+    let g:gutentags_cache_dir = ''
 else
-    let g:autotags_cache_dir = fnamemodify(g:autotags_cache_dir, ':s?[/\\]$??')
+    let g:gutentags_cache_dir = fnamemodify(g:gutentags_cache_dir, ':s?[/\\]$??')
 endif
 
-if g:autotags_cache_dir != '' && !isdirectory(g:autotags_cache_dir)
-    call mkdir(g:autotags_cache_dir, 'p')
+if g:gutentags_cache_dir != '' && !isdirectory(g:gutentags_cache_dir)
+    call mkdir(g:gutentags_cache_dir, 'p')
 endif
 
 " }}}
@@ -89,14 +89,14 @@ endif
 
 " Throw an exception message.
 function! s:throw(message)
-    let v:errmsg = "autotags: " . a:message
+    let v:errmsg = "gutentags: " . a:message
     throw v:errmsg
 endfunction
 
 " Prints a message if debug tracing is enabled.
 function! s:trace(message, ...)
-   if g:autotags_trace || (a:0 && a:1)
-       let l:message = "autotags: " . a:message
+   if g:gutentags_trace || (a:0 && a:1)
+       let l:message = "gutentags: " . a:message
        echom l:message
    endif
 endfunction
@@ -128,7 +128,7 @@ endfunction
 
 " }}}
 
-" Autotags Setup {{{
+" Gutentags Setup {{{
 
 let s:known_tagfiles = []
 
@@ -137,12 +137,12 @@ let s:known_tagfiles = []
 function! s:get_project_root(path) abort
     let l:path = s:stripslash(a:path)
     let l:previous_path = ""
-    let l:markers = g:autotags_project_root[:]
+    let l:markers = g:gutentags_project_root[:]
     if exists('g:ctrlp_root_markers')
         let l:markers += g:ctrlp_root_markers
     endif
     while l:path != l:previous_path
-        for root in g:autotags_project_root
+        for root in g:gutentags_project_root
             if getftype(l:path . '/' . root) != ""
                 return simplify(fnamemodify(l:path, ':p'))
             endif
@@ -155,11 +155,11 @@ endfunction
 
 " Get the tag filename for a given project root.
 function! s:get_tagfile(root_dir) abort
-    let l:tag_path = s:stripslash(a:root_dir) . '/' . g:autotags_tagfile
-    if g:autotags_cache_dir != ""
+    let l:tag_path = s:stripslash(a:root_dir) . '/' . g:gutentags_tagfile
+    if g:gutentags_cache_dir != ""
         " Put the tag file in the cache dir instead of inside the
         " projet root.
-        let l:tag_path = g:autotags_cache_dir . '/' .
+        let l:tag_path = g:gutentags_cache_dir . '/' .
                     \tr(l:tag_path, '\/:', '---')
         let l:tag_path = substitute(l:tag_path, '/\-', '/', '')
     endif
@@ -167,61 +167,61 @@ function! s:get_tagfile(root_dir) abort
     return l:tag_path
 endfunction
 
-" Setup autotags for the current buffer.
-function! s:setup_autotags() abort
-    if exists('b:autotags_file') && !g:autotags_debug
-        " This buffer already has autotags support.
+" Setup gutentags for the current buffer.
+function! s:setup_gutentags() abort
+    if exists('b:gutentags_file') && !g:gutentags_debug
+        " This buffer already has gutentags support.
         return
     endif
 
     " Try and find what tags file we should manage.
-    call s:trace("Scanning buffer '" . bufname('%') . "' for autotags setup...")
+    call s:trace("Scanning buffer '" . bufname('%') . "' for gutentags setup...")
     try
-        let b:autotags_root = s:get_project_root(expand('%:h'))
-        let b:autotags_file = s:get_tagfile(b:autotags_root)
-    catch /^autotags\:/
-        call s:trace("Can't figure out what tag file to use... no autotags support.")
+        let b:gutentags_root = s:get_project_root(expand('%:h'))
+        let b:gutentags_file = s:get_tagfile(b:gutentags_root)
+    catch /^gutentags\:/
+        call s:trace("Can't figure out what tag file to use... no gutentags support.")
         return
     endtry
 
     " We know what tags file to manage! Now set things up.
-    call s:trace("Setting autotags for buffer '" . bufname('%') . "' with tagfile: " . b:autotags_file)
+    call s:trace("Setting gutentags for buffer '" . bufname('%') . "' with tagfile: " . b:gutentags_file)
 
     " Set the tags file for Vim to use.
-    if g:autotags_auto_set_tags
-        execute 'setlocal tags^=' . b:autotags_file
+    if g:gutentags_auto_set_tags
+        execute 'setlocal tags^=' . b:gutentags_file
     endif
 
     " Autocommands for updating the tags on save.
     let l:bn = bufnr('%')
-    execute 'augroup autotags_buffer_' . l:bn
+    execute 'augroup gutentags_buffer_' . l:bn
     execute '  autocmd!'
     execute '  autocmd BufWritePost <buffer=' . l:bn . '> call s:write_triggered_update_tags()'
     execute 'augroup end'
 
     " Miscellaneous commands.
-    command! -buffer -bang AutotagsUpdate :call s:manual_update_tags(<bang>0)
+    command! -buffer -bang GutentagsUpdate :call s:manual_update_tags(<bang>0)
 
     " Add this tags file to the known tags files if it wasn't there already.
-    let l:found = index(s:known_tagfiles, b:autotags_file)
+    let l:found = index(s:known_tagfiles, b:gutentags_file)
     if l:found < 0
-        call add(s:known_tagfiles, b:autotags_file)
+        call add(s:known_tagfiles, b:gutentags_file)
 
         " Generate this new file depending on settings and stuff.
-        if g:autotags_generate_on_missing && !filereadable(b:autotags_file)
-            call s:trace("Generating missing tags file: " . b:autotags_file)
+        if g:gutentags_generate_on_missing && !filereadable(b:gutentags_file)
+            call s:trace("Generating missing tags file: " . b:gutentags_file)
             call s:update_tags(1, 0)
-        elseif g:autotags_generate_on_new
-            call s:trace("Generating tags file: " . b:autotags_file)
+        elseif g:gutentags_generate_on_new
+            call s:trace("Generating tags file: " . b:gutentags_file)
             call s:update_tags(1, 0)
         endif
     endif
 endfunction
 
-augroup autotags_detect
+augroup gutentags_detect
     autocmd!
-    autocmd BufNewFile,BufReadPost *  call s:setup_autotags()
-    autocmd VimEnter               *  if expand('<amatch>')==''|call s:setup_autotags()|endif
+    autocmd BufNewFile,BufReadPost *  call s:setup_gutentags()
+    autocmd VimEnter               *  if expand('<amatch>')==''|call s:setup_gutentags()|endif
 augroup end
 
 " }}}
@@ -240,7 +240,7 @@ let s:maybe_in_progress = {}
 function! s:get_execute_cmd() abort
     if has('win32')
         let l:cmd = '!start '
-        if g:autotags_background_update
+        if g:gutentags_background_update
             let l:cmd .= '/b '
         endif
         return l:cmd
@@ -265,7 +265,7 @@ endfunction
 
 " (Re)Generate the tags file for a buffer that just go saved.
 function! s:write_triggered_update_tags() abort
-    if g:autotags_enabled && g:autotags_generate_on_write
+    if g:gutentags_enabled && g:gutentags_generate_on_write
         call s:update_tags(0, 1)
     endif
 endfunction
@@ -280,15 +280,15 @@ endfunction
 "   1: if an update is already in progress, queue another one.
 "
 " An additional argument specifies where to write the tags file. If nothing
-" is specified, it will go to the autotags-defined file.
+" is specified, it will go to the gutentags-defined file.
 function! s:update_tags(write_mode, queue_mode, ...) abort
     " Figure out where to save.
     if a:0 == 1
         let l:tags_file = a:1
         let l:proj_dir = fnamemodify(a:1, ':h')
     else
-        let l:tags_file = b:autotags_file
-        let l:proj_dir = b:autotags_root
+        let l:tags_file = b:gutentags_file
+        let l:proj_dir = b:gutentags_root
     endif
     
     " Check that there's not already an update in progress.
@@ -302,7 +302,7 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
             call s:trace("Tag file '" . l:tags_file . "' is already being updated. Queuing it up...")
             call s:trace("")
         else
-            echom "autotags: The tags file is already being updated, please try again later."
+            echom "gutentags: The tags file is already being updated, please try again later."
             echom ""
         endif
         return
@@ -318,7 +318,7 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
     try
         " Build the command line.
         let l:cmd = s:get_execute_cmd() . s:runner_exe
-        let l:cmd .= ' -e "' . g:autotags_executable . '"'
+        let l:cmd .= ' -e "' . g:gutentags_executable . '"'
         let l:cmd .= ' -t "' . l:tags_file . '"'
         let l:cmd .= ' -p "' . l:proj_dir . '"'
         if a:write_mode == 0 && filereadable(l:tags_file)
@@ -328,16 +328,16 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
         for ign in split(&wildignore, ',')
             let l:cmd .= ' -x ' . ign
         endfor
-        for exc in g:autotags_exclude
+        for exc in g:gutentags_exclude
             let l:cmd .= ' -x ' . exc
         endfor
-        if g:autotags_pause_after_update
+        if g:gutentags_pause_after_update
             let l:cmd .= ' -p'
         endif
-        if len(g:autotags_options_file)
-            let l:cmd .= ' -o "' . g:autotags_options_file . '"'
+        if len(g:gutentags_options_file)
+            let l:cmd .= ' -o "' . g:gutentags_options_file . '"'
         endif
-        if g:autotags_trace
+        if g:gutentags_trace
             if has('win32')
                 let l:cmd .= ' -l "' . l:tags_file . '.log"'
             else
@@ -352,9 +352,9 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
 
         call s:trace("Running: " . l:cmd)
         call s:trace("In:      " . l:work_dir)
-        if !g:autotags_fake
+        if !g:gutentags_fake
             " Run the background process.
-            if !g:autotags_trace
+            if !g:gutentags_trace
                 silent execute l:cmd
             else
                 execute l:cmd
@@ -381,66 +381,66 @@ function! s:generate_tags(bang, ...) abort
     call s:update_tags(1, 0, a:1)
 endfunction
 
-command! -bang -nargs=1 -complete=file AutotagsGenerate :call s:generate_tags(<bang>0, <f-args>)
+command! -bang -nargs=1 -complete=file GutentagsGenerate :call s:generate_tags(<bang>0, <f-args>)
 
 " }}}
 
 " Toggles and Miscellaneous Commands {{{
 
-command! AutotagsToggleEnabled :let g:autotags_enabled=!g:autotags_enabled
-command! AutotagsToggleTrace   :call autotags#trace()
-command! AutotagsUnlock        :call delete(b:autotags_file . '.lock')
+command! GutentagsToggleEnabled :let g:gutentags_enabled=!g:gutentags_enabled
+command! GutentagsToggleTrace   :call gutentags#trace()
+command! GutentagsUnlock        :call delete(b:gutentags_file . '.lock')
 
-if g:autotags_debug
-    command! AutotagsToggleFake    :call autotags#fake()
+if g:gutentags_debug
+    command! GutentagsToggleFake    :call gutentags#fake()
 endif
 
 " }}}
 
 " Autoload Functions {{{
 
-function! autotags#rescan(...)
-    if exists('b:autotags_file')
-        unlet b:autotags_file
+function! gutentags#rescan(...)
+    if exists('b:gutentags_file')
+        unlet b:gutentags_file
     endif
     if a:0 && a:1
-        let l:trace_backup = g:autotags_trace
-        let l:autotags_trace = 1
+        let l:trace_backup = g:gutentags_trace
+        let l:gutentags_trace = 1
     endif
-    call s:setup_autotags()
+    call s:setup_gutentags()
     if a:0 && a:1
-        let g:autotags_trace = l:trace_backup
+        let g:gutentags_trace = l:trace_backup
     endif
 endfunction
 
-function! autotags#trace(...)
-    let g:autotags_trace = !g:autotags_trace
+function! gutentags#trace(...)
+    let g:gutentags_trace = !g:gutentags_trace
     if a:0 > 0
-        let g:autotags_trace = a:1
+        let g:gutentags_trace = a:1
     endif
-    if g:autotags_trace
-        echom "autotags: Tracing is enabled."
+    if g:gutentags_trace
+        echom "gutentags: Tracing is enabled."
     else
-        echom "autotags: Tracing is disabled."
+        echom "gutentags: Tracing is disabled."
     endif
     echom ""
 endfunction
 
-function! autotags#fake(...)
-    let g:autotags_fake = !g:autotags_fake
+function! gutentags#fake(...)
+    let g:gutentags_fake = !g:gutentags_fake
     if a:0 > 0
-        let g:autotags_fake = a:1
+        let g:gutentags_fake = a:1
     endif
-    if g:autotags_fake
-        echom "autotags: Now faking autotags."
+    if g:gutentags_fake
+        echom "gutentags: Now faking gutentags."
     else
-        echom "autotags: Now running autotags for real."
+        echom "gutentags: Now running gutentags for real."
     endif
     echom ""
 endfunction
 
-function! autotags#inprogress()
-    echom "autotags: generations in progress:"
+function! gutentags#inprogress()
+    echom "gutentags: generations in progress:"
     for mip in keys(s:maybe_in_progress)
         echom mip
     endfor
@@ -461,9 +461,9 @@ endfunction
 " - arg 3 is the text to be shown if tags are currently being generated.
 "   (defaults to 'TAGS')
 
-function! autotags#statusline(...) abort
-    if !exists('b:autotags_file')
-        " This buffer doesn't have autotags.
+function! gutentags#statusline(...) abort
+    if !exists('b:gutentags_file')
+        " This buffer doesn't have gutentags.
         return ''
     endif
 
@@ -477,7 +477,7 @@ function! autotags#statusline(...) abort
     " current buffer's tags file is 'maybe' being generated. This provides a
     " nice and quick bail out for 99.9% of cases before we need to this the
     " file-system to check the lock file.
-    let l:abs_tag_file = fnamemodify(b:autotags_file, ':p')
+    let l:abs_tag_file = fnamemodify(b:gutentags_file, ':p')
     let l:timestamp = get(s:maybe_in_progress, l:abs_tag_file)
     if l:timestamp == 0
         return ''
