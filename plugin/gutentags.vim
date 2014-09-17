@@ -144,7 +144,8 @@ function! s:get_project_root(path) abort
     while l:path != l:previous_path
         for root in g:gutentags_project_root
             if getftype(l:path . '/' . root) != ""
-                return simplify(fnamemodify(l:path, ':p'))
+                let l:proj_dir = simplify(fnamemodify(l:path, ':p'))
+                return s:stripslash(l:proj_dir)
             endif
         endfor
         let l:previous_path = l:path
