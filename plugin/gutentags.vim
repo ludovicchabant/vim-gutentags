@@ -47,7 +47,7 @@ endif
 if !exists('g:gutentags_project_root')
     let g:gutentags_project_root = []
 endif
-let g:gutentags_project_root += ['.git', '.hg', '.bzr', '_darcs']
+let g:gutentags_project_root += ['.git', '.hg', '.svn', '.bzr', '_darcs']
 
 if !exists('g:gutentags_options_file')
     let g:gutentags_options_file = ''
