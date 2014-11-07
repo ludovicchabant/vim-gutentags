@@ -57,7 +57,7 @@ done
 
 shift $((OPTIND - 1))
 
-if [[ "$1" -ne "" ]]; then
+if [ "$1" != "" ]; then
     echo "Invalid Argument: $1"
     exit 1
 fi
@@ -65,8 +65,8 @@ fi
 echo "Locking tags file..."
 echo $$ > "$TAGS_FILE.lock"
 
-if [[ -f "$TAGS_FILE" ]]; then
-    if [[ "$UPDATED_SOURCE" != "" ]]; then
+if [ -f "$TAGS_FILE" ]; then
+    if [ "$UPDATED_SOURCE" != "" ]; then
         echo "Removing references to: $UPDATED_SOURCE"
         echo "grep -v $UPDATED_SOURCE \"$TAGS_FILE\" > \"$TAGS_FILE.temp\""
         grep -v $UPDATED_SOURCE "$TAGS_FILE" > "$TAGS_FILE.temp"
@@ -87,7 +87,7 @@ rm -f "$TAGS_FILE.lock"
 
 echo "Done."
 
-if [[ $PAUSE_BEFORE_EXIT -eq 1 ]]; then
+if [ $PAUSE_BEFORE_EXIT -eq 1 ]; then
     read -p "Press ENTER to exit..."
 fi
 
