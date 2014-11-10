@@ -291,7 +291,7 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
         let l:tags_file = b:gutentags_file
         let l:proj_dir = b:gutentags_root
     endif
-    
+
     " Check that there's not already an update in progress.
     let l:lock_file = l:tags_file . '.lock'
     if filereadable(l:lock_file)
@@ -327,10 +327,10 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
             let l:cmd .= ' -s "' . l:full_path . '"'
         endif
         for ign in split(&wildignore, ',')
-            let l:cmd .= ' -x ' . ign
+            let l:cmd .= ' -x ' . '"' . ign . '"'
         endfor
         for exc in g:gutentags_exclude
-            let l:cmd .= ' -x ' . exc
+            let l:cmd .= ' -x ' . '"' . exc . '"'
         endfor
         if g:gutentags_pause_after_update
             let l:cmd .= ' -p'
@@ -360,7 +360,7 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
             else
                 execute l:cmd
             endif
-            
+
             " Flag this tags file as being in progress
             let l:full_tags_file = fnamemodify(l:tags_file, ':p')
             let s:maybe_in_progress[l:full_tags_file] = localtime()
