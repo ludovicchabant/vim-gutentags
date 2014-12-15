@@ -40,7 +40,7 @@ if [%1]==[-s] (
     shift
     goto :LoopParseArgs
 )
-if [%1]==[-p] (
+if [%1]==[-c] (
     set PAUSE_BEFORE_EXIT=1
     goto :LoopParseArgs
 )
@@ -115,5 +115,6 @@ echo    -p [dir=]:      The path to the project root
 echo    -s [file=]:     The path to the source file that needs updating
 echo    -l [log=]:      The log file to output to
 echo    -o [options=]:  An options file to read additional options from
+echo    -c:             Ask for confirmation before exiting
 echo.
 

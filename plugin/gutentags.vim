@@ -333,7 +333,7 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
             let l:cmd .= ' -x ' . '"' . exc . '"'
         endfor
         if g:gutentags_pause_after_update
-            let l:cmd .= ' -p'
+            let l:cmd .= ' -c'
         endif
         if len(g:gutentags_options_file)
             let l:cmd .= ' -o "' . g:gutentags_options_file . '"'
