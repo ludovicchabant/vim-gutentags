@@ -83,15 +83,27 @@ if exist "%TAGS_FILE%" (
 )
 
 echo Running ctags >> %LOG_FILE%
-echo "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% %PROJECT_ROOT% >> %LOG_FILE%
-"%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% %PROJECT_ROOT%
+echo call "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% %PROJECT_ROOT% >> %LOG_FILE%
+call "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% %PROJECT_ROOT% >> %LOG_FILE% 2>&1
+if ERRORLEVEL 1 (
+    echo ERROR: Ctags executable returned non-zero code. >> %LOG_FILE%
+    goto :Unlock
+)
 
 echo Replacing tags file >> %LOG_FILE%
 echo move /Y "%TAGS_FILE%.temp" "%TAGS_FILE%" >> %LOG_FILE%
-move /Y "%TAGS_FILE%.temp" "%TAGS_FILE%" >NUL 2>&1
+move /Y "%TAGS_FILE%.temp" "%TAGS_FILE%" >> %LOG_FILE% 2>&1
+if ERRORLEVEL 1 (
+    echo ERROR: Unable to rename temp tags file into actual tags file. >> %LOG_FILE%
+    goto :Unlock
+)
 
+:Unlock
 echo Unlocking tags file... >> %LOG_FILE%
 del /F "%TAGS_FILE%.lock"
+if ERRORLEVEL 1 (
+    echo ERROR: Unable to remove file lock. >> %LOG_FILE%
+)
 
 echo Done. >> %LOG_FILE%
 if [%PAUSE_BEFORE_EXIT%]==[1] (
