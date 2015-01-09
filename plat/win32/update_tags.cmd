@@ -74,17 +74,17 @@ echo Locking tags file... > %LOG_FILE%
 echo locked > "%TAGS_FILE%.lock"
 
 if exist "%TAGS_FILE%" (
-    if not [%UPDATED_SOURCE%]==[] (
+    if not ["%UPDATED_SOURCE%"]==[""] (
         echo Removing references to: %UPDATED_SOURCE% >> %LOG_FILE%
         echo type "%TAGS_FILE%" ^| findstr /V /C:"%UPDATED_SOURCE%" ^> "%TAGS_FILE%.temp" >> %LOG_FILE%
         findstr /V /C:"%UPDATED_SOURCE%" "%TAGS_FILE%" > "%TAGS_FILE%.temp"
-        set CTAGS_ARGS=%CTAGS_ARGS% --append %UPDATED_SOURCE%
+        set CTAGS_ARGS=%CTAGS_ARGS% --append "%UPDATED_SOURCE%"
     )
 )
 
 echo Running ctags >> %LOG_FILE%
-echo call "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% %PROJECT_ROOT% >> %LOG_FILE%
-call "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% %PROJECT_ROOT% >> %LOG_FILE% 2>&1
+echo call "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% "%PROJECT_ROOT%" >> %LOG_FILE%
+call "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% "%PROJECT_ROOT%" >> %LOG_FILE% 2>&1
 if ERRORLEVEL 1 (
     echo ERROR: Ctags executable returned non-zero code. >> %LOG_FILE%
     goto :Unlock
