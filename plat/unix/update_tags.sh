@@ -72,15 +72,15 @@ trap "rm -f \"$TAGS_FILE.lock\" \"$TAGS_FILE.temp\"" 0 3 4 15
 if [ -f "$TAGS_FILE" ]; then
     if [ "$UPDATED_SOURCE" != "" ]; then
         echo "Removing references to: $UPDATED_SOURCE"
-        echo "grep -v $UPDATED_SOURCE \"$TAGS_FILE\" > \"$TAGS_FILE.temp\""
-        grep -v $UPDATED_SOURCE "$TAGS_FILE" > "$TAGS_FILE.temp"
-        CTAGS_ARGS="$CTAGS_ARGS --append $UPDATED_SOURCE"
+        echo "grep -v "$UPDATED_SOURCE" \"$TAGS_FILE\" > \"$TAGS_FILE.temp\""
+        grep -v "$UPDATED_SOURCE" "$TAGS_FILE" > "$TAGS_FILE.temp"
+        CTAGS_ARGS="$CTAGS_ARGS --append \"$UPDATED_SOURCE\""
     fi
 fi
 
 echo "Running ctags"
-echo "$CTAGS_EXE -R -f \"$TAGS_FILE.temp\" $CTAGS_ARGS $PROJECT_ROOT"
-$CTAGS_EXE -R -f "$TAGS_FILE.temp" $CTAGS_ARGS $PROJECT_ROOT
+echo "$CTAGS_EXE -R -f \"$TAGS_FILE.temp\" $CTAGS_ARGS \"$PROJECT_ROOT\""
+$CTAGS_EXE -R -f "$TAGS_FILE.temp" $CTAGS_ARGS "$PROJECT_ROOT"
 
 echo "Replacing tags file"
 echo "mv -f \"$TAGS_FILE.temp\" \"$TAGS_FILE\""
