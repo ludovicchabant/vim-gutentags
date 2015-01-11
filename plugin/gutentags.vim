@@ -190,7 +190,7 @@ function! s:setup_gutentags() abort
 
     " Set the tags file for Vim to use.
     if g:gutentags_auto_set_tags
-        execute 'setlocal tags^=' . b:gutentags_file
+        execute 'setlocal tags^=' . fnameescape(b:gutentags_file)
     endif
 
     " Autocommands for updating the tags on save.
@@ -370,7 +370,7 @@ function! s:update_tags(write_mode, queue_mode, ...) abort
         call s:trace("")
     finally
         " Restore the current directory...
-        execute "chdir " . l:prev_cwd
+        execute "chdir " . fnameescape(l:prev_cwd)
     endtry
 endfunction
 
