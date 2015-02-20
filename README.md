@@ -15,7 +15,7 @@ Install Gutentags like any other Vim plugin. I recommend something like
     hg clone https://bitbucket.org/ludovicchabant/vim-gutentags
 
 Then you only need to do a `:call pathogen#helptags()` to generate the
-documentation tags (how ironic, eh?) and you can access Autotag's help pages
+documentation tags (how ironic, eh?) and you can access Gutentags' help pages
 with `help gutentags`.
 
 
