@@ -211,8 +211,8 @@ g:gutentags_enabled
                         don't.
                         Defaults to 1.
 
-                                                *gutentags_executable*
-g:gutentags_executable
+                                                *gutentags_ctags_executable*
+g:gutentags_ctags_executable
                         Specifies the ctags executable to launch.
                         Defaults to `ctags`.
 
@@ -248,8 +248,8 @@ g:gutentags_exclude
                         Patterns defined in 'wildignore' will also be given as
                         exclude patterns to the `ctags` executable.
 
-                                                *gutentags_options_file*
-g:gutentags_options_file
+                                                *gutentags_ctags_options_file*
+g:gutentags_ctags_options_file
                         The path to an options file that will be passed to
                         the `ctags` executable with the `--options` option.
                         In general you can put options in a `$HOME/.ctags`
