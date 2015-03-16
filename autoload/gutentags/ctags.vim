@@ -61,8 +61,8 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         if g:gutentags_pause_after_update
             let l:cmd .= ' -c'
         endif
-        if len(g:gutentags_options_file)
-            let l:cmd .= ' -o "' . g:gutentags_options_file . '"'
+        if len(g:gutentags_ctags_options_file)
+            let l:cmd .= ' -o "' . g:gutentags_ctags_options_file . '"'
         endif
         if g:gutentags_trace
             if has('win32')
