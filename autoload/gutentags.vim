@@ -185,7 +185,7 @@ function! gutentags#get_execute_cmd_suffix() abort
 endfunction
 
 " (Re)Generate the tags file for the current buffer's file.
-function! s:manual_update_tags(module, bang) abort
+function! s:manual_update_tags(bang) abort
     for module in g:gutentags_modules
         call s:update_tags(module, a:bang, 0)
     endfor
