@@ -4,6 +4,11 @@
 
 " Globals {{{
 
+if v:version < 704
+    echoerr "gutentags: this plugin requires vim >= 7.4."
+    finish
+endif
+
 if !exists('g:gutentags_debug')
     let g:gutentags_debug = 0
 endif
