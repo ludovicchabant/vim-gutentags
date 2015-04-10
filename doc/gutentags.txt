@@ -102,6 +102,10 @@ belongs to. When not project is found (i.e. the file is not under any of the
 known project markers), Gutentags is disabled for that buffer, and the
 following commands and remarks don't apply.
 
+If you want to force-disable Gutentags for a given project even though it does
+match one of the items in |gutentags_project_root|, create a file named
+"`.notags`" at the root of the project.
+
 The tag file that Gutentags creates and manages will be named after
 |gutentags_tagfile|, relative to the project's root directory. When Gutentags
 finds a valid project root, it will prepend the tag file's path to 'tags',

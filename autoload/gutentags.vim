@@ -99,6 +99,11 @@ function! gutentags#setup_gutentags() abort
     call gutentags#trace("Scanning buffer '" . bufname('%') . "' for gutentags setup...")
     try
         let b:gutentags_root = gutentags#get_project_root(expand('%:h'))
+        if filereadable(b:gutentags_root . '/.notags')
+            call gutentags#trace("'notags' file found... no gutentags support.")
+            return
+        endif
+
         let b:gutentags_files = {}
         for module in g:gutentags_modules
             call call("gutentags#".module."#init", [b:gutentags_root])
