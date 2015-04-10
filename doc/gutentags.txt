@@ -32,6 +32,7 @@
 2. Commands                 |gutentags-commands|
 3. Status Line              |gutentags-status-line|
 4. Global Settings          |gutentags-settings|
+5. Project Settings         |gutentags-project-settings|
 
 =============================================================================
 1. Introduction                                 *gutentags-intro*
@@ -175,6 +176,7 @@ Some debugging/troubleshooting commands are also available if the
                         Gutentags, or something otherwise wrong or unexpected
                         with your system. Please file a bug.
 
+
 =============================================================================
 3.  Status Line                                 *gutentags-status-line*
 
@@ -253,14 +255,6 @@ g:gutentags_exclude
                         Patterns defined in 'wildignore' will also be given as
                         exclude patterns to the `ctags` executable.
 
-                                                *gutentags_ctags_options_file*
-g:gutentags_ctags_options_file
-                        The path to an options file that will be passed to
-                        the `ctags` executable with the `--options` option.
-                        In general you can put options in a `$HOME/.ctags`
-                        file, but this lets you specify a custom file
-                        specifically for Vim/Gutentags.
-
                                                 *gutentags_auto_set_tags*
 g:gutentags_auto_set_tags
                         If set to 1, Gutentags will automatically prepend
@@ -316,6 +310,26 @@ g:gutentags_cache_dir
 g:gutentags_define_advanced_commands
                         Defines some advanced commands like
                         |GutentagsToggleEnabled| and |GutentagsUnlock|.
+
+
+=============================================================================
+5. Project Settings                             *gutentags-project-settings*
+
+Gutentags can be customized to some extent on a per-project basis with the
+following files present in the project root directory:
+
+                                                *gutentags-.ctags*
+`.ctags`: if this file exists, Ctags will be told to load additional
+command-line parameters by reading it line by line (see the Ctags
+documentation for more information).
+
+Note that for complex reasons, Gutentags can't always run `ctags` from the
+project root, so if the `.ctags` file exists, its path will actually be passed
+through the `--options=` parameter.
+
+                                                *gutentags-.notags*
+`.notags`: if this file exists, Gutentags will be disabled completely for that
+project.
 
 
  vim:tw=78:et:ft=help:norl:

@@ -6,10 +6,6 @@ if !exists('g:gutentags_ctags_executable')
     let g:gutentags_executable = 'ctags'
 endif
 
-if !exists('g:gutentags_ctags_options_file')
-    let g:gutentags_ctags_options_file = ''
-endif
-
 if !exists('g:gutentags_tagfile')
     let g:gutentags_tagfile = 'tags'
 endif
@@ -61,8 +57,9 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         if g:gutentags_pause_after_update
             let l:cmd .= ' -c'
         endif
-        if len(g:gutentags_ctags_options_file)
-            let l:cmd .= ' -o "' . g:gutentags_ctags_options_file . '"'
+        let l:proj_options_file = a:proj_dir . '/.ctags'
+        if filereadable(l:proj_options_file)
+            let l:cmd .= ' -o "' . l:proj_options_file . '"'
         endif
         if g:gutentags_trace
             if has('win32')
