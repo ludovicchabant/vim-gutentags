@@ -134,7 +134,8 @@ have to run |GutentagsUpdate| manually.
                         current buffer.
 
 
-Some debugging/troubleshooting commands are also available.
+Some debugging/troubleshooting commands are also available if the
+|gutentags_define_advanced_commands| global setting is set to 1.
 
                                                 *:GutentagsToggleEnabled*
 :GutentagsToggleEnabled
@@ -306,6 +307,11 @@ g:gutentags_cache_dir
                         files, instead of writing them at the root of each
                         project. This is handy to keep tags files from
                         polluting many directories all across your computer.
+
+                                            *gutentags_define_advanced_commands*
+g:gutentags_define_advanced_commands
+                        Defines some advanced commands like
+                        |GutentagsToggleEnabled| and |GutentagsUnlock|.
 
 
  vim:tw=78:et:ft=help:norl:

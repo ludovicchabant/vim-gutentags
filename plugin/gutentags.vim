@@ -67,6 +67,10 @@ else
     let g:gutentags_cache_dir = fnamemodify(g:gutentags_cache_dir, ':s?[/\\]$??')
 endif
 
+if !exists('g:gutentags_define_advanced_commands')
+    let g:gutentags_define_advanced_commands = 0
+endif
+
 if g:gutentags_cache_dir != '' && !isdirectory(g:gutentags_cache_dir)
     call mkdir(g:gutentags_cache_dir, 'p')
 endif
@@ -93,15 +97,12 @@ augroup end
 
 " Toggles and Miscellaneous Commands {{{
 
-function! s:delete_lock_files() abort
-    for tagfile in values(b:gutentags_files)
-        silent call delete(tagfile.'.lock')
-    endfor
-endfunction
+command! GutentagsUnlock :call gutentags#delete_lock_files()
 
-command! GutentagsToggleEnabled :let g:gutentags_enabled=!g:gutentags_enabled
-command! GutentagsToggleTrace   :call gutentags#trace()
-command! GutentagsUnlock        :call s:delete_lock_files()
+if g:gutentags_define_advanced_commands
+    command! GutentagsToggleEnabled :let g:gutentags_enabled=!g:gutentags_enabled
+    command! GutentagsToggleTrace   :call gutentags#trace()
+endif
 
 if g:gutentags_debug
     command! GutentagsToggleFake    :call gutentags#fake()

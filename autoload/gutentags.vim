@@ -277,6 +277,14 @@ function! gutentags#rescan(...)
     endif
 endfunction
 
+function! gutentags#delete_lock_files() abort
+    if exists('b:gutentags_files')
+        for tagfile in values(b:gutentags_files)
+            silent call delete(tagfile.'.lock')
+        endfor
+    endif
+endfunction
+
 function! gutentags#toggletrace(...)
     let g:gutentags_trace = !g:gutentags_trace
     if a:0 > 0
