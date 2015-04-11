@@ -106,7 +106,7 @@ command! GutentagsUnlock :call gutentags#delete_lock_files()
 
 if g:gutentags_define_advanced_commands
     command! GutentagsToggleEnabled :let g:gutentags_enabled=!g:gutentags_enabled
-    command! GutentagsToggleTrace   :call gutentags#trace()
+    command! GutentagsToggleTrace   :call gutentags#toggletrace()
 endif
 
 if g:gutentags_debug
