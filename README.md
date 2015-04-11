@@ -65,5 +65,6 @@ I hope Gutentags will bring you as much closure as me regarding tag files. I kno
 I don't want to have to think about it, and probably neither do you.
 
 
+[Pathogen]: https://github.com/tpope/vim-pathogen
 [ctrlp]: https://github.com/kien/ctrlp.vim
 
