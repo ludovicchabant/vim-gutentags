@@ -98,7 +98,7 @@ function! gutentags#setup_gutentags() abort
     " Try and find what tags file we should manage.
     call gutentags#trace("Scanning buffer '" . bufname('%') . "' for gutentags setup...")
     try
-        let b:gutentags_root = gutentags#get_project_root(expand('%:p:h'))
+        let b:gutentags_root = gutentags#get_project_root(expand('%:p:h', 1))
         if filereadable(b:gutentags_root . '/.notags')
             call gutentags#trace("'notags' file found... no gutentags support.")
             return
