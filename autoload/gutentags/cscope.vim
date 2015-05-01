@@ -39,6 +39,17 @@ function! gutentags#cscope#init(project_root) abort
     endif
 endfunction
 
+function! gutentags#cscope#command_terminated(job_id, data, event) abort
+    if a:data == 0
+        if index(s:added_dbs, self.db_file) < 0
+            call add(s:added_dbs, self.db_file)
+            execute 'cs add ' . fnameescape(s:db_file)
+        else
+            execute 'cs reset'
+        endif
+    endif
+endfunction
+
 function! gutentags#cscope#generate(proj_dir, tags_file, write_mode) abort
     let l:cmd = gutentags#get_execute_cmd() . s:runner_exe
     let l:cmd .= ' -e ' . g:gutentags_cscope_executable
@@ -50,10 +61,19 @@ function! gutentags#cscope#generate(proj_dir, tags_file, write_mode) abort
     call gutentags#trace("Running: " . l:cmd)
     call gutentags#trace("In:      " . getcwd())
     if !g:gutentags_fake
-        if !g:gutentags_trace
-            silent execute l:cmd
+        if !(has('nvim') && exists('*jobwait'))
+            if !g:gutentags_trace
+                silent execute l:cmd
+            else
+                execute l:cmd
+            endif
         else
-            execute l:cmd
+            let job_dict = { 'db_file': a:tags_file, 'on_exit' : function('gutentags#cscope#command_terminated') }
+            let job_cmd = [ s:runner_exe,
+                        \ '-e', g:gutentags_cscope_executable,
+                        \ '-p', a:proj_dir,
+                        \ '-f', a:tags_file ]
+            let job_id = jobstart(job_cmd, job_dict)
         endif
 
         let l:full_scopedb_file = fnamemodify(a:tags_file, ':p')
