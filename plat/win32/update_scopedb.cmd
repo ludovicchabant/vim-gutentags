@@ -6,7 +6,7 @@ rem            PARSE ARGUMENTS
 rem ==========================================
 
 set CSCOPE_EXE=cscope
-set DB_FILE=scope.out
+set DB_FILE=cscope.out
 
 :ParseArgs
 if [%1]==[] goto :DoneParseArgs
@@ -43,7 +43,7 @@ echo Locking db file
 echo locked > "%DB_FILE%.lock"
 
 echo Running cscope
-cscope -R -b -k -f "%DB_FILE%"
+"%CSCOPE_EXE%" -R -b -k -f "%DB_FILE%"
 if ERRORLEVEL 1 (
     echo ERROR: Cscope executable returned non-zero code.
 )
