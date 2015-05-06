@@ -208,18 +208,10 @@ endfunction
 " queue_mode:
 "   0: if an update is already in progress, report it and abort.
 "   1: if an update is already in progress, queue another one.
-"
-" An additional argument specifies where to write the tags file. If nothing
-" is specified, it will go to the gutentags-defined file.
-function! s:update_tags(module, write_mode, queue_mode, ...) abort
+function! s:update_tags(module, write_mode, queue_mode) abort
     " Figure out where to save.
-    if a:0 == 1
-        let l:tags_file = a:1
-        let l:proj_dir = fnamemodify(a:1, ':h')
-    else
-        let l:tags_file = b:gutentags_files[a:module]
-        let l:proj_dir = b:gutentags_root
-    endif
+    let l:tags_file = b:gutentags_files[a:module]
+    let l:proj_dir = b:gutentags_root
 
     " Check that there's not already an update in progress.
     let l:lock_file = l:tags_file . '.lock'
