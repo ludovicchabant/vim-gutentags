@@ -256,16 +256,6 @@ endfunction
 
 " }}}
 
-" Manual Tagfile Generation {{{
-
-function! s:generate_tags(bang, ...) abort
-    call s:update_tags(1, 0, a:1)
-endfunction
-
-command! -bang -nargs=1 -complete=file GutentagsGenerate :call s:generate_tags(<bang>0, <f-args>)
-
-" }}}
-
 " Utility Functions {{{
 
 function! gutentags#rescan(...)
