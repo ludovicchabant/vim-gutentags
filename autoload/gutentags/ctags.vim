@@ -2,7 +2,7 @@
 
 " Global Options {{{
 
-if !exists('g:gutentags_ctags_executable')
+if !exists('g:gutentags_executable')
     let g:gutentags_executable = 'ctags'
 endif
 

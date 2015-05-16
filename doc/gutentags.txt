@@ -218,8 +218,8 @@ g:gutentags_enabled
                         don't.
                         Defaults to 1.
 
-                                                *gutentags_ctags_executable*
-g:gutentags_ctags_executable
+                                                *gutentags_executable*
+g:gutentags_executable
                         Specifies the ctags executable to launch.
                         Defaults to `ctags`.
 
