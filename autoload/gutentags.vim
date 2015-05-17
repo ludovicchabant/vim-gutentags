@@ -175,6 +175,15 @@ function! gutentags#get_execute_cmd() abort
     endif
 endfunction
 
+" Get final ctags executable depending whether a filetype one is defined
+function! gutentags#get_ctags_executable() abort
+  if exists('g:gutentags_ctags_executable_{&filetype}')
+    return g:gutentags_ctags_executable_{&filetype}
+  else
+    return g:gutentags_ctags_executable
+  endif
+endfunction
+
 " Get the suffix for how to execute an external command.
 function! gutentags#get_execute_cmd_suffix() abort
     if has('win32')

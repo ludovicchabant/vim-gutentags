@@ -41,7 +41,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     try
         " Build the command line.
         let l:cmd = gutentags#get_execute_cmd() . s:runner_exe
-        let l:cmd .= ' -e "' . g:gutentags_ctags_executable . '"'
+        let l:cmd .= ' -e "' . gutentags#get_ctags_executable() . '"'
         let l:cmd .= ' -t "' . a:tags_file . '"'
         let l:cmd .= ' -p "' . a:proj_dir . '"'
         if a:write_mode == 0 && filereadable(a:tags_file)
