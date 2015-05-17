@@ -249,11 +249,11 @@ g:gutentags_project_root
                                                 *gutentags_exclude*
 g:gutentags_exclude
                         A list of file patterns to pass to the
-                        |gutentags_executable| so that they will be excluded
-                        from parsing for the tags generation.
-                        Defaults to `[]` (an empty |List|).
-                        Patterns defined in 'wildignore' will also be given as
-                        exclude patterns to the `ctags` executable.
+                        |gutentags_ctags_executable| so that they will be
+                        excluded from parsing for the tags generation.
+                        Defaults to `[]` (an empty |List|).  Patterns defined
+                        in 'wildignore' will also be given as exclude patterns
+                        to the `ctags` executable.
 
                                                 *gutentags_auto_set_tags*
 g:gutentags_auto_set_tags
