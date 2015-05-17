@@ -177,8 +177,10 @@ endfunction
 
 " Get final ctags executable depending whether a filetype one is defined
 function! gutentags#get_ctags_executable() abort
-  if exists('g:gutentags_ctags_executable_{&filetype}')
-    return g:gutentags_ctags_executable_{&filetype}
+  "Only consider the main filetype in cases like 'python.django'
+  let l:ftype = get(split(&filetype, '\.'), 0, '')
+  if exists('g:gutentags_ctags_executable_{l:ftype}')
+    return g:gutentags_ctags_executable_{l:ftype}
   else
     return g:gutentags_ctags_executable
   endif
