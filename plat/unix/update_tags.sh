@@ -67,7 +67,7 @@ echo "Locking tags file..."
 echo $$ > "$TAGS_FILE.lock"
 
 # Remove lock and temp file if script is stopped unexpectedly.
-trap "rm -f \"$TAGS_FILE.lock\" \"$TAGS_FILE.temp\"" 0 3 4 15
+trap "errorcode=$?; rm -f \"$TAGS_FILE.lock\" \"$TAGS_FILE.temp\"; exit $errorcode" INT TERM EXIT
 
 if [ -f "$TAGS_FILE" ]; then
     if [ "$UPDATED_SOURCE" != "" ]; then
