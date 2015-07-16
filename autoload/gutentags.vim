@@ -95,6 +95,13 @@ function! gutentags#setup_gutentags() abort
         return
     endif
 
+    " Don't setup gutentags for anything that's not a normal buffer
+    " (so don't do anything for help buffers and quickfix windows and
+    "  other such things)
+    if &buftype != ''
+        return
+    endif
+
     " Try and find what tags file we should manage.
     call gutentags#trace("Scanning buffer '" . bufname('%') . "' for gutentags setup...")
     try
