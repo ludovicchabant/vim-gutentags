@@ -223,6 +223,15 @@ g:gutentags_ctags_executable
                         Specifies the ctags executable to launch.
                         Defaults to `ctags`.
 
+                                     *gutentags_ctags_executable_{filetype}*
+g:gutentags_ctags_executable_{filetype}
+                        Specifies the ctags executable to launch for
+                        {filetype} files. It has precedence over
+                        g:gutentags_ctags_executable.
+                        Example: >
+                         let g:gutentags_ctags_executable_ruby = 'ripper-tags'
+<
+
                                                 *gutentags_tagfile*
 g:gutentags_tagfile
                         Specifies the name of the tag file to create. This
