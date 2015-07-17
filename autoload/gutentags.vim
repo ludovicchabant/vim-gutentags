@@ -182,17 +182,6 @@ function! gutentags#get_execute_cmd() abort
     endif
 endfunction
 
-" Get final ctags executable depending whether a filetype one is defined
-function! gutentags#get_ctags_executable() abort
-  "Only consider the main filetype in cases like 'python.django'
-  let l:ftype = get(split(&filetype, '\.'), 0, '')
-  if exists('g:gutentags_ctags_executable_{l:ftype}')
-    return g:gutentags_ctags_executable_{l:ftype}
-  else
-    return g:gutentags_ctags_executable
-  endif
-endfunction
-
 " Get the suffix for how to execute an external command.
 function! gutentags#get_execute_cmd_suffix() abort
     if has('win32')
