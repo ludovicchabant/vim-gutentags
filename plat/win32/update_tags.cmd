@@ -12,6 +12,7 @@ set PROJECT_ROOT=
 set UPDATED_SOURCE=
 set PAUSE_BEFORE_EXIT=0
 set LOG_FILE=
+set RECURSIVE_FLAG="-R"
 
 :ParseArgs
 if [%1]==[] goto :DoneParseArgs
@@ -51,6 +52,7 @@ if [%1]==[-l] (
 )
 if [%1]==[-o] (
     set CTAGS_ARGS=%CTAGS_ARGS% --options=%2
+    set RECURSIVE_FLAG=""
     shift
     goto :LoopParseArgs
 )
@@ -83,8 +85,8 @@ if exist "%TAGS_FILE%" (
 )
 
 echo Running ctags >> %LOG_FILE%
-echo call "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% "%PROJECT_ROOT%" >> %LOG_FILE%
-call "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% "%PROJECT_ROOT%" >> %LOG_FILE% 2>&1
+echo call "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %RECURSIVE_FLAG% %CTAGS_ARGS% "%PROJECT_ROOT%" >> %LOG_FILE%
+call "%CTAGS_EXE%" -f "%TAGS_FILE%.temp" %RECURSIVE_FLAG% %CTAGS_ARGS% "%PROJECT_ROOT%" >> %LOG_FILE% 2>&1
 if ERRORLEVEL 1 (
     echo ERROR: Ctags executable returned non-zero code. >> %LOG_FILE%
     goto :Unlock

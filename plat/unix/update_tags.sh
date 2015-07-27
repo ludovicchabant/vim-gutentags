@@ -9,6 +9,7 @@ TAGS_FILE=tags
 PROJECT_ROOT=
 UPDATED_SOURCE=
 PAUSE_BEFORE_EXIT=0
+RECURSIVE_FLAG="-R"
 
 
 ShowUsage() {
@@ -52,6 +53,8 @@ while getopts "h?e:x:t:p:s:o:c" opt; do
             ;;
         o)
             CTAGS_ARGS="$CTAGS_ARGS --options=$OPTARG"
+            # No recursive flag when options file is present.
+            RECURSIVE_FLAG=""
             ;;
     esac
 done
@@ -79,8 +82,8 @@ if [ -f "$TAGS_FILE" ]; then
 fi
 
 echo "Running ctags"
-echo "$CTAGS_EXE -R -f \"$TAGS_FILE.temp\" $CTAGS_ARGS \"$PROJECT_ROOT\""
-$CTAGS_EXE -R -f "$TAGS_FILE.temp" $CTAGS_ARGS "$PROJECT_ROOT"
+echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $RECURSIVE_FLAG $CTAGS_ARGS \"$PROJECT_ROOT\""
+$CTAGS_EXE -f "$TAGS_FILE.temp" $RECURSIVE_FLAG $CTAGS_ARGS "$PROJECT_ROOT"
 
 echo "Replacing tags file"
 echo "mv -f \"$TAGS_FILE.temp\" \"$TAGS_FILE\""
