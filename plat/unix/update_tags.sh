@@ -79,8 +79,8 @@ if [ -f "$TAGS_FILE" ]; then
 fi
 
 echo "Running ctags"
-echo "$CTAGS_EXE -R -f \"$TAGS_FILE.temp\" $CTAGS_ARGS \"$PROJECT_ROOT\""
-$CTAGS_EXE -R -f "$TAGS_FILE.temp" $CTAGS_ARGS "$PROJECT_ROOT"
+echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS \"$PROJECT_ROOT\""
+$CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS "$PROJECT_ROOT"
 
 echo "Replacing tags file"
 echo "mv -f \"$TAGS_FILE.temp\" \"$TAGS_FILE\""

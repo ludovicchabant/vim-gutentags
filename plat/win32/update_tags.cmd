@@ -83,8 +83,8 @@ if exist "%TAGS_FILE%" (
 )
 
 echo Running ctags >> %LOG_FILE%
-echo call "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% "%PROJECT_ROOT%" >> %LOG_FILE%
-call "%CTAGS_EXE%" -R -f "%TAGS_FILE%.temp" %CTAGS_ARGS% "%PROJECT_ROOT%" >> %LOG_FILE% 2>&1
+echo call "%CTAGS_EXE%" -f "%TAGS_FILE%.temp" %CTAGS_ARGS% "%PROJECT_ROOT%" >> %LOG_FILE%
+call "%CTAGS_EXE%" -f "%TAGS_FILE%.temp" %CTAGS_ARGS% "%PROJECT_ROOT%" >> %LOG_FILE% 2>&1
 if ERRORLEVEL 1 (
     echo ERROR: Ctags executable returned non-zero code. >> %LOG_FILE%
     goto :Unlock

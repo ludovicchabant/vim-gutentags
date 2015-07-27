@@ -82,9 +82,11 @@ endif
 
 if has('win32')
     let g:gutentags_plat_dir = expand('<sfile>:h:h:p') . "\\plat\\win32\\"
+    let g:gutentags_res_dir = expand('<sfile>:h:h:p') . "\\res\\"
     let g:gutentags_script_ext = '.cmd'
 else
     let g:gutentags_plat_dir = expand('<sfile>:h:h:p') . '/plat/unix/'
+    let g:gutentags_res_dir = expand('<sfile>:h:h:p') . '/res/'
     let g:gutentags_script_ext = '.sh'
 endif
 

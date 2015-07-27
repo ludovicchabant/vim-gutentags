@@ -52,6 +52,16 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
             let l:full_path = expand('%:p')
             let l:cmd .= ' -s "' . l:full_path . '"'
         endif
+        " Pass the Gutentags options file first, and then the project specific
+        " one, so that users can override the default behaviour.
+        let l:cmd .= ' -o "' . gutentags#get_res_file('ctags.options') . '"'
+        let l:proj_options_file = a:proj_dir . '/' . 
+                    \g:gutentags_ctags_options_file
+        if filereadable(l:proj_options_file)
+            let l:proj_options_file = s:process_options_file(
+                        \a:proj_dir, l:proj_options_file)
+            let l:cmd .= ' -o "' . l:proj_options_file . '"'
+        endif
         for ign in split(&wildignore, ',')
             let l:cmd .= ' -x ' . '"' . ign . '"'
         endfor
@@ -60,13 +70,6 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         endfor
         if g:gutentags_pause_after_update
             let l:cmd .= ' -c'
-        endif
-        let l:proj_options_file = a:proj_dir . '/' . 
-                    \g:gutentags_ctags_options_file
-        if filereadable(l:proj_options_file)
-            let l:proj_options_file = s:process_options_file(
-                        \a:proj_dir, l:proj_options_file)
-            let l:cmd .= ' -o "' . l:proj_options_file . '"'
         endif
         if g:gutentags_trace
             if has('win32')

@@ -46,6 +46,11 @@ function! gutentags#get_plat_file(filename) abort
     return g:gutentags_plat_dir . a:filename . g:gutentags_script_ext
 endfunction
 
+" Gets a file path in the resource folder.
+function! gutentags#get_res_file(filename) abort
+    return g:gutentags_res_dir . a:filename
+endfunction
+
 " }}}
 
 " Gutentags Setup {{{
