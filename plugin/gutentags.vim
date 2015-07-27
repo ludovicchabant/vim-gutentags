@@ -69,6 +69,9 @@ endif
 if !exists('g:gutentags_cache_dir')
     let g:gutentags_cache_dir = ''
 else
+    " Make sure we get an absolute/resolved path (e.g. expanding `~/`), and
+    " strip any trailing slash.
+    let g:gutentags_cache_dir = fnamemodify(g:gutentags_cache_dir, ':p')
     let g:gutentags_cache_dir = fnamemodify(g:gutentags_cache_dir, ':s?[/\\]$??')
 endif
 
