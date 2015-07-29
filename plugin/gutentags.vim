@@ -48,7 +48,7 @@ endif
 if !exists('g:gutentags_project_root')
     let g:gutentags_project_root = []
 endif
-let g:gutentags_project_root += ['.git', '.hg', '.svn', '.bzr', '_darcs']
+let g:gutentags_project_root += ['.git', '.hg', '.svn', '.bzr', '_darcs', '_FOSSIL_', '.fslckout']
 
 if !exists('g:gutentags_exclude')
     let g:gutentags_exclude = []
