@@ -67,7 +67,7 @@ function! gutentags#get_project_root(path) abort
         let l:markers += g:ctrlp_root_markers
     endif
     while l:path != l:previous_path
-        for root in g:gutentags_project_root
+        for root in l:markers
             if getftype(l:path . '/' . root) != ""
                 let l:proj_dir = simplify(fnamemodify(l:path, ':p'))
                 return gutentags#stripslash(l:proj_dir)
