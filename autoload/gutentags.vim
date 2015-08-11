@@ -177,10 +177,11 @@ endfunction
 " Get how to execute an external command depending on debug settings.
 function! gutentags#get_execute_cmd() abort
     if has('win32')
-        let l:cmd = '!start '
+        let l:cmd = '!start "" '
         if g:gutentags_background_update
             let l:cmd .= '/b '
         endif
+        let l:cmd .= '/d '
         return l:cmd
     else
         return '!'

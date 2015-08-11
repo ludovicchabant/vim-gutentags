@@ -11,17 +11,17 @@ set DB_FILE=cscope.out
 :ParseArgs
 if [%1]==[] goto :DoneParseArgs
 if [%1]==[-e] (
-    set CSCOPE_EXE=%~2
+    set CSCOPE_EXE=%2
     shift
     goto :LoopParseArgs
 )
 if [%1]==[-f] (
-    set DB_FILE=%~2
+    set DB_FILE=%2
     shift
     goto :LoopParseArgs
 )
 if [%1]==[-p] (
-    set PROJ_ROOT=%~2
+    set PROJ_ROOT=%2
     shift
     goto :LoopParseArgs
 )
@@ -40,16 +40,16 @@ rem             GENERATE DATABASE
 rem ==========================================
 
 echo Locking db file
-echo locked > "%DB_FILE%.lock"
+echo locked > %DB_FILE%.lock
 
 echo Running cscope
-"%CSCOPE_EXE%" -R -b -k -f "%DB_FILE%"
+%CSCOPE_EXE% -R -b -k -f %DB_FILE%
 if ERRORLEVEL 1 (
     echo ERROR: Cscope executable returned non-zero code.
 )
 
 echo Unlocking db file
-del /F "%DB_FILE%.lock"
+del /F %DB_FILE%.lock
 if ERRORLEVEL 1 (
     echo ERROR: Unable to remove file lock.
 )
