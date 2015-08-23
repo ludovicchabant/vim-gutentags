@@ -15,7 +15,6 @@ set PAUSE_BEFORE_EXIT=0
 set LOG_FILE=
 set LOCK_FILE="%TAGS_FILE:"=%.lock"
 
-echo parsing arguments
 
 :ParseArgs
 if [%1]==[] goto :DoneParseArgs
@@ -80,7 +79,7 @@ echo Locking tags file... > %LOG_FILE%
 echo locked > %LOCK_FILE%
 
 if exist %TAGS_FILE% (
-    if not [%UPDATED_SOURCE%]==[""] (
+    if not [%UPDATED_SOURCE%]==[] (
         echo Removing references to: %UPDATED_SOURCE% >> %LOG_FILE%
         echo type %TAGS_FILE% ^| findstr /V /C:%UPDATED_SOURCE% ^> %TAGS_FILE_TEMP% >> %LOG_FILE%
         findstr /V /C:%UPDATED_SOURCE% %TAGS_FILE% > %TAGS_FILE_TEMP%
@@ -115,6 +114,7 @@ echo Done. >> %LOG_FILE%
 if [%PAUSE_BEFORE_EXIT%]==[1] (
     pause
 )
+
 
 goto :EOF
 
