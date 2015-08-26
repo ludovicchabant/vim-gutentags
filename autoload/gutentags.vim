@@ -270,7 +270,7 @@ function! gutentags#rescan(...)
         let l:trace_backup = g:gutentags_trace
         let l:gutentags_trace = 1
     endif
-    call s:setup_gutentags()
+    call gutentags#setup_gutentags()
     if a:0 && a:1
         let g:gutentags_trace = l:trace_backup
     endif
