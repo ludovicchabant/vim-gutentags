@@ -148,10 +148,10 @@ function! gutentags#setup_gutentags() abort
             " Generate this new file depending on settings and stuff.
             if g:gutentags_generate_on_missing && !filereadable(l:tagfile)
                 call gutentags#trace("Generating missing tags file: " . l:tagfile)
-                call s:update_tags(module, 1, 0)
+                call s:update_tags(module, 1, 1)
             elseif g:gutentags_generate_on_new
                 call gutentags#trace("Generating tags file: " . l:tagfile)
-                call s:update_tags(module, 1, 0)
+                call s:update_tags(module, 1, 1)
             endif
         endif
     endfor
@@ -207,7 +207,7 @@ endfunction
 function! s:write_triggered_update_tags() abort
     if g:gutentags_enabled && g:gutentags_generate_on_write
         for module in g:gutentags_modules
-            call s:update_tags(module, 0, 1)
+            call s:update_tags(module, 0, 2)
         endfor
     endif
 endfunction
@@ -219,7 +219,8 @@ endfunction
 "
 " queue_mode:
 "   0: if an update is already in progress, report it and abort.
-"   1: if an update is already in progress, queue another one.
+"   1: if an update is already in progress, abort silently.
+"   2: if an update is already in progress, queue another one.
 function! s:update_tags(module, write_mode, queue_mode) abort
     " Figure out where to save.
     let l:tags_file = b:gutentags_files[a:module]
@@ -228,18 +229,21 @@ function! s:update_tags(module, write_mode, queue_mode) abort
     " Check that there's not already an update in progress.
     let l:lock_file = l:tags_file . '.lock'
     if filereadable(l:lock_file)
-        if a:queue_mode == 1
+        if a:queue_mode == 2
             let l:idx = index(s:update_queue[a:module], l:tags_file)
             if l:idx < 0
                 call add(s:update_queue[a:module], l:tags_file)
             endif
             call gutentags#trace("Tag file '" . l:tags_file . 
                         \"' is already being updated. Queuing it up...")
-            call gutentags#trace("")
-        else
+        elseif a:queue_mode == 1
+            call gutentags#trace("Tag file '" . l:tags_file .
+                        \"' is already being updated. Skipping...")
+        elseif a:queue_mode == 0
             echom "gutentags: The tags file is already being updated, " .
                         \"please try again later."
-            echom ""
+        else
+            call gutentags#throw("Unknown queue mode: " . a:queue_mode)
         endif
         return
     endif
