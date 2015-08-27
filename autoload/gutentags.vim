@@ -256,6 +256,9 @@ function! s:update_tags(module, write_mode, queue_mode) abort
     try
         call call("gutentags#".a:module."#generate",
                     \[l:proj_dir, l:tags_file, a:write_mode])
+    catch /^gutentags\:/
+        echom "Error while generating ".a:module." file:"
+        echom v:exception
     finally
         " Restore the current directory...
         execute "chdir " . fnameescape(l:prev_cwd)

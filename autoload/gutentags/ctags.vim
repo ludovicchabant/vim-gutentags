@@ -40,6 +40,18 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     " these things.
     let l:prev_cwd = getcwd()
     let l:work_dir = fnamemodify(a:tags_file, ':h')
+    let l:tags_file_exists = filereadable(a:tags_file)
+
+    if l:tags_file_exists
+        let l:first_lines = readfile(a:tags_file, '', 1)
+        if len(l:first_lines) == 0 || stridx(l:first_lines[0], '!_TAG_') != 0
+            call gutentags#throw("File ".a:tags_file." doesn't appear to be ".
+                        \"a ctags file. Please delete it and run ".
+                        \":GutentagsUpdate!.")
+            return
+        endif
+    endif
+
     execute "chdir " . fnameescape(l:work_dir)
 
     try
@@ -48,7 +60,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         let l:cmd .= ' -e "' . s:get_ctags_executable() . '"'
         let l:cmd .= ' -t "' . a:tags_file . '"'
         let l:cmd .= ' -p "' . a:proj_dir . '"'
-        if a:write_mode == 0 && filereadable(a:tags_file)
+        if a:write_mode == 0 && l:tags_file_exists
             let l:full_path = expand('%:p')
             let l:cmd .= ' -s "' . l:full_path . '"'
         endif
