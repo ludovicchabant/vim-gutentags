@@ -54,6 +54,10 @@ if !exists('g:gutentags_exclude')
     let g:gutentags_exclude = []
 endif
 
+if !exists('g:gutentags_resolve_symlinks')
+    let g:gutentags_resolve_symlinks = 0
+endif
+
 if !exists('g:gutentags_generate_on_new')
     let g:gutentags_generate_on_new = 1
 endif

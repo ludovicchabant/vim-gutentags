@@ -329,6 +329,17 @@ g:gutentags_cache_dir
                         project. This is handy to keep tags files from
                         polluting many directories all across your computer.
 
+                                            *gutentags_resolve_symlinks*
+g:gutentags_resolve_symlinks
+                        When set to 1, Gutentags will resolve any symlinks in
+                        the current buffer's path in order to find the project
+                        it belongs to. This is what you want if you're editing
+                        a symlink located outside of the project, and it
+                        points to a file inside the project. However, this is
+                        maybe not what you want if the symlink itself is
+                        part of the project.
+                        Defaults to 0.
+
                                             *gutentags_define_advanced_commands*
 g:gutentags_define_advanced_commands
                         Defines some advanced commands like
