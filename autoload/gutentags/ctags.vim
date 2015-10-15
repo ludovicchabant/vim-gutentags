@@ -18,6 +18,10 @@ if !exists('g:gutentags_ctags_options_file')
     let g:gutentags_ctags_options_file = '.gutctags'
 endif
 
+if !exists('g:gutentags_ctags_check_tagfile')
+    let g:gutentags_ctags_check_tagfile = 0
+endif
+
 " }}}
 
 " Gutentags Module Interface {{{
@@ -42,7 +46,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     let l:work_dir = fnamemodify(a:tags_file, ':h')
     let l:tags_file_exists = filereadable(a:tags_file)
 
-    if l:tags_file_exists
+    if l:tags_file_exists && g:gutentags_ctags_check_tagfile
         let l:first_lines = readfile(a:tags_file, '', 1)
         if len(l:first_lines) == 0 || stridx(l:first_lines[0], '!_TAG_') != 0
             call gutentags#throw("File ".a:tags_file." doesn't appear to be ".
