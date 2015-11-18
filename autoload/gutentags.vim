@@ -150,12 +150,14 @@ function! gutentags#setup_gutentags() abort
             call add(s:known_files, l:tagfile)
 
             " Generate this new file depending on settings and stuff.
-            if g:gutentags_generate_on_missing && !filereadable(l:tagfile)
-                call gutentags#trace("Generating missing tags file: " . l:tagfile)
-                call s:update_tags(module, 1, 1)
-            elseif g:gutentags_generate_on_new
-                call gutentags#trace("Generating tags file: " . l:tagfile)
-                call s:update_tags(module, 1, 1)
+            if g:gutentags_enabled
+                if g:gutentags_generate_on_missing && !filereadable(l:tagfile)
+                    call gutentags#trace("Generating missing tags file: " . l:tagfile)
+                    call s:update_tags(module, 1, 1)
+                elseif g:gutentags_generate_on_new
+                    call gutentags#trace("Generating tags file: " . l:tagfile)
+                    call s:update_tags(module, 1, 1)
+                endif
             endif
         endif
     endfor
