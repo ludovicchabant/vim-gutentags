@@ -107,6 +107,14 @@ function! gutentags#setup_gutentags() abort
         return
     endif
 
+    " Let the user specify custom ways to disable Gutentags.
+    if g:gutentags_enabled_user_func != '' &&
+                \!call(g:gutentags_enabled_user_func, [expand('%:p')])
+        call gutentags#trace("Ignoring '" . bufname('%') . "' because of " .
+                    \"custom user function.")
+        return
+    endif
+
     " Try and find what tags file we should manage.
     call gutentags#trace("Scanning buffer '" . bufname('%') . "' for gutentags setup...")
     try

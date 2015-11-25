@@ -339,6 +339,15 @@ g:gutentags_resolve_symlinks
                         maybe not what you want if the symlink itself is
                         part of the project.
                         Defaults to 0.
+                        
+                                            *gutentags_enabled_user_func*
+g:gutentags_enabled_user_func
+                        When set to a non-empty string, it is expected to be
+                        the name of a function that will be called when a file
+                        is open in a project. The function gets passed the
+                        path of the file and if it returns 0, Gutentags won't
+                        be enabled for that file.
+                        Defaults to "".
 
                                             *gutentags_define_advanced_commands*
 g:gutentags_define_advanced_commands

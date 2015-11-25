@@ -41,6 +41,10 @@ if !exists('g:gutentags_enabled')
     let g:gutentags_enabled = 1
 endif
 
+if !exists('g:gutentags_enabled_user_func')
+    let g:gutentags_enabled_user_func = ''
+endif
+
 if !exists('g:gutentags_modules')
     let g:gutentags_modules = ['ctags']
 endif
