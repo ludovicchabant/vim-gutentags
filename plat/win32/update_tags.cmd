@@ -8,15 +8,18 @@ rem ==========================================
 set CTAGS_EXE=ctags
 set CTAGS_ARGS=
 set TAGS_FILE=tags
+set TAGS_FILE_TEMP=tags.temp
 set PROJECT_ROOT=
 set UPDATED_SOURCE=
 set PAUSE_BEFORE_EXIT=0
 set LOG_FILE=
+set LOCK_FILE="%TAGS_FILE:"=%.lock"
+
 
 :ParseArgs
 if [%1]==[] goto :DoneParseArgs
 if [%1]==[-e] (
-    set CTAGS_EXE=%~2
+    set CTAGS_EXE=%2
     shift
     goto :LoopParseArgs
 )
@@ -26,17 +29,19 @@ if [%1]==[-x] (
     goto :LoopParseArgs
 )
 if [%1]==[-t] (
-    set TAGS_FILE=%~2
+    set TAGS_FILE=%2
+    set TAGS_FILE_TEMP="%TAGS_FILE:"=%.temp"
+    set LOCK_FILE="%TAGS_FILE:"=%.lock"
     shift
     goto :LoopParseArgs
 )
 if [%1]==[-p] (
-    set PROJECT_ROOT=%~2
+    set PROJECT_ROOT=%2
     shift
     goto :LoopParseArgs
 )
 if [%1]==[-s] (
-    set UPDATED_SOURCE=%~2
+    set UPDATED_SOURCE=%2
     shift
     goto :LoopParseArgs
 )
@@ -45,7 +50,7 @@ if [%1]==[-c] (
     goto :LoopParseArgs
 )
 if [%1]==[-l] (
-    set LOG_FILE=%~2
+    set LOG_FILE=%2
     shift
     goto :LoopParseArgs
 )
@@ -71,28 +76,28 @@ rem ==========================================
 if [%LOG_FILE%]==[] set LOG_FILE=CON
 
 echo Locking tags file... > %LOG_FILE%
-echo locked > "%TAGS_FILE%.lock"
+echo locked > %LOCK_FILE%
 
-if exist "%TAGS_FILE%" (
-    if not ["%UPDATED_SOURCE%"]==[""] (
+if exist %TAGS_FILE% (
+    if not [%UPDATED_SOURCE%]==[] (
         echo Removing references to: %UPDATED_SOURCE% >> %LOG_FILE%
-        echo type "%TAGS_FILE%" ^| findstr /V /C:"%UPDATED_SOURCE%" ^> "%TAGS_FILE%.temp" >> %LOG_FILE%
-        findstr /V /C:"%UPDATED_SOURCE%" "%TAGS_FILE%" > "%TAGS_FILE%.temp"
-        set CTAGS_ARGS=%CTAGS_ARGS% --append "%UPDATED_SOURCE%"
+        echo type %TAGS_FILE% ^| findstr /V /C:%UPDATED_SOURCE% ^> %TAGS_FILE_TEMP% >> %LOG_FILE%
+        findstr /V /C:%UPDATED_SOURCE% %TAGS_FILE% > %TAGS_FILE_TEMP%
+        set CTAGS_ARGS=%CTAGS_ARGS% --append %UPDATED_SOURCE%
     )
 )
 
 echo Running ctags >> %LOG_FILE%
-echo call "%CTAGS_EXE%" -f "%TAGS_FILE%.temp" %CTAGS_ARGS% "%PROJECT_ROOT%" >> %LOG_FILE%
-call "%CTAGS_EXE%" -f "%TAGS_FILE%.temp" %CTAGS_ARGS% "%PROJECT_ROOT%" >> %LOG_FILE% 2>&1
+echo call %CTAGS_EXE% -f %TAGS_FILE_TEMP% %CTAGS_ARGS% %PROJECT_ROOT% >> %LOG_FILE%
+call %CTAGS_EXE% -f %TAGS_FILE_TEMP% %CTAGS_ARGS% %PROJECT_ROOT% >> %LOG_FILE% 2>&1
 if ERRORLEVEL 1 (
     echo ERROR: Ctags executable returned non-zero code. >> %LOG_FILE%
     goto :Unlock
 )
 
 echo Replacing tags file >> %LOG_FILE%
-echo move /Y "%TAGS_FILE%.temp" "%TAGS_FILE%" >> %LOG_FILE%
-move /Y "%TAGS_FILE%.temp" "%TAGS_FILE%" >> %LOG_FILE% 2>&1
+echo move /Y %TAGS_FILE_TEMP% %TAGS_FILE% >> %LOG_FILE%
+move /Y %TAGS_FILE_TEMP% %TAGS_FILE% >> %LOG_FILE% 2>&1
 if ERRORLEVEL 1 (
     echo ERROR: Unable to rename temp tags file into actual tags file. >> %LOG_FILE%
     goto :Unlock
@@ -100,7 +105,7 @@ if ERRORLEVEL 1 (
 
 :Unlock
 echo Unlocking tags file... >> %LOG_FILE%
-del /F "%TAGS_FILE%.lock"
+del /F %LOCK_FILE%
 if ERRORLEVEL 1 (
     echo ERROR: Unable to remove file lock. >> %LOG_FILE%
 )
@@ -109,6 +114,7 @@ echo Done. >> %LOG_FILE%
 if [%PAUSE_BEFORE_EXIT%]==[1] (
     pause
 )
+
 
 goto :EOF
 
