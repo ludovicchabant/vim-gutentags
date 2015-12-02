@@ -61,7 +61,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     try
         " Build the command line.
         let l:cmd = gutentags#get_execute_cmd() . s:runner_exe
-        let l:cmd .= ' -e "' . s:get_ctags_executable() . '"'
+        let l:cmd .= ' -e "' . s:get_ctags_executable(a:proj_dir) . '"'
         let l:cmd .= ' -t "' . a:tags_file . '"'
         let l:cmd .= ' -p "' . a:proj_dir . '"'
         if a:write_mode == 0 && l:tags_file_exists
@@ -128,11 +128,13 @@ endfunction
 " Utilities {{{
 
 " Get final ctags executable depending whether a filetype one is defined
-function! s:get_ctags_executable() abort
+function! s:get_ctags_executable(proj_dir) abort
     "Only consider the main filetype in cases like 'python.django'
     let l:ftype = get(split(&filetype, '\.'), 0, '')
-    if exists('g:gutentags_ctags_executable_{l:ftype}')
-        return g:gutentags_ctags_executable_{l:ftype}
+    let l:proj_info = gutentags#get_project_info(a:proj_dir)
+    let l:type = get(l:proj_info, 'type', l:ftype)
+    if exists('g:gutentags_ctags_executable_{l:type}')
+        return g:gutentags_ctags_executable_{l:type}
     else
         return g:gutentags_ctags_executable
     endif

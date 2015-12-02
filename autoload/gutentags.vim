@@ -56,6 +56,27 @@ endfunction
 " Gutentags Setup {{{
 
 let s:known_files = []
+let s:known_projects = {}
+
+function! s:cache_project_root(path) abort
+    let l:result = {}
+
+    for proj_info in g:gutentags_project_info
+        let l:filematch = get(proj_info, 'file', '')
+        if l:filematch != '' && filereadable(a:path . '/'. l:filematch)
+            let l:result = copy(proj_info)
+            break
+        endif
+
+        let l:globmatch = get(proj_info, 'glob', '')
+        if l:globmatch != '' && glob(a:path . '/' . l:globmatch) != ''
+            let l:result = copy(proj_info)
+            break
+        endif
+    endfor
+
+    let s:known_projects[a:path] = l:result
+endfunction
 
 " Finds the first directory with a project marker by walking up from the given
 " file path.
@@ -77,6 +98,11 @@ function! gutentags#get_project_root(path) abort
         let l:path = fnamemodify(l:path, ':h')
     endwhile
     call gutentags#throw("Can't figure out what tag file to use for: " . a:path)
+endfunction
+
+" Get info on the project we're inside of.
+function! gutentags#get_project_info(path) abort
+    return get(s:known_projects, a:path, {})
 endfunction
 
 " Generate a path for a given filename in the cache directory.
@@ -126,6 +152,18 @@ function! gutentags#setup_gutentags() abort
         if filereadable(b:gutentags_root . '/.notags')
             call gutentags#trace("'notags' file found... no gutentags support.")
             return
+        endif
+
+        if !has_key(s:known_projects, b:gutentags_root)
+            call s:cache_project_root(b:gutentags_root)
+        endif
+        if g:gutentags_trace
+            let l:projnfo = gutentags#get_project_info(b:gutentags_root)
+            if l:projnfo != {}
+                call gutentags#trace("Setting project type to ".l:projnfo['type'])
+            else
+                call gutentags#trace("No specific project type.")
+            endif
         endif
 
         let b:gutentags_files = {}

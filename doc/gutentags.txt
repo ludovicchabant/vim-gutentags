@@ -224,10 +224,10 @@ g:gutentags_ctags_executable
                         Defaults to `ctags`.
 
                                      *gutentags_ctags_executable_{filetype}*
-g:gutentags_ctags_executable_{filetype}
-                        Specifies the ctags executable to launch for
-                        {filetype} files. It has precedence over
-                        g:gutentags_ctags_executable.
+g:gutentags_ctags_executable_{type}
+                        Specifies the ctags executable to launch for a project
+                        of type {type}. See |gutentags_project_info| for more
+                        information.
                         Example: >
                          let g:gutentags_ctags_executable_ruby = 'ripper-tags'
 <
@@ -353,6 +353,42 @@ g:gutentags_enabled_user_func
 g:gutentags_define_advanced_commands
                         Defines some advanced commands like
                         |GutentagsToggleEnabled| and |GutentagsUnlock|.
+
+                                            *gutentags_project_info*
+g:gutentags_project_info
+                        Defines ways for Gutentags to figure out what kind of
+                        project any given file belongs to. This should be
+                        a list of dictionaries:
+
+                        let g:gutentags_project_info = []
+                        call add(g:gutentags_project_info, {...})
+
+                        Each dictionary item must contain at least a `type`
+                        key, indicating the type of project:
+
+                        {"type": "python"}
+
+                        Other items will be used to figure out if a project is
+                        of the given type.
+
+                        "file": any existing file with this path (relative to
+                        the project root) will make the current project match
+                        the given info.
+
+                        "glob": any result found with this glob pattern
+                        (relative to the project root) will make the current
+                        project match the given info. See |glob()| for more
+                        information.
+
+                        Gutentags adds by default the following definitions:
+
+                        call add(g:gutentags_project_info, {'type': 'python', 'file': 'setup.py'})
+                        call add(g:gutentags_project_info, {'type': 'ruby', 'file': 'Gemfile'})
+
+                        This means, for example, that you can use
+                        `g:gutentags_ctags_executable_ruby` out of the box.
+                        See |gutentags_ctags_executable_{filetype}| for more
+                        information.
 
 
 =============================================================================

@@ -54,6 +54,12 @@ if !exists('g:gutentags_project_root')
 endif
 let g:gutentags_project_root += ['.git', '.hg', '.svn', '.bzr', '_darcs', '_FOSSIL_', '.fslckout']
 
+if !exists('g:gutentags_project_info')
+    let g:gutentags_project_info = []
+endif
+call add(g:gutentags_project_info, {'type': 'python', 'file': 'setup.py'})
+call add(g:gutentags_project_info, {'type': 'ruby', 'file': 'Gemfile'})
+
 if !exists('g:gutentags_exclude')
     let g:gutentags_exclude = []
 endif
