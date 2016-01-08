@@ -91,7 +91,16 @@ function! gutentags#get_project_root(path) abort
         for root in l:markers
             if getftype(l:path . '/' . root) != ""
                 let l:proj_dir = simplify(fnamemodify(l:path, ':p'))
-                return gutentags#stripslash(l:proj_dir)
+                let l:proj_dir = gutentags#stripslash(l:proj_dir)
+                if l:proj_dir == ''
+                    call gutentags#trace("Found project marker '" . root .
+                                \"' at the root of your file-system! " .
+                                \" That's probably wrong, disabling " .
+                                \"gutentags for this file...",
+                                \1)
+                    call gutentags#throw("Marker found at root, aborting.")
+                endif
+                return l:proj_dir
             endif
         endfor
         let l:previous_path = l:path
