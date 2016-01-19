@@ -83,18 +83,6 @@ I set for myself with Gutentags:
 =============================================================================
 2. Commands                                     *gutentags-commands*
 
-                                                *gutentags-global-commands*
-The following commands are always available, whatever buffer you currently
-have open:
-
-                                                *:GutentagsGenerate*
-:GutentagsGenerate {tagsfile}
-                        Generates a tag file named {tagsfile}. Tags will be
-                        generated for all the files in the same directory as
-                        {tagsfile} and below (i.e. recursive from {tagsfile}'s
-                        own directory).
-
-
                                                 *gutentags-project-commands*
 The following commands are only available in buffers that have been found to
 belong to a project that should be managed by Gutentags. See
