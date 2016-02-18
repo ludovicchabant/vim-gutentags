@@ -4,8 +4,8 @@
 
 " Globals {{{
 
-if v:version < 700
-    echoerr "gutentags: this plugin requires vim >= 7.0."
+if v:version < 704
+    echoerr "gutentags: this plugin requires vim >= 7.4."
     finish
 endif
 
