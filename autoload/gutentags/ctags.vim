@@ -37,6 +37,14 @@ function! gutentags#ctags#init(project_root) abort
     if g:gutentags_auto_set_tags
         execute 'setlocal tags^=' . fnameescape(b:gutentags_files['ctags'])
     endif
+
+    " Check if the ctags executable exists.
+    if g:gutentags_enabled && executable(g:gutentags_ctags_executable) == 0
+        let g:gutentags_enabled = 0
+        echoerr "Executable '".g:gutentags_ctags_executable."' can't be found. "
+                    \."Gutentags will be disabled. You can re-enable it by "
+                    \."setting g:gutentags_enabled back to 1."
+    endif
 endfunction
 
 function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
