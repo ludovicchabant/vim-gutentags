@@ -69,18 +69,23 @@ echo $$ > "$TAGS_FILE.lock"
 # Remove lock and temp file if script is stopped unexpectedly.
 trap "errorcode=$?; rm -f \"$TAGS_FILE.lock\" \"$TAGS_FILE.temp\"; exit $errorcode" INT TERM EXIT
 
+INDEX_WHOLE_PROJECT=1
 if [ -f "$TAGS_FILE" ]; then
     if [ "$UPDATED_SOURCE" != "" ]; then
         echo "Removing references to: $UPDATED_SOURCE"
         echo "grep -v "$UPDATED_SOURCE" \"$TAGS_FILE\" > \"$TAGS_FILE.temp\""
         grep -v "$UPDATED_SOURCE" "$TAGS_FILE" > "$TAGS_FILE.temp"
         CTAGS_ARGS="$CTAGS_ARGS --append \"$UPDATED_SOURCE\""
+        INDEX_WHOLE_PROJECT=0
     fi
+fi
+if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
+    CTAGS_ARGS="$CTAGS_ARGS \"$PROJECT_ROOT\""
 fi
 
 echo "Running ctags"
-echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS \"$PROJECT_ROOT\""
-$CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS "$PROJECT_ROOT"
+echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS"
+$CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS
 
 echo "Replacing tags file"
 echo "mv -f \"$TAGS_FILE.temp\" \"$TAGS_FILE\""
