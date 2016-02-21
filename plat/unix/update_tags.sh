@@ -75,17 +75,19 @@ if [ -f "$TAGS_FILE" ]; then
         echo "Removing references to: $UPDATED_SOURCE"
         echo "grep -v "$UPDATED_SOURCE" \"$TAGS_FILE\" > \"$TAGS_FILE.temp\""
         grep -v "$UPDATED_SOURCE" "$TAGS_FILE" > "$TAGS_FILE.temp"
-        CTAGS_ARGS="$CTAGS_ARGS --append \"$UPDATED_SOURCE\""
         INDEX_WHOLE_PROJECT=0
     fi
 fi
-if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
-    CTAGS_ARGS="$CTAGS_ARGS \"$PROJECT_ROOT\""
-fi
 
-echo "Running ctags"
-echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS"
-$CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS
+if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
+    echo "Running ctags on whole project"
+    echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS \"$PROJECT_ROOT\""
+    $CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS "$PROJECT_ROOT"
+else
+    echo "Running ctags on \"$UPDATED_SOURCE\""
+    echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS --append \"$UPDATED_SOURCE\""
+    $CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS --append "$UPDATED_SOURCE"
+fi
 
 echo "Replacing tags file"
 echo "mv -f \"$TAGS_FILE.temp\" \"$TAGS_FILE\""
