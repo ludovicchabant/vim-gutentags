@@ -22,6 +22,10 @@ if !exists('g:gutentags_ctags_check_tagfile')
     let g:gutentags_ctags_check_tagfile = 0
 endif
 
+if !exists('g:gutentags_ctags_no_space_in_paths')
+    let g:gutentags_ctags_no_space_in_paths = 1
+endif
+
 " }}}
 
 " Gutentags Module Interface {{{
@@ -30,8 +34,15 @@ let s:runner_exe = gutentags#get_plat_file('update_tags')
 
 function! gutentags#ctags#init(project_root) abort
     " Figure out the path to the tags file.
+    if g:gutentags_ctags_no_space_in_paths
+        " We need to replace spaces in the project root because `ctags` seems
+        " incapable of reading/writing to tags files with spaces.
+        let l:fixed_project_root = tr(a:project_root, ' ', '_')
+    else
+        let l:fixed_project_root = a:project_root
+    endif
     let b:gutentags_files['ctags'] = gutentags#get_cachefile(
-                \a:project_root, g:gutentags_tagfile)
+                \l:fixed_project_root, g:gutentags_tagfile)
 
     " Set the tags file for Vim to use.
     if g:gutentags_auto_set_tags
