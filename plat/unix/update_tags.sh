@@ -99,5 +99,6 @@ rm -f "$TAGS_FILE.lock"
 echo "Done."
 
 if [ $PAUSE_BEFORE_EXIT -eq 1 ]; then
-    read -p "Press ENTER to exit..."
+    printf "Press ENTER to exit..."
+    read
 fi
