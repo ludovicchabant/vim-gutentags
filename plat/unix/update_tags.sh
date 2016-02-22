@@ -20,14 +20,14 @@ ShowUsage() {
     echo "    -p [dir=]:      The path to the project root"
     echo "    -s [file=]:     The path to the source file that needs updating"
     echo "    -x [pattern=]:  A pattern of files to exclude"
-    echo "    -o [options=]:  An options file to read additional options from" 
+    echo "    -o [options=]:  An options file to read additional options from"
     echo "    -c:             Ask for confirmation before exiting"
     echo ""
 }
 
 
 while getopts "h?e:x:t:p:s:o:c" opt; do
-    case $opt in 
+    case $opt in
         h|\?)
             ShowUsage
             exit 0
