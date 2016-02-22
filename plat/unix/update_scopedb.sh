@@ -47,7 +47,7 @@ echo "Locking cscope DB file..."
 echo $$ > "$DB_FILE.lock"
 
 # Remove lock and temp file if script is stopped unexpectedly.
-trap "rm -f \"$DB_FILE.lock\" \"$DB_FILE.temp\"" 0 3 4 15
+trap 'rm -f "$DB_FILE.lock" "$DB_FILE.temp"' 0 3 4 15
 
 PREVIOUS_DIR=$(pwd)
 if [ -d "$PROJECT_ROOT" ]; then
