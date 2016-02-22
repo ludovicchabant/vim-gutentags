@@ -100,5 +100,5 @@ echo "Done."
 
 if [ $PAUSE_BEFORE_EXIT -eq 1 ]; then
     printf "Press ENTER to exit..."
-    read
+    read -r
 fi
