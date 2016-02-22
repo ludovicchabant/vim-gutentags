@@ -101,4 +101,3 @@ echo "Done."
 if [ $PAUSE_BEFORE_EXIT -eq 1 ]; then
     read -p "Press ENTER to exit..."
 fi
-
