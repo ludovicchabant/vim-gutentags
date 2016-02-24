@@ -27,6 +27,7 @@ endif
 " Gutentags Module Interface {{{
 
 let s:runner_exe = gutentags#get_plat_file('update_tags')
+let s:unix_redir = (&shellredir =~# '%s') ? &shellredir : &shellredir . ' %s'
 
 function! gutentags#ctags#init(project_root) abort
     " Figure out the path to the tags file.
@@ -113,11 +114,11 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
             if has('win32')
                 let l:cmd .= ' -l "' . l:actual_tags_file . '.log"'
             else
-                let l:cmd .= ' > "' . l:actual_tags_file . '.log" 2>&1'
+                let l:cmd .= ' ' . printf(s:unix_redir, '"' . l:actual_tags_file . '.log"')
             endif
         else
             if !has('win32')
-                let l:cmd .= ' > /dev/null 2>&1'
+                let l:cmd .= ' ' . printf(s:unix_redir, '/dev/null')
             endif
         endif
         let l:cmd .= gutentags#get_execute_cmd_suffix()
