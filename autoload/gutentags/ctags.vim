@@ -64,7 +64,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         endif
     endif
 
-    if g:gutentags_cache_dir == ""
+    if empty(g:gutentags_cache_dir)
         " If we don't use the cache directory, let's just use the tag filename
         " as specified by the user, and change the working directory to the
         " project root.
@@ -164,7 +164,7 @@ function! s:get_ctags_executable(proj_dir) abort
 endfunction
 
 function! s:process_options_file(proj_dir, path) abort
-    if g:gutentags_cache_dir == ""
+    if empty(g:gutentags_cache_dir)
         " If we're not using a cache directory to store tag files, we can
         " use the options file straight away.
         return a:path
