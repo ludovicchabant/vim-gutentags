@@ -93,7 +93,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         " Pass the Gutentags options file first, and then the project specific
         " one, so that users can override the default behaviour.
         let l:cmd .= ' -o "' . gutentags#get_res_file('ctags.options') . '"'
-        let l:proj_options_file = a:proj_dir . '/' . 
+        let l:proj_options_file = a:proj_dir . '/' .
                     \g:gutentags_ctags_options_file
         if filereadable(l:proj_options_file)
             let l:proj_options_file = s:process_options_file(
