@@ -214,4 +214,3 @@ function! s:process_options_file(proj_dir, path) abort
 endfunction
 
 " }}}
-
