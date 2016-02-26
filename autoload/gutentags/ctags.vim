@@ -22,10 +22,6 @@ if !exists('g:gutentags_ctags_check_tagfile')
     let g:gutentags_ctags_check_tagfile = 0
 endif
 
-if !exists('g:gutentags_ctags_no_space_in_paths')
-    let g:gutentags_ctags_no_space_in_paths = 1
-endif
-
 " }}}
 
 " Gutentags Module Interface {{{
@@ -34,15 +30,8 @@ let s:runner_exe = gutentags#get_plat_file('update_tags')
 
 function! gutentags#ctags#init(project_root) abort
     " Figure out the path to the tags file.
-    if g:gutentags_ctags_no_space_in_paths
-        " We need to replace spaces in the project root because `ctags` seems
-        " incapable of reading/writing to tags files with spaces.
-        let l:fixed_project_root = tr(a:project_root, ' ', '_')
-    else
-        let l:fixed_project_root = a:project_root
-    endif
     let b:gutentags_files['ctags'] = gutentags#get_cachefile(
-                \l:fixed_project_root, g:gutentags_tagfile)
+                \a:project_root, g:gutentags_tagfile)
 
     " Set the tags file for Vim to use.
     if g:gutentags_auto_set_tags
@@ -62,7 +51,6 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     " Get to the tags file directory because ctags is finicky about
     " these things.
     let l:prev_cwd = getcwd()
-    let l:work_dir = fnamemodify(a:tags_file, ':h')
     let l:tags_file_exists = filereadable(a:tags_file)
 
     if l:tags_file_exists && g:gutentags_ctags_check_tagfile
@@ -75,14 +63,29 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         endif
     endif
 
-    execute "chdir " . fnameescape(l:work_dir)
+    if g:gutentags_cache_dir == ""
+        " If we don't use the cache directory, let's just use the tag filename
+        " as specified by the user, and change the working directory to the
+        " project root.
+        " Note that if we don't do this and pass a full path, `ctags` gets
+        " confused if the paths have spaces -- but not if you're *in* the
+        " root directory.
+        let l:actual_proj_dir = '.'
+        let l:actual_tags_file = g:gutentags_tagfile
+        execute "chdir " . fnameescape(a:proj_dir)
+    else
+        " else: the tags file goes in a cache directory, so we need to specify
+        " all the paths absolutely for `ctags` to do its job correctly.
+        let l:actual_proj_dir = a:proj_dir
+        let l:actual_tags_file = a:tags_file
+    endif
 
     try
         " Build the command line.
         let l:cmd = gutentags#get_execute_cmd() . s:runner_exe
         let l:cmd .= ' -e "' . s:get_ctags_executable(a:proj_dir) . '"'
-        let l:cmd .= ' -t "' . a:tags_file . '"'
-        let l:cmd .= ' -p "' . a:proj_dir . '"'
+        let l:cmd .= ' -t "' . l:actual_tags_file . '"'
+        let l:cmd .= ' -p "' . l:actual_proj_dir . '"'
         if a:write_mode == 0 && l:tags_file_exists
             let l:full_path = expand('%:p')
             let l:cmd .= ' -s "' . l:full_path . '"'
@@ -108,9 +111,9 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         endif
         if g:gutentags_trace
             if has('win32')
-                let l:cmd .= ' -l "' . a:tags_file . '.log"'
+                let l:cmd .= ' -l "' . l:actual_tags_file . '.log"'
             else
-                let l:cmd .= ' > "' . a:tags_file . '.log" 2>&1'
+                let l:cmd .= ' > "' . l:actual_tags_file . '.log" 2>&1'
             endif
         else
             if !has('win32')

@@ -378,16 +378,6 @@ g:gutentags_project_info
                         See |gutentags_ctags_executable_{filetype}| for more
                         information.
 
-                                             *gutentags_ctags_no_space_in_paths*
-g:gutentags_ctags_no_space_in_paths
-                        When set to 1, the root path of a project will have
-                        any spaces replaced by underscores. This is in case
-                        the particular `ctags` implementation you're using
-                        doesn't support tags filenames with spaces, which
-                        seems to be the case with Exuberant Ctags.
-                        Set to 0 to leave project root paths as is.
-                        Defaults to 1.
-
 
 =============================================================================
 5. Project Settings                             *gutentags-project-settings*
