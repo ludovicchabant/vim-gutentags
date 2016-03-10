@@ -198,13 +198,27 @@ function! s:process_options_file(proj_dir, path) abort
     let l:lines = readfile(a:path)
     let l:outlines = []
     for line in l:lines
-        let l:exarg = matchend(line, '\v^\-\-exclude=')
-        if l:exarg < 0
+        let l:exarg_idx = matchend(line, '\v^\-\-exclude=')
+        if l:exarg_idx < 0
             call add(l:outlines, line)
             continue
         endif
-        let l:fullp = gutentags#normalizepath(l:proj_dir.'/'.
-                    \strpart(line, l:exarg + 1))
+
+        " Don't convert things that don't look like paths.
+        let l:exarg = strpart(line, l:exarg_idx + 1)
+        let l:do_convert = 1
+        if l:exarg[0] == '@'   " Manifest file path
+            let l:do_convert = 0
+        endif
+        if stridx(l:exarg, '/') < 0 && stridx(l:exarg, '\\') < 0   " Filename
+            let l:do_convert = 0
+        endif
+        if l:do_convert == 0
+            call add(l:outlines, line)
+            continue
+        endif
+
+        let l:fullp = l:proj_dir . gutentags#normalizepath('/'.l:exarg)
         let l:ol = '--exclude='.l:fullp
         call add(l:outlines, l:ol)
     endfor
