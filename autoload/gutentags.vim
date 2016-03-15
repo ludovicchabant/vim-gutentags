@@ -242,6 +242,7 @@ function! gutentags#get_execute_cmd() abort
         if g:gutentags_background_update
             let l:cmd .= '/b '
         endif
+        let l:cmd .= '"'
         return l:cmd
     else
         return '!'
@@ -251,7 +252,7 @@ endfunction
 " Get the suffix for how to execute an external command.
 function! gutentags#get_execute_cmd_suffix() abort
     if has('win32')
-        return ''
+        return '"'
     else
         return ' &'
     endif
