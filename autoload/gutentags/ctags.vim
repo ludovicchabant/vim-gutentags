@@ -82,7 +82,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
 
     try
         " Build the command line.
-        let l:cmd = gutentags#get_execute_cmd() . s:runner_exe
+        let l:cmd = gutentags#get_execute_cmd() . shellescape(s:runner_exe)
         let l:cmd .= ' -e "' . s:get_ctags_executable(a:proj_dir) . '"'
         let l:cmd .= ' -t "' . l:actual_tags_file . '"'
         let l:cmd .= ' -p "' . l:actual_proj_dir . '"'
