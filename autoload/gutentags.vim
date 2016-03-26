@@ -262,6 +262,7 @@ function! s:manual_update_tags(bang) abort
     for module in g:gutentags_modules
         call s:update_tags(module, a:bang, 0)
     endfor
+    silent doautocmd User GutentagsUpdated
 endfunction
 
 " (Re)Generate the tags file for a buffer that just go saved.
@@ -271,6 +272,7 @@ function! s:write_triggered_update_tags() abort
             call s:update_tags(module, 0, 2)
         endfor
     endif
+    silent doautocmd User GutentagsUpdated
 endfunction
 
 " Update the tags file for the current buffer's file.
