@@ -20,14 +20,14 @@ ShowUsage() {
     echo "    -p [dir=]:      The path to the project root"
     echo "    -s [file=]:     The path to the source file that needs updating"
     echo "    -x [pattern=]:  A pattern of files to exclude"
-    echo "    -o [options=]:  An options file to read additional options from" 
+    echo "    -o [options=]:  An options file to read additional options from"
     echo "    -c:             Ask for confirmation before exiting"
     echo ""
 }
 
 
 while getopts "h?e:x:t:p:s:o:c" opt; do
-    case $opt in 
+    case $opt in
         h|\?)
             ShowUsage
             exit 0
@@ -67,13 +67,13 @@ echo "Locking tags file..."
 echo $$ > "$TAGS_FILE.lock"
 
 # Remove lock and temp file if script is stopped unexpectedly.
-trap "errorcode=$?; rm -f \"$TAGS_FILE.lock\" \"$TAGS_FILE.temp\"; exit $errorcode" INT TERM EXIT
+trap 'errorcode=$?; rm -f "$TAGS_FILE.lock" "$TAGS_FILE.temp"; exit $errorcode' INT QUIT TERM EXIT
 
 INDEX_WHOLE_PROJECT=1
 if [ -f "$TAGS_FILE" ]; then
     if [ "$UPDATED_SOURCE" != "" ]; then
         echo "Removing references to: $UPDATED_SOURCE"
-        echo "grep -v "$UPDATED_SOURCE" \"$TAGS_FILE\" > \"$TAGS_FILE.temp\""
+        echo "grep -v \"$UPDATED_SOURCE\" \"$TAGS_FILE\" > \"$TAGS_FILE.temp\""
         grep -v "$UPDATED_SOURCE" "$TAGS_FILE" > "$TAGS_FILE.temp"
         INDEX_WHOLE_PROJECT=0
     fi
@@ -99,6 +99,6 @@ rm -f "$TAGS_FILE.lock"
 echo "Done."
 
 if [ $PAUSE_BEFORE_EXIT -eq 1 ]; then
-    read -p "Press ENTER to exit..."
+    printf "Press ENTER to exit..."
+    read -r
 fi
-
