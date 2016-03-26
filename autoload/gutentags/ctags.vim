@@ -27,6 +27,7 @@ endif
 " Gutentags Module Interface {{{
 
 let s:runner_exe = gutentags#get_plat_file('update_tags')
+let s:unix_redir = (&shellredir =~# '%s') ? &shellredir : &shellredir . ' %s'
 
 function! gutentags#ctags#init(project_root) abort
     " Figure out the path to the tags file.
@@ -63,7 +64,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         endif
     endif
 
-    if g:gutentags_cache_dir == ""
+    if empty(g:gutentags_cache_dir)
         " If we don't use the cache directory, let's just use the tag filename
         " as specified by the user, and change the working directory to the
         " project root.
@@ -93,7 +94,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         " Pass the Gutentags options file first, and then the project specific
         " one, so that users can override the default behaviour.
         let l:cmd .= ' -o "' . gutentags#get_res_file('ctags.options') . '"'
-        let l:proj_options_file = a:proj_dir . '/' . 
+        let l:proj_options_file = a:proj_dir . '/' .
                     \g:gutentags_ctags_options_file
         if filereadable(l:proj_options_file)
             let l:proj_options_file = s:process_options_file(
@@ -113,11 +114,11 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
             if has('win32')
                 let l:cmd .= ' -l "' . l:actual_tags_file . '.log"'
             else
-                let l:cmd .= ' > "' . l:actual_tags_file . '.log" 2>&1'
+                let l:cmd .= ' ' . printf(s:unix_redir, '"' . l:actual_tags_file . '.log"')
             endif
         else
             if !has('win32')
-                let l:cmd .= ' > /dev/null 2>&1'
+                let l:cmd .= ' ' . printf(s:unix_redir, '/dev/null')
             endif
         endif
         let l:cmd .= gutentags#get_execute_cmd_suffix()
@@ -163,7 +164,7 @@ function! s:get_ctags_executable(proj_dir) abort
 endfunction
 
 function! s:process_options_file(proj_dir, path) abort
-    if g:gutentags_cache_dir == ""
+    if empty(g:gutentags_cache_dir)
         " If we're not using a cache directory to store tag files, we can
         " use the options file straight away.
         return a:path
@@ -228,4 +229,3 @@ function! s:process_options_file(proj_dir, path) abort
 endfunction
 
 " }}}
-
