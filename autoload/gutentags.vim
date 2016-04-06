@@ -119,7 +119,7 @@ function! gutentags#get_cachefile(root_dir, filename) abort
     let l:tag_path = gutentags#stripslash(a:root_dir) . '/' . a:filename
     if g:gutentags_cache_dir != ""
         " Put the tag file in the cache dir instead of inside the
-        " projet root.
+        " project root.
         let l:tag_path = g:gutentags_cache_dir . '/' .
                     \tr(l:tag_path, '\/: ', '---_')
         let l:tag_path = substitute(l:tag_path, '/\-', '/', '')
@@ -159,7 +159,7 @@ function! gutentags#setup_gutentags() abort
         endif
         let b:gutentags_root = gutentags#get_project_root(l:buf_dir)
         if filereadable(b:gutentags_root . '/.notags')
-            call gutentags#trace("'notags' file found... no gutentags support.")
+            call gutentags#trace("'.notags' file found... no gutentags support.")
             return
         endif
 
@@ -185,7 +185,7 @@ function! gutentags#setup_gutentags() abort
     endtry
 
     " We know what tags file to manage! Now set things up.
-    call gutentags#trace("Setting gutentags for buffer '" . bufname('%'))
+    call gutentags#trace("Setting gutentags for buffer '".bufname('%')."'")
 
     " Autocommands for updating the tags on save.
     let l:bn = bufnr('%')
