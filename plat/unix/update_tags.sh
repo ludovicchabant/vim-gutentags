@@ -69,9 +69,24 @@ echo $$ > "$TAGS_FILE.lock"
 # Remove lock and temp file if script is stopped unexpectedly.
 trap 'errorcode=$?; rm -f "$TAGS_FILE.lock" "$TAGS_FILE.temp"; exit $errorcode' INT QUIT TERM EXIT
 
+# Change to directory of tags file for relative paths.
+cd "$(dirname "$TAGS_FILE")"
+
 INDEX_WHOLE_PROJECT=1
 if [ -f "$TAGS_FILE" ]; then
     if [ "$UPDATED_SOURCE" != "" ]; then
+        # Make the file path relative to the tags file.
+        # This is required for consistent naming.
+        # See https://github.com/ludovicchabant/vim-gutentags/issues/70.
+        relpath() {
+            python -c "import os.path; print(os.path.relpath('$1', '${2}'))"
+        }
+        orig_updated_source="$UPDATED_SOURCE"
+        UPDATED_SOURCE="$(relpath "$UPDATED_SOURCE" "$(dirname "$TAGS_FILE")")"
+        if [ "$orig_updated_source" != "$UPDATED_SOURCE" ]; then
+            echo "Made UPDATED_SOURCE relative: $orig_updated_source => $UPDATED_SOURCE"
+        fi
+
         echo "Removing references to: $UPDATED_SOURCE"
         echo "grep -v \"$UPDATED_SOURCE\" \"$TAGS_FILE\" > \"$TAGS_FILE.temp\""
         grep -v "$UPDATED_SOURCE" "$TAGS_FILE" > "$TAGS_FILE.temp"
