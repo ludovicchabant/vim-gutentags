@@ -73,8 +73,9 @@ INDEX_WHOLE_PROJECT=1
 if [ -f "$TAGS_FILE" ]; then
     if [ "$UPDATED_SOURCE" != "" ]; then
         echo "Removing references to: $UPDATED_SOURCE"
-        echo "grep -v \"$UPDATED_SOURCE\" \"$TAGS_FILE\" > \"$TAGS_FILE.temp\""
-        grep -v "$UPDATED_SOURCE" "$TAGS_FILE" > "$TAGS_FILE.temp"
+        cmd="awk '\$2 != \"$UPDATED_SOURCE\"' '$TAGS_FILE' > '$TAGS_FILE.temp'"
+        echo "$cmd"
+        eval "$cmd"
         INDEX_WHOLE_PROJECT=0
     fi
 fi
