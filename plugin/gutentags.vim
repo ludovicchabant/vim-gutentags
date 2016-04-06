@@ -50,9 +50,8 @@ if !exists('g:gutentags_modules')
 endif
 
 if !exists('g:gutentags_project_root')
-    let g:gutentags_project_root = []
+    let g:gutentags_project_root = ['.git', '.hg', '.svn', '.bzr', '_darcs', '_FOSSIL_', '.fslckout']
 endif
-let g:gutentags_project_root += ['.git', '.hg', '.svn', '.bzr', '_darcs', '_FOSSIL_', '.fslckout']
 
 if !exists('g:gutentags_project_info')
     let g:gutentags_project_info = []

@@ -238,10 +238,8 @@ g:gutentags_project_root
                         Gutentags will be enabled for the project, and a tags
                         file named after |gutentags_tagfile| will be created at
                         the project root.
-                        Defaults to `[]` (an empty |List|).
-                        A list of default markers will always be appended to
-                        the user-defined ones: ['.git', '.hg', '.bzr',
-                        '_darcs'].
+                        Defaults to `['.git', '.hg', '.svn', '.bzr', '_darcs',
+                        '_FOSSIL_', '.fslckout']`.
 
                                                 *gutentags_exclude*
 g:gutentags_exclude
