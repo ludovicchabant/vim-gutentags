@@ -81,8 +81,31 @@ endfunction
 " Finds the first directory with a project marker by walking up from the given
 " file path.
 function! gutentags#get_project_root(path) abort
-    let l:path = gutentags#stripslash(a:path)
-    let l:previous_path = ""
+    " Look for existing output files (tags, cscope.out etc) first.
+    if g:gutentags_use_generated_file_marker
+        let l:markers = []
+        for module in g:gutentags_modules
+            exec 'let l:markers += [gutentags#'.module.'#filename()]'
+        endfor
+        let l:path = gutentags#stripslash(a:path)
+        let l:previous_path = ""
+        while l:path != l:previous_path
+            for root in l:markers
+                if getftype(l:path . '/' . root) != ""
+                    let l:proj_dir = simplify(fnamemodify(l:path, ':p'))
+                    let l:proj_dir = gutentags#stripslash(l:proj_dir)
+                    if l:proj_dir != ''
+                        call gutentags#trace("Found file marker in ".
+                                    \ l:proj_dir . ': ' . l:root)
+                        return l:proj_dir
+                    endif
+                endif
+                let l:previous_path = l:path
+                let l:path = fnamemodify(l:path, ':h')
+            endfor
+        endwhile
+    endif
+
     let l:markers = g:gutentags_project_root[:]
     if exists('g:ctrlp_root_markers')
         let l:markers += g:ctrlp_root_markers
