@@ -157,7 +157,9 @@ function! gutentags#setup_gutentags() abort
         if g:gutentags_resolve_symlinks
             let l:buf_dir = fnamemodify(resolve(expand('%:p', 1)), ':p:h')
         endif
-        let b:gutentags_root = gutentags#get_project_root(l:buf_dir)
+        if !exists('b:gutentags_root')
+            let b:gutentags_root = gutentags#get_project_root(l:buf_dir)
+        endif
         if filereadable(b:gutentags_root . '/.notags')
             call gutentags#trace("'notags' file found... no gutentags support.")
             return
