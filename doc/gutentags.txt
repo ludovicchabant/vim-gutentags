@@ -243,6 +243,18 @@ g:gutentags_project_root
                         the user-defined ones: ['.git', '.hg', '.bzr',
                         '_darcs'].
 
+                                                *gutentags_exclude_project_root*
+g:gutentags_exclude_project_root
+                        A list of project roots to generally ignore. If a file
+                        is opened inside one of those projects, Gutentags
+                        won't be activated. This is similar to placing
+                        a `.notags` file in the root of those projects, but
+                        can be useful when you don't want to, or can't, place
+                        such a file there.
+                        Defaults to ['/usr/local'], which is the folder where
+                        Homebrew is known to create a Git directory by default
+                        on MacOS.
+
                                                 *gutentags_exclude*
 g:gutentags_exclude
                         A list of file patterns to pass to the

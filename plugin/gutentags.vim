@@ -64,6 +64,10 @@ if !exists('g:gutentags_exclude')
     let g:gutentags_exclude = []
 endif
 
+if !exists('g:gutentags_exclude_project_root')
+    let g:gutentags_exclude_project_root = ['/usr/local']
+endif
+
 if !exists('g:gutentags_resolve_symlinks')
     let g:gutentags_resolve_symlinks = 0
 endif

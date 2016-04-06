@@ -100,6 +100,15 @@ function! gutentags#get_project_root(path) abort
                                 \1)
                     call gutentags#throw("Marker found at root, aborting.")
                 endif
+                for ign in g:gutentags_exclude_project_root
+                    if l:proj_dir == ign
+                        call gutentags#trace(
+                                    \"Ignoring project root '" . l:proj_dir .
+                                    \"' because it is in the list of ignored" .
+                                    \" projects.")
+                        call gutentags#throw("Ignore project: " . l:proj_dir)
+                    endif
+                endfor
                 return l:proj_dir
             endif
         endfor
@@ -180,7 +189,7 @@ function! gutentags#setup_gutentags() abort
             call call("gutentags#".module."#init", [b:gutentags_root])
         endfor
     catch /^gutentags\:/
-        call gutentags#trace("Can't figure out what tag file to use... no gutentags support.")
+        call gutentags#trace("No gutentags support for this buffer.")
         return
     endtry
 
