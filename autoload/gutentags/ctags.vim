@@ -2,25 +2,11 @@
 
 " Global Options {{{
 
-if !exists('g:gutentags_ctags_executable')
-    let g:gutentags_ctags_executable = 'ctags'
-endif
-
-if !exists('g:gutentags_tagfile')
-    let g:gutentags_tagfile = 'tags'
-endif
-
-if !exists('g:gutentags_auto_set_tags')
-    let g:gutentags_auto_set_tags = 1
-endif
-
-if !exists('g:gutentags_ctags_options_file')
-    let g:gutentags_ctags_options_file = '.gutctags'
-endif
-
-if !exists('g:gutentags_ctags_check_tagfile')
-    let g:gutentags_ctags_check_tagfile = 0
-endif
+let g:gutentags_ctags_executable = get(g:, 'gutentags_ctags_executable', 'ctags')
+let g:gutentags_tagfile = get(g:, 'gutentags_tagfile', 'tags')
+let g:gutentags_auto_set_tags = get(g:, 'gutentags_auto_set_tags', 1)
+let g:gutentags_ctags_options_file = get(g:, 'gutentags_ctags_options_file', '.gutctags')
+let g:gutentags_ctags_check_tagfile = get(g:, 'gutentags_ctags_check_tagfile', 0)
 
 " }}}
 
@@ -40,7 +26,7 @@ function! gutentags#ctags#init(project_root) abort
     endif
 
     " Check if the ctags executable exists.
-    if g:gutentags_enabled && executable(g:gutentags_ctags_executable) == 0
+    if g:gutentags_enabled && executable(expand(g:gutentags_ctags_executable, 1)) == 0
         let g:gutentags_enabled = 0
         echoerr "Executable '".g:gutentags_ctags_executable."' can't be found. "
                     \."Gutentags will be disabled. You can re-enable it by "
@@ -156,11 +142,9 @@ function! s:get_ctags_executable(proj_dir) abort
     let l:ftype = get(split(&filetype, '\.'), 0, '')
     let l:proj_info = gutentags#get_project_info(a:proj_dir)
     let l:type = get(l:proj_info, 'type', l:ftype)
-    if exists('g:gutentags_ctags_executable_{l:type}')
-        return g:gutentags_ctags_executable_{l:type}
-    else
-        return g:gutentags_ctags_executable
-    endif
+    let exepath = exists('g:gutentags_ctags_executable_{l:type}')
+        \ ? g:gutentags_ctags_executable_{l:type} : g:gutentags_ctags_executable
+    return expand(exepath, 1)
 endfunction
 
 function! s:process_options_file(proj_dir, path) abort
