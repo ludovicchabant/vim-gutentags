@@ -79,9 +79,10 @@ function! gutentags#gtags_cscope#generate(proj_dir, db_file, write_mode) abort
 	" have to be set
 
 	let l:proj_options_file = a:proj_dir . '/' . g:gutentags_gtags_options_file
+    let l:proj_options = ''
 	if filereadable(l:proj_options_file)
 		let l:lines = readfile(l:proj_options_file)
-		let l:proj_options = join(l:lines, ' ')
+		let l:proj_options .= join(l:lines, ' ')
 	endif
 
 	let l:cmd .= ' PWD=' . a:proj_dir
