@@ -82,12 +82,13 @@ endfunction
 " file path.
 function! gutentags#get_project_root(path) abort
     " Look for existing output files (tags, cscope.out etc) first.
+    let l:path_arg = gutentags#stripslash(a:path)
     if g:gutentags_use_generated_file_marker
         let l:markers = []
         for module in g:gutentags_modules
             exec 'let l:markers += [gutentags#'.module.'#filename()]'
         endfor
-        let l:path = gutentags#stripslash(a:path)
+        let l:path = l:path_arg
         let l:previous_path = ""
         while l:path != l:previous_path
             for root in l:markers
@@ -110,6 +111,8 @@ function! gutentags#get_project_root(path) abort
     if exists('g:ctrlp_root_markers')
         let l:markers += g:ctrlp_root_markers
     endif
+    let l:path = l:path_arg
+    let l:previous_path = ""
     while l:path != l:previous_path
         for root in l:markers
             if getftype(l:path . '/' . root) != ""
