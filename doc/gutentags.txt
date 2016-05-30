@@ -96,10 +96,10 @@ match one of the items in |gutentags_project_root|, create a file named
 "`.notags`" at the root of the project.
 
 The tag file that Gutentags creates and manages will be named after
-|gutentags_tagfile|, relative to the project's root directory. When Gutentags
-finds a valid project root, it will prepend the tag file's path to 'tags',
-unless |gutentags_auto_set_tags| is set to 0. This is to make sure Vim will use
-that file first.
+|gutentags_ctags_filename|, relative to the project's root directory.
+When Gutentags finds a valid project root, it will prepend the tag file's path
+to 'tags', unless |gutentags_auto_set_tags| is set to 0. This is to make sure
+Vim will use that file first.
 
 If a file managed by Gutentags is opened and no tag file already exists,
 Gutentags will start generating it right away in the background, unless 
@@ -220,8 +220,8 @@ g:gutentags_ctags_executable_{type}
                          let g:gutentags_ctags_executable_ruby = 'ripper-tags'
 <
 
-                                                *gutentags_tagfile*
-g:gutentags_tagfile
+                                                *gutentags_ctags_filename*
+g:gutentags_ctags_filename
                         Specifies the name of the tag file to create. This
                         will be appended to the project's root. See
                         |gutentags_project_root| for how Gutentags locates the
@@ -236,8 +236,8 @@ g:gutentags_project_root
                         in the current file's directory and its parent
                         directories. If it finds any of those markers,
                         Gutentags will be enabled for the project, and a tags
-                        file named after |gutentags_tagfile| will be created at
-                        the project root.
+                        file named after |gutentags_ctag_filename| will be
+                        created at the project root.
                         Defaults to `[]` (an empty |List|).
                         A list of default markers will always be appended to
                         the user-defined ones: ['.git', '.hg', '.bzr',

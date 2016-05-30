@@ -6,9 +6,12 @@ if !exists('g:gutentags_ctags_executable')
     let g:gutentags_ctags_executable = 'ctags'
 endif
 
-if !exists('g:gutentags_tagfile')
-    let g:gutentags_tagfile = 'tags'
+if !exists('g:gutentags_ctags_filename')
+    let g:gutentags_ctags_filename = get(g:, 'gutentags_tagfile', 'tags')
 endif
+function! gutentags#ctags#filename()
+    return g:gutentags_ctags_filename
+endfunction
 
 if !exists('g:gutentags_auto_set_tags')
     let g:gutentags_auto_set_tags = 1
@@ -32,7 +35,7 @@ let s:unix_redir = (&shellredir =~# '%s') ? &shellredir : &shellredir . ' %s'
 function! gutentags#ctags#init(project_root) abort
     " Figure out the path to the tags file.
     let b:gutentags_files['ctags'] = gutentags#get_cachefile(
-                \a:project_root, g:gutentags_tagfile)
+                \a:project_root, g:gutentags_ctags_filename)
 
     " Set the tags file for Vim to use.
     if g:gutentags_auto_set_tags
@@ -72,7 +75,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         " confused if the paths have spaces -- but not if you're *in* the
         " root directory.
         let l:actual_proj_dir = '.'
-        let l:actual_tags_file = g:gutentags_tagfile
+        let l:actual_tags_file = g:gutentags_ctags_filename
         execute "chdir " . fnameescape(a:proj_dir)
     else
         " else: the tags file goes in a cache directory, so we need to specify

@@ -11,9 +11,12 @@ if !exists('g:gutentags_cscope_executable')
     let g:gutentags_cscope_executable = 'cscope'
 endif
 
-if !exists('g:gutentags_scopefile')
-    let g:gutentags_scopefile = 'cscope.out'
+if !exists('g:gutentags_cscope_filename')
+    let g:gutentags_cscope_filename = get(g:, 'gutentags_scopefile', 'cscope.out')
 endif
+function! gutentags#cscope#filename()
+    return g:gutentags_cscope_filename
+endfunction
 
 if !exists('g:gutentags_auto_add_cscope')
     let g:gutentags_auto_add_cscope = 1
@@ -28,7 +31,7 @@ let s:added_dbs = []
 
 function! gutentags#cscope#init(project_root) abort
     let l:dbfile_path = gutentags#get_cachefile(
-                \a:project_root, g:gutentags_scopefile)
+                \a:project_root, g:gutentags_cscope_filename)
     let b:gutentags_files['cscope'] = l:dbfile_path
 
     if g:gutentags_auto_add_cscope && filereadable(l:dbfile_path)
