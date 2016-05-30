@@ -277,6 +277,9 @@ endfunction
 function! s:update_tags(module, write_mode, queue_mode) abort
     if !exists('b:gutentags_files')
         call gutentags#setup_gutentags()
+        if !exists('b:gutentags_files')
+            return
+        endif
     endif
 
     " Figure out where to save.
