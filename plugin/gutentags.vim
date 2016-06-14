@@ -27,8 +27,11 @@ let g:gutentags_enabled = get(g:, 'gutentags_enabled', 1)
 let g:gutentags_enabled_user_func = get(g:, 'gutentags_enabled_user_func', '')
 let g:gutentags_modules = get(g:, 'gutentags_modules', ['ctags'])
 
+let g:gutentags_add_default_project_roots = get(g:, 'gutentags_add_default_project_roots', 1)
 let g:gutentags_project_root = get(g:, 'gutentags_project_root', [])
-let g:gutentags_project_root += ['.git', '.hg', '.svn', '.bzr', '_darcs', '_FOSSIL_', '.fslckout']
+if g:gutentags_add_default_project_roots
+    let g:gutentags_project_root += ['.git', '.hg', '.svn', '.bzr', '_darcs', '_FOSSIL_', '.fslckout']
+endif
 
 let g:gutentags_project_info = get(g:, 'gutentags_project_info', [])
 call add(g:gutentags_project_info, {'type': 'python', 'file': 'setup.py'})
