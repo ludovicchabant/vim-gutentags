@@ -9,9 +9,7 @@ if v:version < 704
     finish
 endif
 
-if !exists('g:gutentags_debug')
-    let g:gutentags_debug = 0
-endif
+let g:gutentags_debug = get(g:, 'gutentags_debug', 0)
 
 if (exists('g:loaded_gutentags') || &cp) && !g:gutentags_debug
     finish
@@ -21,68 +19,27 @@ if (exists('g:loaded_gutentags') && g:gutentags_debug)
 endif
 let g:loaded_gutentags = 1
 
-if !exists('g:gutentags_trace')
-    let g:gutentags_trace = 0
-endif
+let g:gutentags_trace = get(g:, 'gutentags_trace', 0)
+let g:gutentags_fake = get(g:, 'gutentags_fake', 0)
+let g:gutentags_background_update = get(g:, 'gutentags_background_update', 1)
+let g:gutentags_pause_after_update = get(g:, 'gutentags_pause_after_update', 0)
+let g:gutentags_enabled = get(g:, 'gutentags_enabled', 1)
+let g:gutentags_enabled_user_func = get(g:, 'gutentags_enabled_user_func', '')
+let g:gutentags_modules = get(g:, 'gutentags_modules', ['ctags'])
 
-if !exists('g:gutentags_fake')
-    let g:gutentags_fake = 0
-endif
-
-if !exists('g:gutentags_background_update')
-    let g:gutentags_background_update = 1
-endif
-
-if !exists('g:gutentags_pause_after_update')
-    let g:gutentags_pause_after_update = 0
-endif
-
-if !exists('g:gutentags_enabled')
-    let g:gutentags_enabled = 1
-endif
-
-if !exists('g:gutentags_enabled_user_func')
-    let g:gutentags_enabled_user_func = ''
-endif
-
-if !exists('g:gutentags_modules')
-    let g:gutentags_modules = ['ctags']
-endif
-
-if !exists('g:gutentags_project_root')
-    let g:gutentags_project_root = []
-endif
+let g:gutentags_project_root = get(g:, 'gutentags_project_root', [])
 let g:gutentags_project_root += ['.git', '.hg', '.svn', '.bzr', '_darcs', '_FOSSIL_', '.fslckout']
 
-if !exists('g:gutentags_project_info')
-    let g:gutentags_project_info = []
-endif
+let g:gutentags_project_info = get(g:, 'gutentags_project_info', [])
 call add(g:gutentags_project_info, {'type': 'python', 'file': 'setup.py'})
 call add(g:gutentags_project_info, {'type': 'ruby', 'file': 'Gemfile'})
 
-if !exists('g:gutentags_exclude')
-    let g:gutentags_exclude = []
-endif
-
-if !exists('g:gutentags_exclude_project_root')
-    let g:gutentags_exclude_project_root = ['/usr/local']
-endif
-
-if !exists('g:gutentags_resolve_symlinks')
-    let g:gutentags_resolve_symlinks = 0
-endif
-
-if !exists('g:gutentags_generate_on_new')
-    let g:gutentags_generate_on_new = 1
-endif
-
-if !exists('g:gutentags_generate_on_missing')
-    let g:gutentags_generate_on_missing = 1
-endif
-
-if !exists('g:gutentags_generate_on_write')
-    let g:gutentags_generate_on_write = 1
-endif
+let g:gutentags_exclude = get(g:, 'gutentags_exclude', [])
+let g:gutentags_exclude_project_root = get(g:, 'gutentags_exclude_project_root', ['/usr/local'])
+let g:gutentags_resolve_symlinks = get(g:, 'gutentags_resolve_symlinks', 0)
+let g:gutentags_generate_on_new = get(g:, 'gutentags_generate_on_new', 1)
+let g:gutentags_generate_on_missing = get(g:, 'gutentags_generate_on_missing', 1)
+let g:gutentags_generate_on_write = get(g:, 'gutentags_generate_on_write', 1)
 
 if !exists('g:gutentags_cache_dir')
     let g:gutentags_cache_dir = ''
@@ -93,9 +50,7 @@ else
     let g:gutentags_cache_dir = fnamemodify(g:gutentags_cache_dir, ':s?[/\\]$??')
 endif
 
-if !exists('g:gutentags_define_advanced_commands')
-    let g:gutentags_define_advanced_commands = 0
-endif
+let g:gutentags_define_advanced_commands = get(g:, 'gutentags_define_advanced_commands', 0)
 
 if g:gutentags_cache_dir != '' && !isdirectory(g:gutentags_cache_dir)
     call mkdir(g:gutentags_cache_dir, 'p')
