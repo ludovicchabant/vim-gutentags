@@ -198,16 +198,6 @@ function! gutentags#setup_gutentags() abort
     " We know what tags file to manage! Now set things up.
     call gutentags#trace("Setting gutentags for buffer '".bufname('%')."'")
 
-    " Autocommands for updating the tags on save.
-    let l:bn = bufnr('%')
-    execute 'augroup gutentags_buffer_' . l:bn
-    execute '  autocmd!'
-    execute '  autocmd BufWritePost <buffer=' . l:bn . '> call s:write_triggered_update_tags()'
-    execute 'augroup end'
-
-    " Miscellaneous commands.
-    command! -buffer -bang GutentagsUpdate :call s:manual_update_tags(<bang>0)
-
     " Add these tags files to the known tags files.
     for module in keys(b:gutentags_files)
         let l:tagfile = b:gutentags_files[module]
@@ -269,7 +259,7 @@ function! gutentags#get_execute_cmd_suffix() abort
 endfunction
 
 " (Re)Generate the tags file for the current buffer's file.
-function! s:manual_update_tags(bang) abort
+function! gutentags#manual_update_tags(bang) abort
     for module in g:gutentags_modules
         call s:update_tags(module, a:bang, 0)
     endfor
@@ -277,7 +267,7 @@ function! s:manual_update_tags(bang) abort
 endfunction
 
 " (Re)Generate the tags file for a buffer that just go saved.
-function! s:write_triggered_update_tags() abort
+function! gutentags#write_triggered_update_tags() abort
     if g:gutentags_enabled && g:gutentags_generate_on_write
         for module in g:gutentags_modules
             call s:update_tags(module, 0, 2)
@@ -296,6 +286,13 @@ endfunction
 "   1: if an update is already in progress, abort silently.
 "   2: if an update is already in progress, queue another one.
 function! s:update_tags(module, write_mode, queue_mode) abort
+    if !exists('b:gutentags_files')
+        call gutentags#setup_gutentags()
+        if !exists('b:gutentags_files')
+            return
+        endif
+    endif
+
     " Figure out where to save.
     let l:tags_file = b:gutentags_files[a:module]
     let l:proj_dir = b:gutentags_root

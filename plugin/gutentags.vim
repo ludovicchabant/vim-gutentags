@@ -73,10 +73,25 @@ endif
 
 " Gutentags Setup {{{
 
+" Autocommands for updating the tags on save.
+augroup gutentags_buffer
+    autocmd!
+    autocmd BufWritePost <buffer> call gutentags#write_triggered_update_tags()
+augroup end'
+
+function! s:lazy_setup()
+    if g:gutentags_generate_on_new
+                \ || g:gutentags_generate_on_missing
+                \ || (get(g:, 'gutentags_auto_set_tags', 1)
+                \     && index(g:gutentags_modules, 'ctags') != -1)
+        call gutentags#setup_gutentags()
+    endif
+endfunction
+
 augroup gutentags_detect
     autocmd!
-    autocmd BufNewFile,BufReadPost *  call gutentags#setup_gutentags()
-    autocmd VimEnter               *  if expand('<amatch>')==''|call gutentags#setup_gutentags()|endif
+    autocmd BufNewFile,BufReadPost *  call s:lazy_setup()
+    autocmd VimEnter               *  if expand('<amatch>')=='' | call s:lazy_setup() | endif
 augroup end
 
 " }}}
@@ -84,6 +99,7 @@ augroup end
 " Toggles and Miscellaneous Commands {{{
 
 command! GutentagsUnlock :call gutentags#delete_lock_files()
+command! -bang GutentagsUpdate :call gutentags#manual_update_tags(<bang>0)
 
 if g:gutentags_define_advanced_commands
     command! GutentagsToggleEnabled :let g:gutentags_enabled=!g:gutentags_enabled
