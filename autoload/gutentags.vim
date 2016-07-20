@@ -199,10 +199,14 @@ function! gutentags#setup_gutentags() abort
     call gutentags#trace("Setting gutentags for buffer '".bufname('%')."'")
 
     " Autocommands for updating the tags on save.
+    " We need to pass the buffer number to the callback function in the rare
+    " case that the current buffer is changed by another `BufWritePost`
+    " callback. This will let us get that buffer's variables without causing
+    " errors.
     let l:bn = bufnr('%')
     execute 'augroup gutentags_buffer_' . l:bn
     execute '  autocmd!'
-    execute '  autocmd BufWritePost <buffer=' . l:bn . '> call s:write_triggered_update_tags()'
+    execute '  autocmd BufWritePost <buffer=' . l:bn . '> call s:write_triggered_update_tags(' . l:bn . ')'
     execute 'augroup end'
 
     " Miscellaneous commands.
@@ -219,10 +223,10 @@ function! gutentags#setup_gutentags() abort
             if g:gutentags_enabled
                 if g:gutentags_generate_on_missing && !filereadable(l:tagfile)
                     call gutentags#trace("Generating missing tags file: " . l:tagfile)
-                    call s:update_tags(module, 1, 1)
+                    call s:update_tags(l:bn, module, 1, 1)
                 elseif g:gutentags_generate_on_new
                     call gutentags#trace("Generating tags file: " . l:tagfile)
-                    call s:update_tags(module, 1, 1)
+                    call s:update_tags(l:bn, module, 1, 1)
                 endif
             endif
         endif
@@ -270,17 +274,18 @@ endfunction
 
 " (Re)Generate the tags file for the current buffer's file.
 function! s:manual_update_tags(bang) abort
+    let l:bn = bufnr('%')
     for module in g:gutentags_modules
-        call s:update_tags(module, a:bang, 0)
+        call s:update_tags(l:bn, module, a:bang, 0)
     endfor
     silent doautocmd User GutentagsUpdated
 endfunction
 
 " (Re)Generate the tags file for a buffer that just go saved.
-function! s:write_triggered_update_tags() abort
+function! s:write_triggered_update_tags(bufno) abort
     if g:gutentags_enabled && g:gutentags_generate_on_write
         for module in g:gutentags_modules
-            call s:update_tags(module, 0, 2)
+            call s:update_tags(a:bufno, module, 0, 2)
         endfor
     endif
     silent doautocmd User GutentagsUpdated
@@ -295,10 +300,11 @@ endfunction
 "   0: if an update is already in progress, report it and abort.
 "   1: if an update is already in progress, abort silently.
 "   2: if an update is already in progress, queue another one.
-function! s:update_tags(module, write_mode, queue_mode) abort
+function! s:update_tags(bufno, module, write_mode, queue_mode) abort
     " Figure out where to save.
-    let l:tags_file = b:gutentags_files[a:module]
-    let l:proj_dir = b:gutentags_root
+    let l:buf_gutentags_files = getbufvar(a:bufno, 'gutentags_files')
+    let l:tags_file = l:buf_gutentags_files[a:module]
+    let l:proj_dir = getbufvar(a:bufno, 'gutentags_root')
 
     " Check that there's not already an update in progress.
     let l:lock_file = l:tags_file . '.lock'
