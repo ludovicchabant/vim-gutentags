@@ -260,9 +260,25 @@ g:gutentags_exclude_project_root
                         a `.notags` file in the root of those projects, but
                         can be useful when you don't want to, or can't, place
                         such a file there.
-                        Defaults to ['/usr/local'], which is the folder where
+                        Defaults to `['/usr/local']`, which is the folder where
                         Homebrew is known to create a Git directory by default
                         on MacOS.
+
+                                                *gutentags_project_root_finder*
+g:gutentags_project_root_finder
+                        When a buffer is loaded, Gutentags uses a default
+                        (internal) implementation to find that file's
+                        project's root directory, using settings like
+                        |g:gutentags_project_root|. When you specify
+                        |g:gutentags_project_root_finder|, you can tell
+                        Gutentags to use a custom implementation, such as
+                        `vim-projectroot`. The value of this setting must be
+                        the name of a function that takes a single string
+                        argument (the path to the current buffer's file) and
+                        returns a string value (the project's root directory).
+                        Defaults to `''`.
+                        Note: when set, the called implementation will most 
+                        likely ignore |g:gutentags_project_root|.
 
                                                 *gutentags_exclude*
 g:gutentags_exclude

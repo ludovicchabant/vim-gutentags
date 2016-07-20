@@ -81,6 +81,10 @@ endfunction
 " Finds the first directory with a project marker by walking up from the given
 " file path.
 function! gutentags#get_project_root(path) abort
+    if g:gutentags_project_root_finder
+        return call(g:gutentags_project_root_finder, [a:path])
+    endif
+
     let l:path = gutentags#stripslash(a:path)
     let l:previous_path = ""
     let l:markers = g:gutentags_project_root[:]
