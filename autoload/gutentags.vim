@@ -87,6 +87,7 @@ function! gutentags#get_project_root(path) abort
     if exists('g:ctrlp_root_markers')
         let l:markers += g:ctrlp_root_markers
     endif
+    let l:markers = uniq(sort(l:markers))
     while l:path != l:previous_path
         for root in l:markers
             if getftype(l:path . '/' . root) != ""
