@@ -74,8 +74,11 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         let l:cmd .= ' -t "' . l:actual_tags_file . '"'
         let l:cmd .= ' -p "' . l:actual_proj_dir . '"'
         if a:write_mode == 0 && l:tags_file_exists
-            let l:full_path = expand('%:p')
-            let l:cmd .= ' -s "' . l:full_path . '"'
+            let l:cur_file_path = expand('%:p')
+            if empty(g:gutentags_cache_dir)
+                let l:cur_file_path = fnamemodify(l:cur_file_path, ':.')
+            endif
+            let l:cmd .= ' -s "' . l:cur_file_path . '"'
         endif
         " Pass the Gutentags options file first, and then the project specific
         " one, so that users can override the default behaviour.
