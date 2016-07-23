@@ -78,6 +78,29 @@ function! s:cache_project_root(path) abort
     let s:known_projects[a:path] = l:result
 endfunction
 
+function! gutentags#validate_cmd(cmd) abort
+    if !empty(a:cmd) && executable(split(a:cmd)[0])
+        return a:cmd
+    endif
+    return ""
+endfunction
+
+function! gutentags#get_project_file_list_cmd(path) abort
+    if type(g:gutentags_file_list_command) == type("")
+        return gutentags#validate_cmd(g:gutentags_file_list_command)
+    elseif type(g:gutentags_file_list_command) == type({})
+        let l:markers = get(g:gutentags_file_list_command, 'markers', [])
+        if type(l:markers) == type({})
+            for [marker, file_list_cmd] in items(l:markers)
+                if getftype(a:path . '/' . marker) != ""
+                    return gutentags#validate_cmd(file_list_cmd)
+                endif
+            endfor
+        endif
+    endif
+    return ""
+endfunction
+
 " Finds the first directory with a project marker by walking up from the given
 " file path.
 function! gutentags#get_project_root(path) abort

@@ -6,7 +6,9 @@ rem            PARSE ARGUMENTS
 rem ==========================================
 
 set CSCOPE_EXE=cscope
+set CSCOPE_ARGS=
 set DB_FILE=cscope.out
+set FILE_LIST_CMD=
 
 :ParseArgs
 if [%1]==[] goto :DoneParseArgs
@@ -22,6 +24,11 @@ if [%1]==[-f] (
 )
 if [%1]==[-p] (
     set PROJ_ROOT=%~2
+    shift
+    goto :LoopParseArgs
+)
+if [%1]==[-L] (
+    set FILE_LIST_CMD=%~2
     shift
     goto :LoopParseArgs
 )
@@ -43,13 +50,25 @@ echo Locking db file
 echo locked > "%DB_FILE%.lock"
 
 echo Running cscope
-"%CSCOPE_EXE%" -R -b -k -f "%DB_FILE%"
+if NOT ["%FILE_LIST_CMD%"]==[""] (
+    if ["%PROJECT_ROOT%"]==["."] (
+        call %FILE_LIST_CMD% > %DB_FILE%.files
+    ) else (
+        rem Potentially useful:
+        rem http://stackoverflow.com/questions/9749071/cmd-iterate-stdin-piped-from-another-command
+        %FILE_LIST_CMD% | for /F "usebackq delims=" %%F in (`findstr "."`) do @echo %PROJECT_ROOT%\%%F > %DB_FILE%.files
+    )
+    set CSCOPE_ARGS=%CSCOPE_ARGS% -i %TAGS_FILE%.files
+) ELSE (
+    set CSCOPE_ARGS=%CSCOPE_ARGS% -R
+)
+"%CSCOPE_EXE%" %CSCOPE_ARGS% -b -k -f "%DB_FILE%"
 if ERRORLEVEL 1 (
     echo ERROR: Cscope executable returned non-zero code.
 )
 
 echo Unlocking db file
-del /F "%DB_FILE%.lock"
+del /F "%DB_FILE%.files" "%DB_FILE%.lock"
 if ERRORLEVEL 1 (
     echo ERROR: Unable to remove file lock.
 )
@@ -70,5 +89,6 @@ echo.
 echo    -e [exe=cscope]:     The cscope executable to run
 echo    -f [file=scope.out]: The path to the database file to create
 echo    -p [dir=]:           The path to the project root
+echo    -L [cmd=]:           The file list command to run
 echo.
 

@@ -417,6 +417,40 @@ g:gutentags_project_info
                         See |gutentags_ctags_executable_{filetype}| for more
                         information.
 
+                                            *gutentags_file_list_command*
+g:gutentags_file_list_command
+                        Specifies command(s) to use to list files for which
+                        tags should be generated, instead of recursively
+                        examining all files within the project root. When
+                        invoked, file list commands will execute in the
+                        project root directory.
+
+                        This setting is useful in projects using source
+                        control to restrict tag generation to only files
+                        tracked in the repository.
+
+                        This variable may be set in one of two ways. If
+                        set as a |String|, the specified command will be used to
+                        list files for all projects. For example: >
+
+                         let g:gutentags_file_list_command = 'find . -type f'
+<
+                        If set as a |Dictionary|, this variable should be set
+                        as a mapping of project root markers to the desired
+                        file list command for that root marker. (See
+                        |gutentags_project_root| for how Gutentags uses root
+                        markerts to locate the project.) For example: >
+
+                         let g:gutentags_file_list_command = {
+                             \ 'markers': {
+                                 \ '.git': 'git ls-files',
+                                 \ '.hg': 'hg locate',
+                                 \ },
+                             \ }
+<
+                        Note: If a custom ctags executable is specified, it
+                        must support the '-L' command line option in order to
+                        read the list of files to be examined.
 
 =============================================================================
 5. Project Settings                             *gutentags-project-settings*

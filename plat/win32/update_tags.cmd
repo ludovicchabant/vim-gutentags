@@ -9,6 +9,7 @@ set CTAGS_EXE=ctags
 set CTAGS_ARGS=
 set TAGS_FILE=tags
 set PROJECT_ROOT=
+set FILE_LIST_CMD=
 set UPDATED_SOURCE=
 set PAUSE_BEFORE_EXIT=0
 set LOG_FILE=
@@ -32,6 +33,11 @@ if [%1]==[-t] (
 )
 if [%1]==[-p] (
     set PROJECT_ROOT=%~2
+    shift
+    goto :LoopParseArgs
+)
+if [%1]==[-L] (
+    set FILE_LIST_CMD=%~2
     shift
     goto :LoopParseArgs
 )
@@ -85,6 +91,16 @@ if exist "%TAGS_FILE%" (
 )
 if ["%INDEX_WHOLE_PROJECT%"]==["1"] (
     set CTAGS_ARGS=%CTAGS_ARGS% "%PROJECT_ROOT%"
+    if NOT ["%FILE_LIST_CMD%"]==[""] (
+        if ["%PROJECT_ROOT%"]==["."] (
+            call %FILE_LIST_CMD% > %TAGS_FILE%.files
+        ) else (
+            rem Potentially useful:
+            rem http://stackoverflow.com/questions/9749071/cmd-iterate-stdin-piped-from-another-command
+            %FILE_LIST_CMD% | for /F "usebackq delims=" %%F in (`findstr "."`) do @echo %PROJECT_ROOT%\%%F > %TAGS_FILE%.files
+        )
+        set CTAGS_ARGS=%CTAGS_ARGS% -L %TAGS_FILE%.files
+    )
 )
 
 echo Running ctags >> %LOG_FILE%
@@ -105,7 +121,7 @@ if ERRORLEVEL 1 (
 
 :Unlock
 echo Unlocking tags file... >> %LOG_FILE%
-del /F "%TAGS_FILE%.lock"
+del /F "%TAGS_FILE.files" "%TAGS_FILE%.lock"
 if ERRORLEVEL 1 (
     echo ERROR: Unable to remove file lock. >> %LOG_FILE%
 )
@@ -129,6 +145,7 @@ echo.
 echo    -e [exe=ctags]: The ctags executable to run
 echo    -t [file=tags]: The path to the ctags file to update
 echo    -p [dir=]:      The path to the project root
+echo    -L [cmd=]:      The file list command to run
 echo    -s [file=]:     The path to the source file that needs updating
 echo    -l [log=]:      The log file to output to
 echo    -o [options=]:  An options file to read additional options from
