@@ -80,9 +80,9 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
             endif
             let l:cmd .= ' -s "' . l:cur_file_path . '"'
         endif
-        " Pass the Gutentags options file first, and then the project specific
-        " one, so that users can override the default behaviour.
-        let l:cmd .= ' -o "' . gutentags#get_res_file('ctags.options') . '"'
+        " Pass the Gutentags recursive options file before the project
+        " options file, so that users can override --recursive.
+        let l:cmd .= ' -o "' . gutentags#get_res_file('ctags_recursive.options') . '"'
         let l:proj_options_file = a:proj_dir . '/' .
                     \g:gutentags_ctags_options_file
         if filereadable(l:proj_options_file)
