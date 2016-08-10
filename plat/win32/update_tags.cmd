@@ -83,7 +83,7 @@ set INDEX_WHOLE_PROJECT=1
 if exist "%TAGS_FILE%" (
     if not ["%UPDATED_SOURCE%"]==[""] (
         echo Removing references to: %UPDATED_SOURCE% >> %LOG_FILE%
-        echo type "%TAGS_FILE%" ^| findstr /V /C:"%UPDATED_SOURCE%" ^> "%TAGS_FILE%.temp" >> %LOG_FILE%
+        echo findstr /V /C:"%UPDATED_SOURCE%" "%TAGS_FILE%" ^> "%TAGS_FILE%.temp" >> %LOG_FILE%
         findstr /V /C:"%UPDATED_SOURCE%" "%TAGS_FILE%" > "%TAGS_FILE%.temp"
         set CTAGS_ARGS=%CTAGS_ARGS% --append "%UPDATED_SOURCE%"
         set INDEX_WHOLE_PROJECT=0
@@ -91,13 +91,17 @@ if exist "%TAGS_FILE%" (
 )
 if ["%INDEX_WHOLE_PROJECT%"]==["1"] (
     set CTAGS_ARGS=%CTAGS_ARGS% "%PROJECT_ROOT%"
-    if NOT ["%FILE_LIST_CMD%"]==[""] (
+    if not ["%FILE_LIST_CMD%"]==[""] (
+        echo Running custom file lister >> %LOG_FILE%
         if ["%PROJECT_ROOT%"]==["."] (
+            echo call %FILE_LIST_CMD% ^> %TAGS_FILE%.files >> %LOG_FILE%
             call %FILE_LIST_CMD% > %TAGS_FILE%.files
         ) else (
             rem Potentially useful:
             rem http://stackoverflow.com/questions/9749071/cmd-iterate-stdin-piped-from-another-command
-            %FILE_LIST_CMD% | for /F "usebackq delims=" %%F in (`findstr "."`) do @echo %PROJECT_ROOT%\%%F > %TAGS_FILE%.files
+            echo call %FILE_LIST_CMD% -- with loop for prepending project root >> %LOG_FILE%
+            type NUL > %TAGS_FILE%.files
+            for /F "usebackq delims=" %%F in (`%FILE_LIST_CMD%`) do @echo %PROJECT_ROOT%\%%F >> %TAGS_FILE%.files
         )
         set CTAGS_ARGS=%CTAGS_ARGS% -L %TAGS_FILE%.files
     )
@@ -121,7 +125,7 @@ if ERRORLEVEL 1 (
 
 :Unlock
 echo Unlocking tags file... >> %LOG_FILE%
-del /F "%TAGS_FILE.files" "%TAGS_FILE%.lock"
+del /F "%TAGS_FILE%.files" "%TAGS_FILE%.lock"
 if ERRORLEVEL 1 (
     echo ERROR: Unable to remove file lock. >> %LOG_FILE%
 )
