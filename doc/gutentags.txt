@@ -444,7 +444,7 @@ g:gutentags_file_list_command
                          let g:gutentags_file_list_command = {
                              \ 'markers': {
                                  \ '.git': 'git ls-files',
-                                 \ '.hg': 'hg locate',
+                                 \ '.hg': 'hg files',
                                  \ },
                              \ }
 <
