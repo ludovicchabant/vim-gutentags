@@ -2,25 +2,11 @@
 
 " Global Options {{{
 
-if !exists('g:gutentags_ctags_executable')
-    let g:gutentags_ctags_executable = 'ctags'
-endif
-
-if !exists('g:gutentags_tagfile')
-    let g:gutentags_tagfile = 'tags'
-endif
-
-if !exists('g:gutentags_auto_set_tags')
-    let g:gutentags_auto_set_tags = 1
-endif
-
-if !exists('g:gutentags_ctags_options_file')
-    let g:gutentags_ctags_options_file = '.gutctags'
-endif
-
-if !exists('g:gutentags_ctags_check_tagfile')
-    let g:gutentags_ctags_check_tagfile = 0
-endif
+let g:gutentags_ctags_executable = get(g:, 'gutentags_ctags_executable', 'ctags')
+let g:gutentags_tagfile = get(g:, 'gutentags_tagfile', 'tags')
+let g:gutentags_auto_set_tags = get(g:, 'gutentags_auto_set_tags', 1)
+let g:gutentags_ctags_options_file = get(g:, 'gutentags_ctags_options_file', '.gutctags')
+let g:gutentags_ctags_check_tagfile = get(g:, 'gutentags_ctags_check_tagfile', 0)
 
 " }}}
 
@@ -40,7 +26,7 @@ function! gutentags#ctags#init(project_root) abort
     endif
 
     " Check if the ctags executable exists.
-    if g:gutentags_enabled && executable(g:gutentags_ctags_executable) == 0
+    if g:gutentags_enabled && executable(expand(g:gutentags_ctags_executable, 1)) == 0
         let g:gutentags_enabled = 0
         echoerr "Executable '".g:gutentags_ctags_executable."' can't be found. "
                     \."Gutentags will be disabled. You can re-enable it by "
@@ -88,12 +74,23 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         let l:cmd .= ' -t "' . l:actual_tags_file . '"'
         let l:cmd .= ' -p "' . l:actual_proj_dir . '"'
         if a:write_mode == 0 && l:tags_file_exists
-            let l:full_path = expand('%:p')
-            let l:cmd .= ' -s "' . l:full_path . '"'
+            let l:cur_file_path = expand('%:p')
+            if empty(g:gutentags_cache_dir)
+                let l:cur_file_path = fnamemodify(l:cur_file_path, ':.')
+            endif
+            let l:cmd .= ' -s "' . l:cur_file_path . '"'
+        else
+            let l:file_list_cmd = gutentags#get_project_file_list_cmd(l:actual_proj_dir)
+            if !empty(l:file_list_cmd)
+                let l:cmd .= ' -L ' . '"' . l:file_list_cmd. '"'
+            endif
         endif
-        " Pass the Gutentags options file first, and then the project specific
-        " one, so that users can override the default behaviour.
-        let l:cmd .= ' -o "' . gutentags#get_res_file('ctags.options') . '"'
+        if empty(get(l:, 'file_list_cmd', ''))
+            " Pass the Gutentags recursive options file before the project
+            " options file, so that users can override --recursive.
+            " Omit --recursive if this project uses a file list command.
+            let l:cmd .= ' -o "' . gutentags#get_res_file('ctags_recursive.options') . '"'
+        endif
         let l:proj_options_file = a:proj_dir . '/' .
                     \g:gutentags_ctags_options_file
         if filereadable(l:proj_options_file)
@@ -156,11 +153,9 @@ function! s:get_ctags_executable(proj_dir) abort
     let l:ftype = get(split(&filetype, '\.'), 0, '')
     let l:proj_info = gutentags#get_project_info(a:proj_dir)
     let l:type = get(l:proj_info, 'type', l:ftype)
-    if exists('g:gutentags_ctags_executable_{l:type}')
-        return g:gutentags_ctags_executable_{l:type}
-    else
-        return g:gutentags_ctags_executable
-    endif
+    let exepath = exists('g:gutentags_ctags_executable_{l:type}')
+        \ ? g:gutentags_ctags_executable_{l:type} : g:gutentags_ctags_executable
+    return expand(exepath, 1)
 endfunction
 
 function! s:process_options_file(proj_dir, path) abort

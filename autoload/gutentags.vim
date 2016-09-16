@@ -78,14 +78,45 @@ function! s:cache_project_root(path) abort
     let s:known_projects[a:path] = l:result
 endfunction
 
+function! gutentags#validate_cmd(cmd) abort
+    if !empty(a:cmd) && executable(split(a:cmd)[0])
+        return a:cmd
+    endif
+    return ""
+endfunction
+
+function! gutentags#get_project_file_list_cmd(path) abort
+    if type(g:gutentags_file_list_command) == type("")
+        return gutentags#validate_cmd(g:gutentags_file_list_command)
+    elseif type(g:gutentags_file_list_command) == type({})
+        let l:markers = get(g:gutentags_file_list_command, 'markers', [])
+        if type(l:markers) == type({})
+            for [marker, file_list_cmd] in items(l:markers)
+                if getftype(a:path . '/' . marker) != ""
+                    return gutentags#validate_cmd(file_list_cmd)
+                endif
+            endfor
+        endif
+    endif
+    return ""
+endfunction
+
 " Finds the first directory with a project marker by walking up from the given
 " file path.
 function! gutentags#get_project_root(path) abort
+    if g:gutentags_project_root_finder
+        return call(g:gutentags_project_root_finder, [a:path])
+    endif
+
     let l:path = gutentags#stripslash(a:path)
     let l:previous_path = ""
     let l:markers = g:gutentags_project_root[:]
     if exists('g:ctrlp_root_markers')
-        let l:markers += g:ctrlp_root_markers
+        for crm in g:ctrlp_root_markers
+            if index(l:markers, crm) < 0
+                call add(l:markers, crm)
+            endif
+        endfor
     endif
     while l:path != l:previous_path
         for root in l:markers
@@ -100,6 +131,15 @@ function! gutentags#get_project_root(path) abort
                                 \1)
                     call gutentags#throw("Marker found at root, aborting.")
                 endif
+                for ign in g:gutentags_exclude_project_root
+                    if l:proj_dir == ign
+                        call gutentags#trace(
+                                    \"Ignoring project root '" . l:proj_dir .
+                                    \"' because it is in the list of ignored" .
+                                    \" projects.")
+                        call gutentags#throw("Ignore project: " . l:proj_dir)
+                    endif
+                endfor
                 return l:proj_dir
             endif
         endfor
@@ -119,7 +159,7 @@ function! gutentags#get_cachefile(root_dir, filename) abort
     let l:tag_path = gutentags#stripslash(a:root_dir) . '/' . a:filename
     if g:gutentags_cache_dir != ""
         " Put the tag file in the cache dir instead of inside the
-        " projet root.
+        " project root.
         let l:tag_path = g:gutentags_cache_dir . '/' .
                     \tr(l:tag_path, '\/: ', '---_')
         let l:tag_path = substitute(l:tag_path, '/\-', '/', '')
@@ -157,9 +197,11 @@ function! gutentags#setup_gutentags() abort
         if g:gutentags_resolve_symlinks
             let l:buf_dir = fnamemodify(resolve(expand('%:p', 1)), ':p:h')
         endif
-        let b:gutentags_root = gutentags#get_project_root(l:buf_dir)
+        if !exists('b:gutentags_root')
+            let b:gutentags_root = gutentags#get_project_root(l:buf_dir)
+        endif
         if filereadable(b:gutentags_root . '/.notags')
-            call gutentags#trace("'notags' file found... no gutentags support.")
+            call gutentags#trace("'.notags' file found... no gutentags support.")
             return
         endif
 
@@ -180,18 +222,22 @@ function! gutentags#setup_gutentags() abort
             call call("gutentags#".module."#init", [b:gutentags_root])
         endfor
     catch /^gutentags\:/
-        call gutentags#trace("Can't figure out what tag file to use... no gutentags support.")
+        call gutentags#trace("No gutentags support for this buffer.")
         return
     endtry
 
     " We know what tags file to manage! Now set things up.
-    call gutentags#trace("Setting gutentags for buffer '" . bufname('%'))
+    call gutentags#trace("Setting gutentags for buffer '".bufname('%')."'")
 
     " Autocommands for updating the tags on save.
+    " We need to pass the buffer number to the callback function in the rare
+    " case that the current buffer is changed by another `BufWritePost`
+    " callback. This will let us get that buffer's variables without causing
+    " errors.
     let l:bn = bufnr('%')
     execute 'augroup gutentags_buffer_' . l:bn
     execute '  autocmd!'
-    execute '  autocmd BufWritePost <buffer=' . l:bn . '> call s:write_triggered_update_tags()'
+    execute '  autocmd BufWritePost <buffer=' . l:bn . '> call s:write_triggered_update_tags(' . l:bn . ')'
     execute 'augroup end'
 
     " Miscellaneous commands.
@@ -208,10 +254,10 @@ function! gutentags#setup_gutentags() abort
             if g:gutentags_enabled
                 if g:gutentags_generate_on_missing && !filereadable(l:tagfile)
                     call gutentags#trace("Generating missing tags file: " . l:tagfile)
-                    call s:update_tags(module, 1, 1)
+                    call s:update_tags(l:bn, module, 1, 1)
                 elseif g:gutentags_generate_on_new
                     call gutentags#trace("Generating tags file: " . l:tagfile)
-                    call s:update_tags(module, 1, 1)
+                    call s:update_tags(l:bn, module, 1, 1)
                 endif
             endif
         endif
@@ -259,17 +305,18 @@ endfunction
 
 " (Re)Generate the tags file for the current buffer's file.
 function! s:manual_update_tags(bang) abort
+    let l:bn = bufnr('%')
     for module in g:gutentags_modules
-        call s:update_tags(module, a:bang, 0)
+        call s:update_tags(l:bn, module, a:bang, 0)
     endfor
     silent doautocmd User GutentagsUpdated
 endfunction
 
 " (Re)Generate the tags file for a buffer that just go saved.
-function! s:write_triggered_update_tags() abort
+function! s:write_triggered_update_tags(bufno) abort
     if g:gutentags_enabled && g:gutentags_generate_on_write
         for module in g:gutentags_modules
-            call s:update_tags(module, 0, 2)
+            call s:update_tags(a:bufno, module, 0, 2)
         endfor
     endif
     silent doautocmd User GutentagsUpdated
@@ -284,10 +331,11 @@ endfunction
 "   0: if an update is already in progress, report it and abort.
 "   1: if an update is already in progress, abort silently.
 "   2: if an update is already in progress, queue another one.
-function! s:update_tags(module, write_mode, queue_mode) abort
+function! s:update_tags(bufno, module, write_mode, queue_mode) abort
     " Figure out where to save.
-    let l:tags_file = b:gutentags_files[a:module]
-    let l:proj_dir = b:gutentags_root
+    let l:buf_gutentags_files = getbufvar(a:bufno, 'gutentags_files')
+    let l:tags_file = l:buf_gutentags_files[a:module]
+    let l:proj_dir = getbufvar(a:bufno, 'gutentags_root')
 
     " Check that there's not already an update in progress.
     let l:lock_file = l:tags_file . '.lock'

@@ -54,12 +54,12 @@ in files in that project, it will partially re-generate the tag file. Every
 time you save, it will silently, in the background, update the tags for that
 file.
 
-Usually, ctags can only append tags to an existing tag file, so Gutentags
+Usually, `ctags` can only append tags to an existing tag file, so Gutentags
 removes the tags for the current file first, to make sure the tag file is
 always consistent with the source code.
 
 Also, Gutentags is clever enough to not stumble upon itself by triggering
-multiple ctags processes if you save files to fast, or your project is really
+multiple ctags processes if you save files too fast, or your project is really
 big.
 
 There are some similar Vim plugins out there ("vim-tags", "vim-autotag",
@@ -76,8 +76,8 @@ I set for myself with Gutentags:
   the tag file, otherwise you will still "see" tags for deleted or renamed
   classes and functions.
 * Automatically create the tag file: you open something from a freshly forked
-  project, it should start indexing it automatically, just in Sublime Text or
-  Visual Studio or any other IDE.
+  project, it should start indexing it automatically, just like in Sublime Text 
+  or Visual Studio or any other IDE.
 
 
 =============================================================================
@@ -239,9 +239,46 @@ g:gutentags_project_root
                         file named after |gutentags_tagfile| will be created at
                         the project root.
                         Defaults to `[]` (an empty |List|).
-                        A list of default markers will always be appended to
-                        the user-defined ones: ['.git', '.hg', '.bzr',
-                        '_darcs'].
+                        A list of default markers will be appended to the
+                        user-defined ones unless
+                        |gutentags_add_default_project_roots| is set to 0.
+                        
+                                            *gutentags_add_default_project_roots*
+g:gutentags_add_default_project_roots
+                        Defines whether Gutentags should always define some
+                        default project roots (see |gutentags_project_root|).
+                        This can be useful to prevent unnecessary disk access
+                        when Gutentags searches for a project root.
+                        The default markers are:
+                        `['.git', '.hg', '.bzr', '_darcs', '_darcs', '_FOSSIL_', '.fslckout']`
+
+                                                *gutentags_exclude_project_root*
+g:gutentags_exclude_project_root
+                        A list of project roots to generally ignore. If a file
+                        is opened inside one of those projects, Gutentags
+                        won't be activated. This is similar to placing
+                        a `.notags` file in the root of those projects, but
+                        can be useful when you don't want to, or can't, place
+                        such a file there.
+                        Defaults to `['/usr/local']`, which is the folder where
+                        Homebrew is known to create a Git directory by default
+                        on MacOS.
+
+                                                *gutentags_project_root_finder*
+g:gutentags_project_root_finder
+                        When a buffer is loaded, Gutentags uses a default
+                        (internal) implementation to find that file's
+                        project's root directory, using settings like
+                        |g:gutentags_project_root|. When you specify
+                        |g:gutentags_project_root_finder|, you can tell
+                        Gutentags to use a custom implementation, such as
+                        `vim-projectroot`. The value of this setting must be
+                        the name of a function that takes a single string
+                        argument (the path to the current buffer's file) and
+                        returns a string value (the project's root directory).
+                        Defaults to `''`.
+                        Note: when set, the called implementation will most 
+                        likely ignore |g:gutentags_project_root|.
 
                                                 *gutentags_exclude*
 g:gutentags_exclude
@@ -332,9 +369,11 @@ g:gutentags_resolve_symlinks
 g:gutentags_enabled_user_func
                         When set to a non-empty string, it is expected to be
                         the name of a function that will be called when a file
-                        is open in a project. The function gets passed the
+                        is opened in a project. The function gets passed the
                         path of the file and if it returns 0, Gutentags won't
                         be enabled for that file.
+                        You can use this also to manually set `b:gutentags_root`
+                        (see |gutentags_project_root|).
                         Defaults to "".
 
                                             *gutentags_define_advanced_commands*
@@ -378,6 +417,40 @@ g:gutentags_project_info
                         See |gutentags_ctags_executable_{filetype}| for more
                         information.
 
+                                            *gutentags_file_list_command*
+g:gutentags_file_list_command
+                        Specifies command(s) to use to list files for which
+                        tags should be generated, instead of recursively
+                        examining all files within the project root. When
+                        invoked, file list commands will execute in the
+                        project root directory.
+
+                        This setting is useful in projects using source
+                        control to restrict tag generation to only files
+                        tracked in the repository.
+
+                        This variable may be set in one of two ways. If
+                        set as a |String|, the specified command will be used to
+                        list files for all projects. For example: >
+
+                         let g:gutentags_file_list_command = 'find . -type f'
+<
+                        If set as a |Dictionary|, this variable should be set
+                        as a mapping of project root markers to the desired
+                        file list command for that root marker. (See
+                        |gutentags_project_root| for how Gutentags uses root
+                        markerts to locate the project.) For example: >
+
+                         let g:gutentags_file_list_command = {
+                             \ 'markers': {
+                                 \ '.git': 'git ls-files',
+                                 \ '.hg': 'hg files',
+                                 \ },
+                             \ }
+<
+                        Note: If a custom ctags executable is specified, it
+                        must support the '-L' command line option in order to
+                        read the list of files to be examined.
 
 =============================================================================
 5. Project Settings                             *gutentags-project-settings*
