@@ -387,15 +387,23 @@ g:gutentags_resolve_symlinks
                         part of the project.
                         Defaults to 0.
                         
-                                            *gutentags_enabled_user_func*
-g:gutentags_enabled_user_func
+                                            *gutentags_init_user_func*
+g:gutentags_init_user_func
                         When set to a non-empty string, it is expected to be
                         the name of a function that will be called when a file
                         is opened in a project. The function gets passed the
                         path of the file and if it returns 0, Gutentags won't
                         be enabled for that file.
-                        You can use this also to manually set `b:gutentags_root`
-                        (see |gutentags_project_root|).
+
+                        You can use this to manually set buffer-local
+                        settings:
+                        
+                        * `b:gutentags_tagfile` (see |gutentags_tagfile|).
+
+                        This setting was previously called 
+                        `gutentags_enabled_user_func`. The old setting is
+                        still used as a fallback.
+
                         Defaults to "".
 
                                             *gutentags_define_advanced_commands*

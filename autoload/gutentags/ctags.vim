@@ -17,8 +17,9 @@ let s:unix_redir = (&shellredir =~# '%s') ? &shellredir : &shellredir . ' %s'
 
 function! gutentags#ctags#init(project_root) abort
     " Figure out the path to the tags file.
+    let l:tagfile = getbufvar("", 'gutentags_tagfile', g:gutentags_tagfile)
     let b:gutentags_files['ctags'] = gutentags#get_cachefile(
-                \a:project_root, g:gutentags_tagfile)
+                \a:project_root, l:tagfile)
 
     " Set the tags file for Vim to use.
     if g:gutentags_auto_set_tags

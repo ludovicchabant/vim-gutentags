@@ -183,8 +183,8 @@ function! gutentags#setup_gutentags() abort
     endif
 
     " Let the user specify custom ways to disable Gutentags.
-    if g:gutentags_enabled_user_func != '' &&
-                \!call(g:gutentags_enabled_user_func, [expand('%:p')])
+    if g:gutentags_init_user_func != '' &&
+                \!call(g:gutentags_init_user_func, [expand('%:p')])
         call gutentags#trace("Ignoring '" . bufname('%') . "' because of " .
                     \"custom user function.")
         return
