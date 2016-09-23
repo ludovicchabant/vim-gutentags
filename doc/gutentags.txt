@@ -59,8 +59,27 @@ removes the tags for the current file first, to make sure the tag file is
 always consistent with the source code.
 
 Also, Gutentags is clever enough to not stumble upon itself by triggering
-multiple ctags processes if you save files too fast, or your project is really
-big.
+multiple ctags processes if you save files too fast, or if your project is
+really big.
+
+
+1.1 Requirements
+
+If you're using the `ctags` modules (which is the default and only working one
+at this point, really), you will need a `tags` generator that supports the
+following arguments:
+
+* `-f` (to specify the output file)
+* `--append` (to append to an existing file while keeping it sorted)
+* `--exclude` (to exclude file patterns)
+* `--options` (to specify an options file)
+
+This means you probably want Exhuberant Ctags or Universal Ctags. The basic
+old BSD Ctags WON'T WORK. Other language-specific versions may or may not
+work. Check with their help or man page.
+
+
+1.2 Similar Plugins
 
 There are some similar Vim plugins out there ("vim-tags", "vim-autotag",
 "vim-automatic-ctags", etc.). They all fail on one or more of the requirements
