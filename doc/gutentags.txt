@@ -64,6 +64,7 @@ really big.
 
 
 1.1 Requirements
+                                                *gutentags-ctags-requirements*
 
 If you're using the `ctags` modules (which is the default and only working one
 at this point, really), you will need a `tags` generator that supports the
@@ -80,6 +81,7 @@ work. Check with their help or man page.
 
 
 1.2 Similar Plugins
+                                                *gutentags-similar-plugins*
 
 There are some similar Vim plugins out there ("vim-tags", "vim-autotag",
 "vim-automatic-ctags", etc.). They all fail on one or more of the requirements
@@ -235,8 +237,9 @@ g:gutentags_ctags_executable_{type}
                         Specifies the ctags executable to launch for a project
                         of type {type}. See |gutentags_project_info| for more
                         information.
+                        IMPORTANT: piease see |gutentags-ctags-requirements|.
                         Example: >
-                         let g:gutentags_ctags_executable_ruby = 'ripper-tags'
+                         let g:gutentags_ctags_executable_ruby = 'foobar'
 <
 
                                                 *gutentags_tagfile*
