@@ -37,7 +37,7 @@ endfunction
 function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     " Get to the tags file directory because ctags is finicky about
     " these things.
-    let l:prev_cwd = getcwd()
+    let l:prev_cwd = gutentags#pwd()
     let l:tags_file_exists = filereadable(a:tags_file)
 
     if l:tags_file_exists && g:gutentags_ctags_check_tagfile
@@ -59,7 +59,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         " root directory.
         let l:actual_proj_dir = '.'
         let l:actual_tags_file = g:gutentags_tagfile
-        execute "chdir " . fnameescape(a:proj_dir)
+        call gutentags#chdir(fnameescape(a:proj_dir))
     else
         " else: the tags file goes in a cache directory, so we need to specify
         " all the paths absolutely for `ctags` to do its job correctly.
@@ -121,7 +121,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         let l:cmd .= gutentags#get_execute_cmd_suffix()
 
         call gutentags#trace("Running: " . l:cmd)
-        call gutentags#trace("In:      " . getcwd())
+        call gutentags#trace("In:      " . gutentags#pwd())
         if !g:gutentags_fake
             " Run the background process.
             if !g:gutentags_trace
@@ -139,7 +139,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         call gutentags#trace("")
     finally
         " Restore the previous working directory.
-        execute "chdir " . fnameescape(l:prev_cwd)
+        call gutentags#chdir(fnameescape(l:prev_cwd))
     endtry
 endfunction
 
