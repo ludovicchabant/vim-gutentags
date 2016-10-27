@@ -108,7 +108,7 @@ I set for myself with Gutentags:
 The following commands are only available in buffers that have been found to
 belong to a project that should be managed by Gutentags. See
 |gutentags_project_root| for how Gutentags figures out the project a file
-belongs to. When not project is found (i.e. the file is not under any of the
+belongs to. When no project is found (i.e. the file is not under any of the
 known project markers), Gutentags is disabled for that buffer, and the
 following commands and remarks don't apply.
 
