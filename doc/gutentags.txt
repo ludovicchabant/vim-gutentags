@@ -237,7 +237,7 @@ g:gutentags_ctags_executable_{type}
                         Specifies the ctags executable to launch for a project
                         of type {type}. See |gutentags_project_info| for more
                         information.
-                        IMPORTANT: piease see |gutentags-ctags-requirements|.
+                        IMPORTANT: please see |gutentags-ctags-requirements|.
                         Example: >
                          let g:gutentags_ctags_executable_ruby = 'foobar'
 <
