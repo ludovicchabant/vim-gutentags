@@ -104,7 +104,7 @@ endfunction
 " Finds the first directory with a project marker by walking up from the given
 " file path.
 function! gutentags#get_project_root(path) abort
-    if g:gutentags_project_root_finder
+    if g:gutentags_project_root_finder != ''
         return call(g:gutentags_project_root_finder, [a:path])
     endif
 
