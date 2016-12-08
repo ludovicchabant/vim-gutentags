@@ -227,6 +227,18 @@ g:gutentags_enabled
                         don't.
                         Defaults to 1.
 
+                                                *gutentags_dont_load*
+g:gutentags_dont_load
+                        Prevents Gutentags from loading at all on Vim startup.
+
+                        The difference between this and |gutentags_enabled| is
+                        that |gutentags_enabled| can be turned on and off in
+                        the same Vim session -- Gutentags as a plugin stays
+                        loaded and will keep track of what happened while it
+                        was disabled. However, |gutentags_dont_load| only
+                        works on Vim startup and will prevent Gutentags from
+                        loading at all, as if it wasn't there.
+
                                                 *gutentags_ctags_executable*
 g:gutentags_ctags_executable
                         Specifies the ctags executable to launch.

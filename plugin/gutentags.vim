@@ -4,6 +4,10 @@
 
 " Globals {{{
 
+if (&cp || get(g:, 'gutentags_dont_load', 0))
+    finish
+endif
+
 if v:version < 704
     echoerr "gutentags: this plugin requires vim >= 7.4."
     finish
@@ -11,7 +15,7 @@ endif
 
 let g:gutentags_debug = get(g:, 'gutentags_debug', 0)
 
-if (exists('g:loaded_gutentags') || &cp) && !g:gutentags_debug
+if (exists('g:loaded_gutentags') && !g:gutentags_debug)
     finish
 endif
 if (exists('g:loaded_gutentags') && g:gutentags_debug)
