@@ -4,6 +4,11 @@
 
 " Throw an exception message.
 function! gutentags#throw(message)
+    throw "gutentags: " . a:message
+endfunction
+
+" Throw an exception message and set Vim's error message variable.
+function! gutentags#throwerr(message)
     let v:errmsg = "gutentags: " . a:message
     throw v:errmsg
 endfunction
@@ -354,7 +359,7 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
             echom "gutentags: The tags file is already being updated, " .
                         \"please try again later."
         else
-            call gutentags#throw("Unknown queue mode: " . a:queue_mode)
+            call gutentags#throwerr("Unknown queue mode: " . a:queue_mode)
         endif
         return
     endif

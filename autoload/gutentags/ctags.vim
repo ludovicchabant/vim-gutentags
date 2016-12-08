@@ -44,7 +44,8 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     if l:tags_file_exists && g:gutentags_ctags_check_tagfile
         let l:first_lines = readfile(a:tags_file, '', 1)
         if len(l:first_lines) == 0 || stridx(l:first_lines[0], '!_TAG_') != 0
-            call gutentags#throw("File ".a:tags_file." doesn't appear to be ".
+            call gutentags#throwerr(
+                        \"File ".a:tags_file." doesn't appear to be ".
                         \"a ctags file. Please delete it and run ".
                         \":GutentagsUpdate!.")
             return
