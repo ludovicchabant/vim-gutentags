@@ -10,6 +10,7 @@ set CTAGS_ARGS=
 set TAGS_FILE=tags
 set PROJECT_ROOT=
 set FILE_LIST_CMD=
+set FILE_LIST_CMD_IS_ABSOLUTE=0
 set UPDATED_SOURCE=
 set PAUSE_BEFORE_EXIT=0
 set LOG_FILE=
@@ -39,6 +40,10 @@ if [%1]==[-p] (
 if [%1]==[-L] (
     set FILE_LIST_CMD=%~2
     shift
+    goto :LoopParseArgs
+)
+if [%1]==[-A] (
+    set FILE_LIST_CMD_IS_ABSOLUTE=1
     goto :LoopParseArgs
 )
 if [%1]==[-s] (
@@ -93,7 +98,12 @@ if ["%INDEX_WHOLE_PROJECT%"]==["1"] (
     set CTAGS_ARGS=%CTAGS_ARGS% "%PROJECT_ROOT%"
     if not ["%FILE_LIST_CMD%"]==[""] (
         echo Running custom file lister >> %LOG_FILE%
-        if ["%PROJECT_ROOT%"]==["."] (
+        echo Licensee is %LICENSEE_ID% >> %LOG_FILE%
+        set use_raw_list=0
+        if ["%PROJECT_ROOT%"]==["."] set use_raw_list=1
+        if ["%FILE_LIST_CMD_IS_ABSOLUTE%"]==["1"] set use_raw_list=1
+        rem No idea why we need to use delayed expansion here to make it work :(
+        if ["!use_raw_list!"]==["1"] (
             echo call %FILE_LIST_CMD% ^> %TAGS_FILE%.files >> %LOG_FILE%
             call %FILE_LIST_CMD% > %TAGS_FILE%.files
         ) else (
@@ -150,6 +160,8 @@ echo    -e [exe=ctags]: The ctags executable to run
 echo    -t [file=tags]: The path to the ctags file to update
 echo    -p [dir=]:      The path to the project root
 echo    -L [cmd=]:      The file list command to run
+echo    -A:             Specifies that the file list command returns
+echo                    absolute paths
 echo    -s [file=]:     The path to the source file that needs updating
 echo    -l [log=]:      The log file to output to
 echo    -o [options=]:  An options file to read additional options from

@@ -39,6 +39,8 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     " Get to the tags file directory because ctags is finicky about
     " these things.
     let l:prev_cwd = getcwd()
+    execute "chdir " . fnameescape(a:proj_dir)
+
     let l:tags_file_exists = filereadable(a:tags_file)
 
     if l:tags_file_exists && g:gutentags_ctags_check_tagfile
@@ -54,14 +56,13 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
 
     if empty(g:gutentags_cache_dir)
         " If we don't use the cache directory, let's just use the tag filename
-        " as specified by the user, and change the working directory to the
-        " project root.
+        " as specified by the user, since it's relative to the project root,
+        " and we are already `chdir`'d into it.
         " Note that if we don't do this and pass a full path, `ctags` gets
         " confused if the paths have spaces -- but not if you're *in* the
         " root directory.
         let l:actual_proj_dir = '.'
         let l:actual_tags_file = g:gutentags_tagfile
-        execute "chdir " . fnameescape(a:proj_dir)
     else
         " else: the tags file goes in a cache directory, so we need to specify
         " all the paths absolutely for `ctags` to do its job correctly.
@@ -84,6 +85,14 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         else
             let l:file_list_cmd = gutentags#get_project_file_list_cmd(l:actual_proj_dir)
             if !empty(l:file_list_cmd)
+                let l:suffopts = matchstrpos(l:file_list_cmd, '///')
+                if l:suffopts[1] > 0
+                    let l:suffoptstr = strpart(l:file_list_cmd, l:suffopts[2])
+                    let l:file_list_cmd = strpart(l:file_list_cmd, 0, l:suffopts[1])
+                    if l:suffoptstr == 'absolute'
+                        let l:cmd .= ' -A'
+                    endif
+                endif
                 let l:cmd .= ' -L ' . '"' . l:file_list_cmd. '"'
             endif
         endif

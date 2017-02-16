@@ -8,6 +8,7 @@ CTAGS_ARGS=
 TAGS_FILE=tags
 PROJECT_ROOT=
 FILE_LIST_CMD=
+FILE_LIST_CMD_IS_ABSOLUTE=0
 UPDATED_SOURCE=
 PAUSE_BEFORE_EXIT=0
 
@@ -20,6 +21,8 @@ ShowUsage() {
     echo "    -t [file=tags]: The path to the ctags file to update"
     echo "    -p [dir=]:      The path to the project root"
     echo "    -L [cmd=]:      The file list command to run"
+    echo "    -A:             Specifies that the file list command returns "
+    echo "                    absolute paths"
     echo "    -s [file=]:     The path to the source file that needs updating"
     echo "    -x [pattern=]:  A pattern of files to exclude"
     echo "    -o [options=]:  An options file to read additional options from"
@@ -28,7 +31,7 @@ ShowUsage() {
 }
 
 
-while getopts "h?e:x:t:p:L:s:o:c" opt; do
+while getopts "h?e:x:t:p:L:s:o:cA" opt; do
     case $opt in
         h|\?)
             ShowUsage
@@ -48,6 +51,9 @@ while getopts "h?e:x:t:p:L:s:o:c" opt; do
             ;;
         L)
             FILE_LIST_CMD=$OPTARG
+            ;;
+        A)
+            FILE_LIST_CMD_IS_ABSOLUTE=1
             ;;
         s)
             UPDATED_SOURCE=$OPTARG
@@ -88,7 +94,7 @@ fi
 
 if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
     if [ -n "${FILE_LIST_CMD}" ]; then
-        if [ "${PROJECT_ROOT}" = "." ]; then
+        if [ "${PROJECT_ROOT}" = "." ] || [ $FILE_LIST_CMD_IS_ABSOLUTE -eq 1 ]; then
             $FILE_LIST_CMD > "${TAGS_FILE}.files"
         else
             # If using a tags cache directory, use absolute paths
