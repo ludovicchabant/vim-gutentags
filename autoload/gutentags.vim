@@ -97,11 +97,12 @@ function! gutentags#get_project_file_list_cmd(path) abort
         let l:markers = get(g:gutentags_file_list_command, 'markers', [])
         if type(l:markers) == type({})
             for [marker, file_list_cmd] in items(l:markers)
-                if getftype(a:path . '/' . marker) != ""
+                if !empty(globpath(a:path, marker, 1))
                     return gutentags#validate_cmd(file_list_cmd)
                 endif
             endfor
         endif
+        return get(g:gutentags_file_list_command, 'default', "")
     endif
     return ""
 endfunction
@@ -125,7 +126,7 @@ function! gutentags#get_project_root(path) abort
     endif
     while l:path != l:previous_path
         for root in l:markers
-            if getftype(l:path . '/' . root) != ""
+            if !empty(globpath(l:path, root))
                 let l:proj_dir = simplify(fnamemodify(l:path, ':p'))
                 let l:proj_dir = gutentags#stripslash(l:proj_dir)
                 if l:proj_dir == ''
