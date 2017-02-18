@@ -55,7 +55,7 @@ let g:gutentags_file_list_command = get(g:, 'gutentags_file_list_command', '')
 
 if !exists('g:gutentags_cache_dir')
     let g:gutentags_cache_dir = ''
-else
+elseif !empty(g:gutentags_cache_dir)
     " Make sure we get an absolute/resolved path (e.g. expanding `~/`), and
     " strip any trailing slash.
     let g:gutentags_cache_dir = fnamemodify(g:gutentags_cache_dir, ':p')
