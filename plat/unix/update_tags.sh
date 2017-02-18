@@ -10,6 +10,7 @@ PROJECT_ROOT=
 FILE_LIST_CMD=
 FILE_LIST_CMD_IS_ABSOLUTE=0
 UPDATED_SOURCE=
+POST_PROCESS_CMD=
 PAUSE_BEFORE_EXIT=0
 
 
@@ -26,12 +27,14 @@ ShowUsage() {
     echo "    -s [file=]:     The path to the source file that needs updating"
     echo "    -x [pattern=]:  A pattern of files to exclude"
     echo "    -o [options=]:  An options file to read additional options from"
+    echo "    -O [params=]:   Parameters to pass to ctags"
+    echo "    -P [cmd=]:      Post process command to run on the tags file"
     echo "    -c:             Ask for confirmation before exiting"
     echo ""
 }
 
 
-while getopts "h?e:x:t:p:L:s:o:cA" opt; do
+while getopts "h?e:x:t:p:L:s:o:O:P:cA" opt; do
     case $opt in
         h|\?)
             ShowUsage
@@ -63,6 +66,12 @@ while getopts "h?e:x:t:p:L:s:o:cA" opt; do
             ;;
         o)
             CTAGS_ARGS="$CTAGS_ARGS --options=$OPTARG"
+            ;;
+        O)
+            CTAGS_ARGS="$CTAGS_ARGS $OPTARG"
+            ;;
+        P)
+            POST_PROCESS_CMD=$OPTARG
             ;;
     esac
 done
@@ -111,6 +120,12 @@ else
     echo "Running ctags on \"$UPDATED_SOURCE\""
     echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS --append \"$UPDATED_SOURCE\""
     $CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS --append "$UPDATED_SOURCE"
+fi
+
+if [ "$POST_PROCESS_CMD" != "" ]; then
+    echo "Running post process"
+    echo "$POST_PROCESS_CMD \"$TAGS_FILE.temp\""
+    $POST_PROCESS_CMD "$TAGS_FILE.temp"
 fi
 
 echo "Replacing tags file"
