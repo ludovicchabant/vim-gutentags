@@ -7,6 +7,8 @@ let g:gutentags_tagfile = get(g:, 'gutentags_tagfile', 'tags')
 let g:gutentags_auto_set_tags = get(g:, 'gutentags_auto_set_tags', 1)
 let g:gutentags_ctags_options_file = get(g:, 'gutentags_ctags_options_file', '.gutctags')
 let g:gutentags_ctags_check_tagfile = get(g:, 'gutentags_ctags_check_tagfile', 0)
+let g:gutentags_ctags_extra_args = get(g:, 'gutentags_ctags_extra_args', [])
+let g:gutentags_ctags_post_process_cmd = get(g:, 'gutentags_ctags_post_process_cmd', '')
 
 " }}}
 
@@ -101,6 +103,12 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
             " options file, so that users can override --recursive.
             " Omit --recursive if this project uses a file list command.
             let l:cmd .= ' -o "' . gutentags#get_res_file('ctags_recursive.options') . '"'
+        endif
+        if !empty(g:gutentags_ctags_extra_args)
+            let l:cmd .= ' -O '.shellescape(join(g:gutentags_ctags_extra_args))
+        endif
+        if !empty(g:gutentags_ctags_post_process_cmd)
+            let l:cmd .= ' -P '.shellescape(g:gutentags_ctags_post_process_cmd)
         endif
         let l:proj_options_file = a:proj_dir . '/' .
                     \g:gutentags_ctags_options_file

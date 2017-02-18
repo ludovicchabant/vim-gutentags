@@ -12,6 +12,7 @@ set PROJECT_ROOT=
 set FILE_LIST_CMD=
 set FILE_LIST_CMD_IS_ABSOLUTE=0
 set UPDATED_SOURCE=
+set POST_PROCESS_CMD=
 set PAUSE_BEFORE_EXIT=0
 set LOG_FILE=
 
@@ -65,6 +66,16 @@ if [%1]==[-o] (
     shift
     goto :LoopParseArgs
 )
+if [%1]==[-O] (
+    set CTAGS_ARGS=%CTAGS_ARGS% %~2
+    shift
+    goto :LoopParseArgs
+)
+if [%1]==[-P] (
+    set POST_PROCESS_CMD=%~2
+    shift
+    goto :LoopParseArgs
+)
 echo Invalid Argument: %1
 goto :Usage
 
@@ -98,7 +109,6 @@ if ["%INDEX_WHOLE_PROJECT%"]==["1"] (
     set CTAGS_ARGS=%CTAGS_ARGS% "%PROJECT_ROOT%"
     if not ["%FILE_LIST_CMD%"]==[""] (
         echo Running custom file lister >> %LOG_FILE%
-        echo Licensee is %LICENSEE_ID% >> %LOG_FILE%
         set use_raw_list=0
         if ["%PROJECT_ROOT%"]==["."] set use_raw_list=1
         if ["%FILE_LIST_CMD_IS_ABSOLUTE%"]==["1"] set use_raw_list=1
@@ -123,6 +133,16 @@ call "%CTAGS_EXE%" -f "%TAGS_FILE%.temp" %CTAGS_ARGS% >> %LOG_FILE% 2>&1
 if ERRORLEVEL 1 (
     echo ERROR: Ctags executable returned non-zero code. >> %LOG_FILE%
     goto :Unlock
+)
+
+if not ["%POST_PROCESS_CMD%"]==[""] (
+    echo Running post process >> %LOG_FILE%
+    echo call %POST_PROCESS_CMD% %TAGS_FILE%.temp >> %LOG_FILE%
+    call %POST_PROCESS_CMD% %TAGS_FILE%.temp >> %LOG_FILE% 2>&1
+    if ERRORLEVEL 1 (
+        echo ERROR: Post process returned non-zero code. >> %LOG_FILE%
+        goto :Unlock
+    )
 )
 
 echo Replacing tags file >> %LOG_FILE%
