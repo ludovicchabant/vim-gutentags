@@ -82,14 +82,15 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     endif
 
     if empty(g:gutentags_cache_dir)
-        " If we don't use the cache directory, let's just use the tag filename
-        " as specified by the user, since it's relative to the project root,
-        " and we are already `chdir`'d into it.
-        " Note that if we don't do this and pass a full path, `ctags` gets
-        " confused if the paths have spaces -- but not if you're *in* the
-        " root directory.
+        " If we don't use the cache directory, we can pass relative paths
+        " around.
+        "
+        " Note that if we don't do this and pass a full path for the project
+        " root, some `ctags` implementations like Exhuberant Ctags can get
+        " confused if the paths have spaces -- but not if you're *in* the root 
+        " directory, for some reason...
         let l:actual_proj_dir = '.'
-        let l:actual_tags_file = g:gutentags_ctags_tagfile
+        let l:actual_tags_file = fnamemodify(a:tags_file, ':.')
     else
         " else: the tags file goes in a cache directory, so we need to specify
         " all the paths absolutely for `ctags` to do its job correctly.
