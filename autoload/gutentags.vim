@@ -56,6 +56,17 @@ function! gutentags#get_res_file(filename) abort
     return g:gutentags_res_dir . a:filename
 endfunction
 
+" Returns whether a path is rooted.
+if has('win32') || has('win64')
+function! gutentags#is_path_rooted(path) abort
+  return len(a:path) >= 2 && a:path[1] == ':'
+endfunction
+else
+function! gutentags#is_path_rooted(path) abort
+  return !empty(a:path) && a:path[0] == '/'
+endfunction
+endif
+
 " }}}
 
 " Gutentags Setup {{{
@@ -162,6 +173,9 @@ endfunction
 
 " Generate a path for a given filename in the cache directory.
 function! gutentags#get_cachefile(root_dir, filename) abort
+    if gutentags#is_path_rooted(a:filename)
+        return a:filename
+    endif
     let l:tag_path = gutentags#stripslash(a:root_dir) . '/' . a:filename
     if g:gutentags_cache_dir != ""
         " Put the tag file in the cache dir instead of inside the
