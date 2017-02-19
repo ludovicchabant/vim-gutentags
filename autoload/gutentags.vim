@@ -198,7 +198,9 @@ function! gutentags#setup_gutentags() abort
     " Don't setup gutentags for anything that's not a normal buffer
     " (so don't do anything for help buffers and quickfix windows and
     "  other such things)
-    if &buftype != ''
+    " Also don't do anything for the default `[No Name]` buffer you get
+    " after starting Vim.
+    if &buftype != '' || bufname('%') == ''
         return
     endif
 
