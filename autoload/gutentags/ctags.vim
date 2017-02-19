@@ -3,13 +3,34 @@
 " Global Options {{{
 
 let g:gutentags_ctags_executable = get(g:, 'gutentags_ctags_executable', 'ctags')
-let g:gutentags_tagfile = get(g:, 'gutentags_tagfile', 'tags')
-let g:gutentags_auto_set_tags = get(g:, 'gutentags_auto_set_tags', 1)
+let g:gutentags_ctags_tagfile = get(g:, 'gutentags_ctags_tagfile', 'tags')
+let g:gutentags_ctags_auto_set_tags = get(g:, 'gutentags_ctags_auto_set_tags', 1)
+
 let g:gutentags_ctags_options_file = get(g:, 'gutentags_ctags_options_file', '.gutctags')
 let g:gutentags_ctags_check_tagfile = get(g:, 'gutentags_ctags_check_tagfile', 0)
 let g:gutentags_ctags_extra_args = get(g:, 'gutentags_ctags_extra_args', [])
 let g:gutentags_ctags_post_process_cmd = get(g:, 'gutentags_ctags_post_process_cmd', '')
 
+let g:gutentags_ctags_exclude = get(g:, 'gutentags_ctags_exclude', [])
+let g:gutentags_ctags_exclude_wildignore = get(g:, 'gutentags_ctags_exclude_wildignore', 1)
+
+" Backwards compatibility.
+function! s:_handleOldOptions() abort
+    let l:renamed_options = {
+                \'gutentags_exclude': 'gutentags_ctags_exclude',
+                \'gutentags_tagfile': 'gutentags_ctags_tagfile',
+                \'gutentags_auto_set_tags': 'gutentags_ctags_auto_set_tags'
+                \}
+    for key in keys(l:renamed_options)
+        if exists('g:'.key)
+            let newname = l:renamed_options[key]
+            echom "gutentags: Option 'g:'".key." has been renamed to ".
+                        \"'g:'".newname." Please update your vimrc."
+            let g:[newname] = g:[key]
+        endif
+    endfor
+endfunction
+call s:_handleOldOptions()
 " }}}
 
 " Gutentags Module Interface {{{
@@ -19,12 +40,16 @@ let s:unix_redir = (&shellredir =~# '%s') ? &shellredir : &shellredir . ' %s'
 
 function! gutentags#ctags#init(project_root) abort
     " Figure out the path to the tags file.
-    let l:tagfile = getbufvar("", 'gutentags_tagfile', g:gutentags_tagfile)
+    " Check the old name for this option, too, before falling back to the
+    " globally defined name.
+    let l:tagfile = getbufvar("", 'gutentags_ctags_tagfile',
+                \getbufvar("", 'gutentags_tagfile', 
+                \g:gutentags_ctags_tagfile))
     let b:gutentags_files['ctags'] = gutentags#get_cachefile(
                 \a:project_root, l:tagfile)
 
     " Set the tags file for Vim to use.
-    if g:gutentags_auto_set_tags
+    if g:gutentags_ctags_auto_set_tags
         execute 'setlocal tags^=' . fnameescape(b:gutentags_files['ctags'])
     endif
 
@@ -64,7 +89,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         " confused if the paths have spaces -- but not if you're *in* the
         " root directory.
         let l:actual_proj_dir = '.'
-        let l:actual_tags_file = g:gutentags_tagfile
+        let l:actual_tags_file = g:gutentags_ctags_tagfile
     else
         " else: the tags file goes in a cache directory, so we need to specify
         " all the paths absolutely for `ctags` to do its job correctly.
@@ -117,10 +142,12 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
                         \a:proj_dir, l:proj_options_file)
             let l:cmd .= ' -o "' . l:proj_options_file . '"'
         endif
-        for ign in split(&wildignore, ',')
-            let l:cmd .= ' -x ' . '"' . ign . '"'
-        endfor
-        for exc in g:gutentags_exclude
+        if g:gutentags_ctags_exclude_wildignore
+            for ign in split(&wildignore, ',')
+                let l:cmd .= ' -x ' . '"' . ign . '"'
+            endfor
+        endif
+        for exc in g:gutentags_ctags_exclude
             let l:cmd .= ' -x ' . '"' . exc . '"'
         endfor
         if g:gutentags_pause_after_update
