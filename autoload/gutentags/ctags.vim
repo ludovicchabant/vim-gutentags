@@ -146,7 +146,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         endif
         if g:gutentags_ctags_exclude_wildignore
             for ign in split(&wildignore, ',')
-                let l:cmd .= ' -x ' . '"' . ign . '"'
+                let l:cmd .= ' -x ' . shellescape(ign, 1)
             endfor
         endif
         for exc in g:gutentags_ctags_exclude
