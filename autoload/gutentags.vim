@@ -2,6 +2,23 @@
 
 " Utilities {{{
 
+function! gutentags#pwd()
+  if has('nvim')
+    return haslocaldir() ? getcwd(0, 0) : haslocaldir(-1, 0) ? getcwd(-1, 0) : getcwd()
+  else
+    return haslocaldir() ? getcwd(0, 0) : getcwd()
+  endif
+endfunction
+
+function! gutentags#chdir(path)
+  if has('nvim')
+    let chdir = haslocaldir() ? 'lcd' : haslocaldir(-1, 0) ? 'tcd' : 'cd'
+  else
+    let chdir = haslocaldir() ? 'lcd' : 'cd'
+  endif
+  execute chdir a:path
+endfunction
+
 " Throw an exception message.
 function! gutentags#throw(message)
     throw "gutentags: " . a:message
@@ -384,8 +401,8 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
     " Switch to the project root to make the command line smaller, and make
     " it possible to get the relative path of the filename to parse if we're
     " doing an incremental update.
-    let l:prev_cwd = getcwd()
-    execute "chdir " . fnameescape(l:proj_dir)
+    let l:prev_cwd = gutentags#pwd()
+    call gutentags#chdir(fnameescape(l:proj_dir))
     try
         call call("gutentags#".a:module."#generate",
                     \[l:proj_dir, l:tags_file, a:write_mode])
@@ -394,7 +411,7 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
         echom v:exception
     finally
         " Restore the current directory...
-        execute "chdir " . fnameescape(l:prev_cwd)
+        call gutentags#chdir(fnameescape(l:prev_cwd))
     endtry
 endfunction
 
