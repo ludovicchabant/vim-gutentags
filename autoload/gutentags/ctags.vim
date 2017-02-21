@@ -69,6 +69,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     execute "chdir " . fnameescape(a:proj_dir)
 
     let l:tags_file_exists = filereadable(a:tags_file)
+    let l:tags_file_is_local = match(a:tags_file, '\v[/\\]') < 0
 
     if l:tags_file_exists && g:gutentags_ctags_check_tagfile
         let l:first_lines = readfile(a:tags_file, '', 1)
@@ -81,7 +82,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         endif
     endif
 
-    if empty(g:gutentags_cache_dir)
+    if empty(g:gutentags_cache_dir) && l:tags_file_is_local
         " If we don't use the cache directory, we can pass relative paths
         " around.
         "
@@ -107,7 +108,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         let l:cmd .= ' -p "' . l:actual_proj_dir . '"'
         if a:write_mode == 0 && l:tags_file_exists
             let l:cur_file_path = expand('%:p')
-            if empty(g:gutentags_cache_dir)
+            if empty(g:gutentags_cache_dir) && l:tags_file_is_local
                 let l:cur_file_path = fnamemodify(l:cur_file_path, ':.')
             endif
             let l:cmd .= ' -s "' . l:cur_file_path . '"'

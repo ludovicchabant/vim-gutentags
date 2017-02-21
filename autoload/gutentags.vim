@@ -76,7 +76,8 @@ endfunction
 " Returns whether a path is rooted.
 if has('win32') || has('win64')
 function! gutentags#is_path_rooted(path) abort
-  return len(a:path) >= 2 && a:path[1] == ':'
+  return len(a:path) >= 2 && (
+        \a:path[0] == '/' || a:path[0] == '\' || a:path[1] == ':')
 endfunction
 else
 function! gutentags#is_path_rooted(path) abort
