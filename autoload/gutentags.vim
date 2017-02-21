@@ -155,7 +155,7 @@ function! gutentags#get_project_root(path) abort
     endif
     while l:path != l:previous_path
         for root in l:markers
-            if !empty(globpath(l:path, root))
+            if !empty(globpath(l:path, root, 1))
                 let l:proj_dir = simplify(fnamemodify(l:path, ':p'))
                 let l:proj_dir = gutentags#stripslash(l:proj_dir)
                 if l:proj_dir == ''
