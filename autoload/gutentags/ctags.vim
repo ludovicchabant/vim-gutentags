@@ -65,8 +65,8 @@ endfunction
 function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     " Get to the tags file directory because ctags is finicky about
     " these things.
-    let l:prev_cwd = getcwd()
-    execute "chdir " . fnameescape(a:proj_dir)
+    let l:prev_cwd = gutentags#pwd()
+    call gutentags#chdir(fnameescape(a:proj_dir))
 
     let l:tags_file_exists = filereadable(a:tags_file)
     let l:tags_file_is_local = match(a:tags_file, '\v[/\\]') < 0
