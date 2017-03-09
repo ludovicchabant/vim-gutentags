@@ -6,7 +6,7 @@ function! gutentags#pwd()
   if has('nvim')
     return haslocaldir() ? getcwd(0, 0) : haslocaldir(-1, 0) ? getcwd(-1, 0) : getcwd()
   else
-    return haslocaldir() ? getcwd(0, 0) : getcwd()
+    return getcwd()
   endif
 endfunction
 
