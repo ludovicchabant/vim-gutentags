@@ -104,10 +104,10 @@ fi
 if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
     if [ -n "${FILE_LIST_CMD}" ]; then
         if [ "${PROJECT_ROOT}" = "." ] || [ $FILE_LIST_CMD_IS_ABSOLUTE -eq 1 ]; then
-            $FILE_LIST_CMD > "${TAGS_FILE}.files"
+            eval $FILE_LIST_CMD > "${TAGS_FILE}.files"
         else
             # If using a tags cache directory, use absolute paths
-            $FILE_LIST_CMD | while read -r l; do
+            eval $FILE_LIST_CMD | while read -r l; do
                 echo "${PROJECT_ROOT%/}/${l}"
             done > "${TAGS_FILE}.files"
         fi
