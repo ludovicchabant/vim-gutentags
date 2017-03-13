@@ -150,7 +150,7 @@ function! gutentags#gtags_cscope#generate(proj_dir, db_file, write_mode) abort
 
 	let l:use_jobs = has('job')
 
-	let l:prev_cwd = gutentags#pwd()
+	let l:prev_cwd = getcwd()
 	call gutentags#chdir(fnameescape(a:proj_dir))
 	try
 		if has('win32')
@@ -160,7 +160,7 @@ function! gutentags#gtags_cscope#generate(proj_dir, db_file, write_mode) abort
 		endif
 
 		call gutentags#trace("Running: " . string(l:cmd))
-		call gutentags#trace("In:      " . gutentags#pwd())
+		call gutentags#trace("In:      " . getcwd())
 		if !g:gutentags_fake
 			if l:use_jobs
 				let l:job_opts = {

@@ -64,7 +64,7 @@ function! gutentags#cscope#generate(proj_dir, tags_file, write_mode) abort
     let l:cmd .= gutentags#get_execute_cmd_suffix()
 
     call gutentags#trace("Running: " . l:cmd)
-    call gutentags#trace("In:      " . gutentags#pwd())
+    call gutentags#trace("In:      " . getcwd())
     if !g:gutentags_fake
         if !(has('nvim') && exists('*jobwait'))
             if !g:gutentags_trace
