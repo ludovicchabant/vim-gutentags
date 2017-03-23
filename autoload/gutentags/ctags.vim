@@ -66,7 +66,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     " Get to the tags file directory because ctags is finicky about
     " these things.
     let l:prev_cwd = getcwd()
-    execute "chdir " . fnameescape(a:proj_dir)
+    call gutentags#chdir(fnameescape(a:proj_dir))
 
     let l:tags_file_exists = filereadable(a:tags_file)
     let l:tags_file_is_local = match(a:tags_file, '\v[/\\]') < 0
@@ -170,7 +170,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         let l:cmd .= gutentags#get_execute_cmd_suffix()
 
         call gutentags#trace("Running: " . l:cmd)
-        call gutentags#trace("In:      " . gutentags#pwd())
+        call gutentags#trace("In:      " . getcwd())
         if !g:gutentags_fake
             " Run the background process.
             if !g:gutentags_trace

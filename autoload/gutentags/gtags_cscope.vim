@@ -151,7 +151,7 @@ function! gutentags#gtags_cscope#generate(proj_dir, db_file, write_mode) abort
 	let l:use_jobs = has('job')
 
 	let l:prev_cwd = getcwd()
-	execute "chdir " . fnameescape(a:proj_dir)
+	call gutentags#chdir(fnameescape(a:proj_dir))
 	try
 		if has('win32')
 			let l:cmd = s:get_win32_cmd(l:use_jobs, l:proj_options, l:db_path)
@@ -189,7 +189,7 @@ function! gutentags#gtags_cscope#generate(proj_dir, db_file, write_mode) abort
 		call gutentags#trace("")
     finally
         " Restore the previous working directory.
-        execute "chdir " . fnameescape(l:prev_cwd)
+        call gutentags#chdir(fnameescape(l:prev_cwd))
     endtry
 endfunction
 
