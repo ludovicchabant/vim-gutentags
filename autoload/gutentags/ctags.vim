@@ -69,7 +69,8 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     call gutentags#chdir(fnameescape(a:proj_dir))
 
     let l:tags_file_exists = filereadable(a:tags_file)
-    let l:tags_file_is_local = match(a:tags_file, '\v[/\\]') < 0
+    let l:tags_file_relative = fnamemodify(a:tags_file, ':.')
+    let l:tags_file_is_local = len(l:tags_file_relative) < len(a:tags_file)
 
     if l:tags_file_exists && g:gutentags_ctags_check_tagfile
         let l:first_lines = readfile(a:tags_file, '', 1)
@@ -91,7 +92,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         " confused if the paths have spaces -- but not if you're *in* the root 
         " directory, for some reason...
         let l:actual_proj_dir = '.'
-        let l:actual_tags_file = fnamemodify(a:tags_file, ':.')
+        let l:actual_tags_file = l:tags_file_relative
         call gutentags#chdir(fnameescape(a:proj_dir))
     else
         " else: the tags file goes in a cache directory, so we need to specify
