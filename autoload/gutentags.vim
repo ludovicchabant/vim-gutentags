@@ -210,7 +210,8 @@ function! gutentags#setup_gutentags() abort
     "  other such things)
     " Also don't do anything for the default `[No Name]` buffer you get
     " after starting Vim.
-    if &buftype != '' || bufname('%') == ''
+    if &buftype != '' || 
+          \(bufname('%') == '' && !g:gutentags_generate_on_empty_buffer)
         return
     endif
 

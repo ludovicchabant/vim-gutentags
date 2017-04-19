@@ -381,6 +381,16 @@ g:gutentags_generate_on_write
                         |GutentagsUpdate| manually.
                         Defaults to 1.
 
+                                            *gutentags_generate_on_empty_buffer*
+g:gutentags_generate_on_empty_buffer
+                        If set to 1, Gutentags will start generating the tag
+                        file even if there's no buffer currently open, as long
+                        as the current working directory (as returned by
+                        |:cd|) is inside a known project.
+                        This is useful if you want Gutentags to generate the
+                        tag file right after opening Vim.
+                        Defaults to 0.
+
                                                 *gutentags_background_update*
 g:gutentags_background_update
                         Specifies whether the process that updates the tags
