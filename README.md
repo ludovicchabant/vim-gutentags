@@ -15,6 +15,10 @@ Install Gutentags like any other Vim plugin. I recommend something like
     cd ~/.vim/bundle
     hg clone https://bitbucket.org/ludovicchabant/vim-gutentags
 
+If you're more into Git than Mercurial:
+
+    git clone https://github.com/ludovicchabant/vim-gutentags.git
+
 Then you only need to do a `:call pathogen#helptags()` to generate the
 documentation tags (how ironic, eh?) and you can access Gutentags' help pages
 with `help gutentags`.
