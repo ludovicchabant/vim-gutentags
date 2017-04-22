@@ -116,10 +116,10 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         else
             let l:file_list_cmd = gutentags#get_project_file_list_cmd(l:actual_proj_dir)
             if !empty(l:file_list_cmd)
-                let l:suffopts = matchstrpos(l:file_list_cmd, '///')
-                if l:suffopts[1] > 0
-                    let l:suffoptstr = strpart(l:file_list_cmd, l:suffopts[2])
-                    let l:file_list_cmd = strpart(l:file_list_cmd, 0, l:suffopts[1])
+                if match(l:file_list_cmd, '///') > 0
+                    let l:suffopts = split(l:file_list_cmd, '///')
+                    let l:suffoptstr = l:suffopts[1]
+                    let l:file_list_cmd = l:suffopts[0]
                     if l:suffoptstr == 'absolute'
                         let l:cmd .= ' -A'
                     endif
