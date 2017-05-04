@@ -113,6 +113,12 @@ function! gutentags#get_project_root(path) abort
         return call(g:gutentags_project_root_finder, [a:path])
     endif
 
+    if exists('g:gutentags_project_root_depth')
+        let l:project_root_depth = g:gutentags_project_root_depth
+    else
+        let l:project_root_depth = 99
+    endif
+
     let l:path = gutentags#stripslash(a:path)
     let l:previous_path = ""
     let l:markers = g:gutentags_project_root[:]
@@ -123,7 +129,7 @@ function! gutentags#get_project_root(path) abort
             endif
         endfor
     endif
-    while l:path != l:previous_path
+    while l:path != l:previous_path && l:project_root_depth > 0
         for root in l:markers
             if getftype(l:path . '/' . root) != ""
                 let l:proj_dir = simplify(fnamemodify(l:path, ':p'))
@@ -150,6 +156,7 @@ function! gutentags#get_project_root(path) abort
         endfor
         let l:previous_path = l:path
         let l:path = fnamemodify(l:path, ':h')
+        let l:project_root_depth = l:project_root_depth - 1
     endwhile
     call gutentags#throw("Can't figure out what tag file to use for: " . a:path)
 endfunction
