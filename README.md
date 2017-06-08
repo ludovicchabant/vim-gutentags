@@ -43,7 +43,7 @@ removes the tags for the current file first, to make sure the tag file is
 always consistent with the source code.
 
 Also, Gutentags is clever enough to not stumble upon itself by triggering
-multiple ctags processes if you save files to fast, or your project is really
+multiple ctags processes if you save files too fast, or your project is really
 big.
 
 
