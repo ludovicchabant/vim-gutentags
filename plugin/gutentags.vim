@@ -45,17 +45,17 @@ let g:gutentags_project_info = get(g:, 'gutentags_project_info', [])
 call add(g:gutentags_project_info, {'type': 'python', 'file': 'setup.py'})
 call add(g:gutentags_project_info, {'type': 'ruby', 'file': 'Gemfile'})
 
-let g:gutentags_exclude = get(g:, 'gutentags_exclude', [])
 let g:gutentags_exclude_project_root = get(g:, 'gutentags_exclude_project_root', ['/usr/local'])
 let g:gutentags_resolve_symlinks = get(g:, 'gutentags_resolve_symlinks', 0)
 let g:gutentags_generate_on_new = get(g:, 'gutentags_generate_on_new', 1)
 let g:gutentags_generate_on_missing = get(g:, 'gutentags_generate_on_missing', 1)
 let g:gutentags_generate_on_write = get(g:, 'gutentags_generate_on_write', 1)
+let g:gutentags_generate_on_empty_buffer = get(g:, 'gutentags_generate_on_empty_buffer', 0)
 let g:gutentags_file_list_command = get(g:, 'gutentags_file_list_command', '')
 
 if !exists('g:gutentags_cache_dir')
     let g:gutentags_cache_dir = ''
-else
+elseif !empty(g:gutentags_cache_dir)
     " Make sure we get an absolute/resolved path (e.g. expanding `~/`), and
     " strip any trailing slash.
     let g:gutentags_cache_dir = fnamemodify(g:gutentags_cache_dir, ':p')

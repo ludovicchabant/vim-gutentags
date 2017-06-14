@@ -10,7 +10,9 @@ set CTAGS_ARGS=
 set TAGS_FILE=tags
 set PROJECT_ROOT=
 set FILE_LIST_CMD=
+set FILE_LIST_CMD_IS_ABSOLUTE=0
 set UPDATED_SOURCE=
+set POST_PROCESS_CMD=
 set PAUSE_BEFORE_EXIT=0
 set LOG_FILE=
 
@@ -41,6 +43,10 @@ if [%1]==[-L] (
     shift
     goto :LoopParseArgs
 )
+if [%1]==[-A] (
+    set FILE_LIST_CMD_IS_ABSOLUTE=1
+    goto :LoopParseArgs
+)
 if [%1]==[-s] (
     set UPDATED_SOURCE=%~2
     shift
@@ -57,6 +63,16 @@ if [%1]==[-l] (
 )
 if [%1]==[-o] (
     set CTAGS_ARGS=%CTAGS_ARGS% --options=%2
+    shift
+    goto :LoopParseArgs
+)
+if [%1]==[-O] (
+    set CTAGS_ARGS=%CTAGS_ARGS% %~2
+    shift
+    goto :LoopParseArgs
+)
+if [%1]==[-P] (
+    set POST_PROCESS_CMD=%~2
     shift
     goto :LoopParseArgs
 )
@@ -93,7 +109,11 @@ if ["%INDEX_WHOLE_PROJECT%"]==["1"] (
     set CTAGS_ARGS=%CTAGS_ARGS% "%PROJECT_ROOT%"
     if not ["%FILE_LIST_CMD%"]==[""] (
         echo Running custom file lister >> %LOG_FILE%
-        if ["%PROJECT_ROOT%"]==["."] (
+        set use_raw_list=0
+        if ["%PROJECT_ROOT%"]==["."] set use_raw_list=1
+        if ["%FILE_LIST_CMD_IS_ABSOLUTE%"]==["1"] set use_raw_list=1
+        rem No idea why we need to use delayed expansion here to make it work :(
+        if ["!use_raw_list!"]==["1"] (
             echo call %FILE_LIST_CMD% ^> %TAGS_FILE%.files >> %LOG_FILE%
             call %FILE_LIST_CMD% > %TAGS_FILE%.files
         ) else (
@@ -113,6 +133,16 @@ call "%CTAGS_EXE%" -f "%TAGS_FILE%.temp" %CTAGS_ARGS% >> %LOG_FILE% 2>&1
 if ERRORLEVEL 1 (
     echo ERROR: Ctags executable returned non-zero code. >> %LOG_FILE%
     goto :Unlock
+)
+
+if not ["%POST_PROCESS_CMD%"]==[""] (
+    echo Running post process >> %LOG_FILE%
+    echo call %POST_PROCESS_CMD% %TAGS_FILE%.temp >> %LOG_FILE%
+    call %POST_PROCESS_CMD% %TAGS_FILE%.temp >> %LOG_FILE% 2>&1
+    if ERRORLEVEL 1 (
+        echo ERROR: Post process returned non-zero code. >> %LOG_FILE%
+        goto :Unlock
+    )
 )
 
 echo Replacing tags file >> %LOG_FILE%
@@ -150,6 +180,8 @@ echo    -e [exe=ctags]: The ctags executable to run
 echo    -t [file=tags]: The path to the ctags file to update
 echo    -p [dir=]:      The path to the project root
 echo    -L [cmd=]:      The file list command to run
+echo    -A:             Specifies that the file list command returns
+echo                    absolute paths
 echo    -s [file=]:     The path to the source file that needs updating
 echo    -l [log=]:      The log file to output to
 echo    -o [options=]:  An options file to read additional options from

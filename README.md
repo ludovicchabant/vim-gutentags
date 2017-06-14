@@ -6,6 +6,7 @@ files in Vim. It will (re)generate tag files as you work while staying
 completely out of your way. It will even do its best to keep those tag files
 out of your way too. It has no dependencies and just works.
 
+
 ## How?
 
 Install Gutentags like any other Vim plugin. I recommend something like
@@ -13,6 +14,10 @@ Install Gutentags like any other Vim plugin. I recommend something like
 
     cd ~/.vim/bundle
     hg clone https://bitbucket.org/ludovicchabant/vim-gutentags
+
+If you're more into Git than Mercurial:
+
+    git clone https://github.com/ludovicchabant/vim-gutentags.git
 
 Then you only need to do a `:call pathogen#helptags()` to generate the
 documentation tags (how ironic, eh?) and you can access Gutentags' help pages
@@ -38,7 +43,7 @@ removes the tags for the current file first, to make sure the tag file is
 always consistent with the source code.
 
 Also, Gutentags is clever enough to not stumble upon itself by triggering
-multiple ctags processes if you save files to fast, or your project is really
+multiple ctags processes if you save files too fast, or your project is really
 big.
 
 
@@ -49,11 +54,11 @@ There are some similar Vim plugins out there ("vim-tags", "vim-autotag",
 I set for myself with Gutentags:
 
 * No other dependency than running Vim: no Python, Ruby, or whatever.
-* Cross-platform: should work on at least Mac and Windows.
+* Cross-platform: should work on at least Ubuntu, Mac, and Windows.
 * Incremental tags generation: don't re-generate the whole project all the time.
   This may be fine for small projects, but it doesn't scale.
 * External process management: if the ctags process is taking a long time, don't
-  run another one because I saved the file again.
+  run another one because I saved a file again.
 * Keep the tag file consistent: don't just append the current file's tags to the
   tag file, otherwise you will still "see" tags for deleted or renamed classes
   and functions.

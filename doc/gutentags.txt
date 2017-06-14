@@ -1,26 +1,26 @@
 *gutentags.txt*  Automatic ctags management for VIM
-      ___           ___                         ___           ___     
-     /\__\         /\  \                       /\__\         /\  \    
-    /:/ _/_        \:\  \         ___         /:/ _/_        \:\  \   
-   /:/ /\  \        \:\  \       /\__\       /:/ /\__\        \:\  \  
-  /:/ /::\  \   ___  \:\  \     /:/  /      /:/ /:/ _/_   _____\:\  \ 
- /:/__\/\:\__\ /\  \  \:\__\   /:/__/      /:/_/:/ /\__\ /::::::::\__\
- \:\  \ /:/  / \:\  \ /:/  /  /::\  \      \:\/:/ /:/  / \:\~~\~~\/__/
-  \:\  /:/  /   \:\  /:/  /  /:/\:\  \      \::/_/:/  /   \:\  \      
-   \:\/:/  /     \:\/:/  /   \/__\:\  \      \:\/:/  /     \:\  \     
-    \::/  /       \::/  /         \:\__\      \::/  /       \:\__\    
-     \/__/         \/__/           \/__/       \/__/         \/__/    
-                    ___           ___           ___     
-                   /\  \         /\__\         /\__\    
-      ___         /::\  \       /:/ _/_       /:/ _/_   
-     /\__\       /:/\:\  \     /:/ /\  \     /:/ /\  \  
-    /:/  /      /:/ /::\  \   /:/ /::\  \   /:/ /::\  \ 
-   /:/__/      /:/_/:/\:\__\ /:/__\/\:\__\ /:/_/:/\:\__\
-  /::\  \      \:\/:/  \/__/ \:\  \ /:/  / \:\/:/ /:/  /
- /:/\:\  \      \::/__/       \:\  /:/  /   \::/ /:/  / 
- \/__\:\  \      \:\  \        \:\/:/  /     \/_/:/  /  
-      \:\__\      \:\__\        \::/  /        /:/  /   
-       \/__/       \/__/         \/__/         \/__/    
+      ___           ___           ___           ___           ___     
+     /\__\         /\  \         /\__\         /\__\         /\  \    
+    /:/ _/_        \:\  \       /:/  /        /:/ _/_        \:\  \   
+   /:/ /\  \        \:\  \     /:/__/        /:/ /\__\        \:\  \  
+  /:/ /::\  \   ___  \:\  \   /::\  \       /:/ /:/ _/_   _____\:\  \ 
+ /:/__\/\:\__\ /\  \  \:\__\ /:/\:\  \     /:/_/:/ /\__\ /::::::::\__\
+ \:\  \ /:/  / \:\  \ /:/  / \/__\:\  \    \:\/:/ /:/  / \:\~~\~~\/__/
+  \:\  /:/  /   \:\  /:/  /       \:\__\    \::/_/:/  /   \:\  \      
+   \:\/:/  /     \:\/:/  /         \/__/     \:\/:/  /     \:\  \     
+    \::/  /       \::/  /                     \::/  /       \:\__\    
+     \/__/         \/__/                       \/__/         \/__/    
+        ___           ___           ___           ___     
+       /\__\         /\  \         /\__\         /\__\    
+      /:/  /        /::\  \       /:/ _/_       /:/ _/_   
+     /:/__/        /:/\:\  \     /:/ /\  \     /:/ /\  \  
+    /::\  \       /:/ /::\  \   /:/ /::\  \   /:/ /::\  \ 
+   /:/\:\  \     /:/_/:/\:\__\ /:/__\/\:\__\ /:/_/:/\:\__\
+   \/__\:\  \    \:\/:/  \/__/ \:\  \ /:/  / \:\/:/ /:/  /
+        \:\__\    \::/__/       \:\  /:/  /   \::/ /:/  / 
+         \/__/     \:\  \        \:\/:/  /     \/_/:/  /  
+                    \:\__\        \::/  /        /:/  /   
+                     \/__/         \/__/         \/__/    
 
 
                 GUTENTAGS REFERENCE MANUAL
@@ -117,10 +117,10 @@ match one of the items in |gutentags_project_root|, create a file named
 "`.notags`" at the root of the project.
 
 The tag file that Gutentags creates and manages will be named after
-|gutentags_tagfile|, relative to the project's root directory. When Gutentags
-finds a valid project root, it will prepend the tag file's path to 'tags',
-unless |gutentags_auto_set_tags| is set to 0. This is to make sure Vim will use
-that file first.
+|gutentags_ctags_tagfile|, relative to the project's root directory. When
+Gutentags finds a valid project root, it will prepend the tag file's path to
+'tags', unless |gutentags_ctags_auto_set_tags| is set to 0. This is to make
+sure Vim will use that file first.
 
 If a file managed by Gutentags is opened and no tag file already exists,
 Gutentags will start generating it right away in the background, unless 
@@ -254,8 +254,8 @@ g:gutentags_ctags_executable_{type}
                          let g:gutentags_ctags_executable_ruby = 'foobar'
 <
 
-                                                *gutentags_tagfile*
-g:gutentags_tagfile
+                                                *gutentags_ctags_tagfile*
+g:gutentags_ctags_tagfile
                         Specifies the name of the tag file to create. This
                         will be appended to the project's root. See
                         |gutentags_project_root| for how Gutentags locates the
@@ -270,8 +270,8 @@ g:gutentags_project_root
                         in the current file's directory and its parent
                         directories. If it finds any of those markers,
                         Gutentags will be enabled for the project, and a tags
-                        file named after |gutentags_tagfile| will be created at
-                        the project root.
+                        file named after |gutentags_ctags_tagfile| will be 
+                        created at the project root.
                         Defaults to `[]` (an empty |List|).
                         A list of default markers will be appended to the
                         user-defined ones unless
@@ -314,17 +314,25 @@ g:gutentags_project_root_finder
                         Note: when set, the called implementation will most 
                         likely ignore |g:gutentags_project_root|.
 
-                                                *gutentags_exclude*
-g:gutentags_exclude
+                                                *gutentags_ctags_exclude*
+g:gutentags_ctags_exclude
                         A list of file patterns to pass to the
                         |gutentags_ctags_executable| so that they will be
                         excluded from parsing for the tags generation.
-                        Defaults to `[]` (an empty |List|).  Patterns defined
-                        in 'wildignore' will also be given as exclude patterns
-                        to the `ctags` executable.
+                        See also |gutentags_ctags_exclude_wildignore|.
+                        Defaults to `[]` (an empty |List|).
 
-                                                *gutentags_auto_set_tags*
-g:gutentags_auto_set_tags
+                                                *gutentags_ctags_exclude_wildignore*
+g:gutentags_ctags_exclude_wildignore
+                        When 1, Gutentags will automatically pass your
+                        'wildignore' file patterns to the 
+                        |gutentags_ctags_executable| so that they are ignored.
+                        Set also |gutentags_ctags_exclude| to pass custom
+                        patterns.
+                        Defaults to 1.
+
+                                                *gutentags_ctags_auto_set_tags*
+g:gutentags_ctags_auto_set_tags
                         If set to 1, Gutentags will automatically prepend
                         'tags' with the exact path to the tag file for the
                         current project. See |gutentags_project_root| for how
@@ -373,6 +381,16 @@ g:gutentags_generate_on_write
                         |GutentagsUpdate| manually.
                         Defaults to 1.
 
+                                            *gutentags_generate_on_empty_buffer*
+g:gutentags_generate_on_empty_buffer
+                        If set to 1, Gutentags will start generating the tag
+                        file even if there's no buffer currently open, as long
+                        as the current working directory (as returned by
+                        |:cd|) is inside a known project.
+                        This is useful if you want Gutentags to generate the
+                        tag file right after opening Vim.
+                        Defaults to 0.
+
                                                 *gutentags_background_update*
 g:gutentags_background_update
                         Specifies whether the process that updates the tags
@@ -410,7 +428,7 @@ g:gutentags_init_user_func
                         You can use this to manually set buffer-local
                         settings:
                         
-                        * `b:gutentags_tagfile` (see |gutentags_tagfile|).
+                        * `b:gutentags_ctags_tagfile` (see |gutentags_ctags_tagfile|).
 
                         This setting was previously called 
                         `gutentags_enabled_user_func`. The old setting is

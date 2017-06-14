@@ -8,7 +8,9 @@ CTAGS_ARGS=
 TAGS_FILE=tags
 PROJECT_ROOT=
 FILE_LIST_CMD=
+FILE_LIST_CMD_IS_ABSOLUTE=0
 UPDATED_SOURCE=
+POST_PROCESS_CMD=
 PAUSE_BEFORE_EXIT=0
 
 
@@ -20,15 +22,19 @@ ShowUsage() {
     echo "    -t [file=tags]: The path to the ctags file to update"
     echo "    -p [dir=]:      The path to the project root"
     echo "    -L [cmd=]:      The file list command to run"
+    echo "    -A:             Specifies that the file list command returns "
+    echo "                    absolute paths"
     echo "    -s [file=]:     The path to the source file that needs updating"
     echo "    -x [pattern=]:  A pattern of files to exclude"
     echo "    -o [options=]:  An options file to read additional options from"
+    echo "    -O [params=]:   Parameters to pass to ctags"
+    echo "    -P [cmd=]:      Post process command to run on the tags file"
     echo "    -c:             Ask for confirmation before exiting"
     echo ""
 }
 
 
-while getopts "h?e:x:t:p:L:s:o:c" opt; do
+while getopts "h?e:x:t:p:L:s:o:O:P:cA" opt; do
     case $opt in
         h|\?)
             ShowUsage
@@ -49,6 +55,9 @@ while getopts "h?e:x:t:p:L:s:o:c" opt; do
         L)
             FILE_LIST_CMD=$OPTARG
             ;;
+        A)
+            FILE_LIST_CMD_IS_ABSOLUTE=1
+            ;;
         s)
             UPDATED_SOURCE=$OPTARG
             ;;
@@ -57,6 +66,12 @@ while getopts "h?e:x:t:p:L:s:o:c" opt; do
             ;;
         o)
             CTAGS_ARGS="$CTAGS_ARGS --options=$OPTARG"
+            ;;
+        O)
+            CTAGS_ARGS="$CTAGS_ARGS $OPTARG"
+            ;;
+        P)
+            POST_PROCESS_CMD=$OPTARG
             ;;
     esac
 done
@@ -88,11 +103,11 @@ fi
 
 if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
     if [ -n "${FILE_LIST_CMD}" ]; then
-        if [ "${PROJECT_ROOT}" = "." ]; then
-            $FILE_LIST_CMD > "${TAGS_FILE}.files"
+        if [ "${PROJECT_ROOT}" = "." ] || [ $FILE_LIST_CMD_IS_ABSOLUTE -eq 1 ]; then
+            eval $FILE_LIST_CMD > "${TAGS_FILE}.files"
         else
             # If using a tags cache directory, use absolute paths
-            $FILE_LIST_CMD | while read -r l; do
+            eval $FILE_LIST_CMD | while read -r l; do
                 echo "${PROJECT_ROOT%/}/${l}"
             done > "${TAGS_FILE}.files"
         fi
@@ -105,6 +120,12 @@ else
     echo "Running ctags on \"$UPDATED_SOURCE\""
     echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS --append \"$UPDATED_SOURCE\""
     $CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS --append "$UPDATED_SOURCE"
+fi
+
+if [ "$POST_PROCESS_CMD" != "" ]; then
+    echo "Running post process"
+    echo "$POST_PROCESS_CMD \"$TAGS_FILE.temp\""
+    $POST_PROCESS_CMD "$TAGS_FILE.temp"
 fi
 
 echo "Replacing tags file"

@@ -2,6 +2,15 @@
 
 " Utilities {{{
 
+function! gutentags#chdir(path)
+  if has('nvim')
+    let chdir = haslocaldir() ? 'lcd' : haslocaldir(-1, 0) ? 'tcd' : 'cd'
+  else
+    let chdir = haslocaldir() ? 'lcd' : 'cd'
+  endif
+  execute chdir a:path
+endfunction
+
 " Throw an exception message.
 function! gutentags#throw(message)
     throw "gutentags: " . a:message
@@ -56,6 +65,18 @@ function! gutentags#get_res_file(filename) abort
     return g:gutentags_res_dir . a:filename
 endfunction
 
+" Returns whether a path is rooted.
+if has('win32') || has('win64')
+function! gutentags#is_path_rooted(path) abort
+  return len(a:path) >= 2 && (
+        \a:path[0] == '/' || a:path[0] == '\' || a:path[1] == ':')
+endfunction
+else
+function! gutentags#is_path_rooted(path) abort
+  return !empty(a:path) && a:path[0] == '/'
+endfunction
+endif
+
 " }}}
 
 " Gutentags Setup {{{
@@ -97,11 +118,12 @@ function! gutentags#get_project_file_list_cmd(path) abort
         let l:markers = get(g:gutentags_file_list_command, 'markers', [])
         if type(l:markers) == type({})
             for [marker, file_list_cmd] in items(l:markers)
-                if getftype(a:path . '/' . marker) != ""
+                if !empty(globpath(a:path, marker, 1))
                     return gutentags#validate_cmd(file_list_cmd)
                 endif
             endfor
         endif
+        return get(g:gutentags_file_list_command, 'default', "")
     endif
     return ""
 endfunction
@@ -131,7 +153,7 @@ function! gutentags#get_project_root(path) abort
     endif
     while l:path != l:previous_path && l:project_root_depth > 0
         for root in l:markers
-            if getftype(l:path . '/' . root) != ""
+            if !empty(globpath(l:path, root, 1))
                 let l:proj_dir = simplify(fnamemodify(l:path, ':p'))
                 let l:proj_dir = gutentags#stripslash(l:proj_dir)
                 if l:proj_dir == ''
@@ -168,6 +190,9 @@ endfunction
 
 " Generate a path for a given filename in the cache directory.
 function! gutentags#get_cachefile(root_dir, filename) abort
+    if gutentags#is_path_rooted(a:filename)
+        return a:filename
+    endif
     let l:tag_path = gutentags#stripslash(a:root_dir) . '/' . a:filename
     if g:gutentags_cache_dir != ""
         " Put the tag file in the cache dir instead of inside the
@@ -190,7 +215,10 @@ function! gutentags#setup_gutentags() abort
     " Don't setup gutentags for anything that's not a normal buffer
     " (so don't do anything for help buffers and quickfix windows and
     "  other such things)
-    if &buftype != ''
+    " Also don't do anything for the default `[No Name]` buffer you get
+    " after starting Vim.
+    if &buftype != '' || 
+          \(bufname('%') == '' && !g:gutentags_generate_on_empty_buffer)
         return
     endif
 
@@ -375,7 +403,7 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
     " it possible to get the relative path of the filename to parse if we're
     " doing an incremental update.
     let l:prev_cwd = getcwd()
-    execute "chdir " . fnameescape(l:proj_dir)
+    call gutentags#chdir(fnameescape(l:proj_dir))
     try
         call call("gutentags#".a:module."#generate",
                     \[l:proj_dir, l:tags_file, a:write_mode])
@@ -384,7 +412,7 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
         echom v:exception
     finally
         " Restore the current directory...
-        execute "chdir " . fnameescape(l:prev_cwd)
+        call gutentags#chdir(fnameescape(l:prev_cwd))
     endtry
 endfunction
 
