@@ -75,7 +75,7 @@ following arguments:
 * `--exclude` (to exclude file patterns)
 * `--options` (to specify an options file)
 
-This means you probably want Exhuberant Ctags or Universal Ctags. The basic
+This means you probably want Exuberant Ctags or Universal Ctags. The basic
 old BSD Ctags WON'T WORK. Other language-specific versions may or may not
 work. Check with their help or man page.
 
@@ -499,7 +499,7 @@ g:gutentags_file_list_command
                         as a mapping of project root markers to the desired
                         file list command for that root marker. (See
                         |gutentags_project_root| for how Gutentags uses root
-                        markerts to locate the project.) For example: >
+                        markers to locate the project.) For example: >
 
                          let g:gutentags_file_list_command = {
                              \ 'markers': {
