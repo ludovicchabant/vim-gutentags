@@ -34,7 +34,7 @@ function! gutentags#cscope#init(project_root) abort
     if g:gutentags_auto_add_cscope && filereadable(l:dbfile_path)
         if index(s:added_dbs, l:dbfile_path) < 0
             call add(s:added_dbs, l:dbfile_path)
-            execute 'cs add ' . fnameescape(l:dbfile_path)
+            silent! execute 'cs add ' . fnameescape(l:dbfile_path)
         endif
     endif
 endfunction
@@ -43,7 +43,7 @@ function! gutentags#cscope#command_terminated(job_id, data, event) abort
     if a:data == 0
         if index(s:added_dbs, self.db_file) < 0
             call add(s:added_dbs, self.db_file)
-            execute 'cs add ' . fnameescape(s:db_file)
+            silent! execute 'cs add ' . fnameescape(s:db_file)
         else
             execute 'cs reset'
         endif
