@@ -9,6 +9,7 @@ set CSCOPE_EXE=cscope
 set CSCOPE_ARGS=
 set DB_FILE=cscope.out
 set FILE_LIST_CMD=
+set LOG_FILE=
 
 :ParseArgs
 if [%1]==[] goto :DoneParseArgs
@@ -32,6 +33,11 @@ if [%1]==[-L] (
     shift
     goto :LoopParseArgs
 )
+if [%1]==[-l] (
+    set LOG_FILE=%~2
+    shift
+    goto :LoopParseArgs
+)
 echo Invalid Argument: %1
 goto :Usage
 
@@ -46,10 +52,12 @@ rem ==========================================
 rem             GENERATE DATABASE
 rem ==========================================
 
-echo Locking db file
+if [%LOG_FILE%]==[] set LOG_FILE=CON
+
+echo Locking db file > %LOG_FILE%
 echo locked > "%DB_FILE%.lock"
 
-echo Running cscope
+echo Running cscope >> %LOG_FILE%
 if NOT ["%FILE_LIST_CMD%"]==[""] (
     if ["%PROJECT_ROOT%"]==["."] (
         call %FILE_LIST_CMD% > %DB_FILE%.files
@@ -64,16 +72,16 @@ if NOT ["%FILE_LIST_CMD%"]==[""] (
 )
 "%CSCOPE_EXE%" %CSCOPE_ARGS% -b -k -f "%DB_FILE%"
 if ERRORLEVEL 1 (
-    echo ERROR: Cscope executable returned non-zero code.
+    echo ERROR: Cscope executable returned non-zero code. >> %LOG_FILE%
 )
 
-echo Unlocking db file
+echo Unlocking db file >> %LOG_FILE%
 del /F "%DB_FILE%.files" "%DB_FILE%.lock"
 if ERRORLEVEL 1 (
-    echo ERROR: Unable to remove file lock.
+    echo ERROR: Unable to remove file lock. >> %LOG_FILE%
 )
 
-echo Done.
+echo Done. >> %LOG_FILE%
 
 goto :EOF
 
@@ -90,5 +98,6 @@ echo    -e [exe=cscope]:     The cscope executable to run
 echo    -f [file=scope.out]: The path to the database file to create
 echo    -p [dir=]:           The path to the project root
 echo    -L [cmd=]:           The file list command to run
+echo    -l [log=]:           The log file to output to
 echo.
 

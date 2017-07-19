@@ -24,6 +24,7 @@ endif
 " Gutentags Module Interface {{{
 
 let s:runner_exe = gutentags#get_plat_file('update_scopedb')
+let s:unix_redir = (&shellredir =~# '%s') ? &shellredir : &shellredir . ' %s'
 let s:added_dbs = []
 
 function! gutentags#cscope#init(project_root) abort
@@ -59,6 +60,17 @@ function! gutentags#cscope#generate(proj_dir, tags_file, write_mode) abort
         \ gutentags#get_project_file_list_cmd(a:proj_dir)
     if !empty(l:file_list_cmd)
         let l:cmd .= ' -L "' . l:file_list_cmd . '"'
+    endif
+    if g:gutentags_trace
+        if has('win32')
+            let l:cmd .= ' -l "' . a:tags_file . '.log"'
+        else
+            let l:cmd .= ' ' . printf(s:unix_redir, '"' . a:tags_file . '.log"')
+        endif
+    else
+        if !has('win32')
+            let l:cmd .= ' ' . printf(s:unix_redir, '/dev/null')
+        endif
     endif
     let l:cmd .= ' '
     let l:cmd .= gutentags#get_execute_cmd_suffix()
