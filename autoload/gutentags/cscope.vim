@@ -56,7 +56,7 @@ function! gutentags#cscope#generate(proj_dir, tags_file, write_mode) abort
     let l:cmd .= ' -p ' . a:proj_dir
     let l:cmd .= ' -f ' . a:tags_file
     let l:file_list_cmd =
-        \ gutentags#get_project_file_list_cmd(l:proj_dir)
+        \ gutentags#get_project_file_list_cmd(a:proj_dir)
     if !empty(l:file_list_cmd)
         let l:cmd .= ' -L "' . l:file_list_cmd . '"'
     endif
