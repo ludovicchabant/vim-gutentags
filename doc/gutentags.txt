@@ -186,6 +186,14 @@ Some debugging/troubleshooting commands are also available if the
                         with your system. Please file a bug.
 
 
+Gutentags also has some user auto-commands (see |User| and |:doautocmd|):
+
+                                                *GutentagsUpdated*
+GutentagsUpdated
+                        This auto-command is triggered when a background
+                        update job has been started.
+
+
 =============================================================================
 3.  Status Line                                 *gutentags-status-line*
 
