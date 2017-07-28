@@ -67,11 +67,6 @@ function! gutentags#ctags#init(project_root) abort
 endfunction
 
 function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
-    " Get to the tags file directory because ctags is finicky about
-    " these things.
-    let l:prev_cwd = getcwd()
-    call gutentags#chdir(fnameescape(a:proj_dir))
-
     let l:tags_file_exists = filereadable(a:tags_file)
     let l:tags_file_relative = fnamemodify(a:tags_file, ':.')
     let l:tags_file_is_local = len(l:tags_file_relative) < len(a:tags_file)
@@ -94,10 +89,10 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         " Note that if we don't do this and pass a full path for the project
         " root, some `ctags` implementations like Exhuberant Ctags can get
         " confused if the paths have spaces -- but not if you're *in* the root 
-        " directory, for some reason...
+        " directory, for some reason... (which we are, our caller in
+        " `autoload/gutentags.vim` changed it).
         let l:actual_proj_dir = '.'
         let l:actual_tags_file = l:tags_file_relative
-        call gutentags#chdir(fnameescape(a:proj_dir))
     else
         " else: the tags file goes in a cache directory, so we need to specify
         " all the paths absolutely for `ctags` to do its job correctly.
@@ -105,96 +100,91 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         let l:actual_tags_file = a:tags_file
     endif
 
-    try
-        " Build the command line.
-        let l:cmd = gutentags#get_execute_cmd() . s:runner_exe
-        let l:cmd .= ' -e "' . s:get_ctags_executable(a:proj_dir) . '"'
-        let l:cmd .= ' -t "' . l:actual_tags_file . '"'
-        let l:cmd .= ' -p "' . l:actual_proj_dir . '"'
-        if a:write_mode == 0 && l:tags_file_exists
-            let l:cur_file_path = expand('%:p')
-            if empty(g:gutentags_cache_dir) && l:tags_file_is_local
-                let l:cur_file_path = fnamemodify(l:cur_file_path, ':.')
-            endif
-            let l:cmd .= ' -s "' . l:cur_file_path . '"'
-        else
-            let l:file_list_cmd = gutentags#get_project_file_list_cmd(l:actual_proj_dir)
-            if !empty(l:file_list_cmd)
-                if match(l:file_list_cmd, '///') > 0
-                    let l:suffopts = split(l:file_list_cmd, '///')
-                    let l:suffoptstr = l:suffopts[1]
-                    let l:file_list_cmd = l:suffopts[0]
-                    if l:suffoptstr == 'absolute'
-                        let l:cmd .= ' -A'
-                    endif
+    " Build the command line.
+    let l:cmd = gutentags#get_execute_cmd() . s:runner_exe
+    let l:cmd .= ' -e "' . s:get_ctags_executable(a:proj_dir) . '"'
+    let l:cmd .= ' -t "' . l:actual_tags_file . '"'
+    let l:cmd .= ' -p "' . l:actual_proj_dir . '"'
+    if a:write_mode == 0 && l:tags_file_exists
+        let l:cur_file_path = expand('%:p')
+        if empty(g:gutentags_cache_dir) && l:tags_file_is_local
+            let l:cur_file_path = fnamemodify(l:cur_file_path, ':.')
+        endif
+        let l:cmd .= ' -s "' . l:cur_file_path . '"'
+    else
+        let l:file_list_cmd = gutentags#get_project_file_list_cmd(l:actual_proj_dir)
+        if !empty(l:file_list_cmd)
+            if match(l:file_list_cmd, '///') > 0
+                let l:suffopts = split(l:file_list_cmd, '///')
+                let l:suffoptstr = l:suffopts[1]
+                let l:file_list_cmd = l:suffopts[0]
+                if l:suffoptstr == 'absolute'
+                    let l:cmd .= ' -A'
                 endif
-                let l:cmd .= ' -L ' . '"' . l:file_list_cmd. '"'
             endif
+            let l:cmd .= ' -L ' . '"' . l:file_list_cmd. '"'
         endif
-        if empty(get(l:, 'file_list_cmd', ''))
-            " Pass the Gutentags recursive options file before the project
-            " options file, so that users can override --recursive.
-            " Omit --recursive if this project uses a file list command.
-            let l:cmd .= ' -o "' . gutentags#get_res_file('ctags_recursive.options') . '"'
-        endif
-        if !empty(g:gutentags_ctags_extra_args)
-            let l:cmd .= ' -O '.shellescape(join(g:gutentags_ctags_extra_args))
-        endif
-        if !empty(g:gutentags_ctags_post_process_cmd)
-            let l:cmd .= ' -P '.shellescape(g:gutentags_ctags_post_process_cmd)
-        endif
-        let l:proj_options_file = a:proj_dir . '/' .
-                    \g:gutentags_ctags_options_file
-        if filereadable(l:proj_options_file)
-            let l:proj_options_file = s:process_options_file(
-                        \a:proj_dir, l:proj_options_file)
-            let l:cmd .= ' -o "' . l:proj_options_file . '"'
-        endif
-        if g:gutentags_ctags_exclude_wildignore
-            for ign in split(&wildignore, ',')
-                let l:cmd .= ' -x ' . shellescape(ign, 1)
-            endfor
-        endif
-        for exc in g:gutentags_ctags_exclude
-            let l:cmd .= ' -x ' . '"' . exc . '"'
+    endif
+    if empty(get(l:, 'file_list_cmd', ''))
+        " Pass the Gutentags recursive options file before the project
+        " options file, so that users can override --recursive.
+        " Omit --recursive if this project uses a file list command.
+        let l:cmd .= ' -o "' . gutentags#get_res_file('ctags_recursive.options') . '"'
+    endif
+    if !empty(g:gutentags_ctags_extra_args)
+        let l:cmd .= ' -O '.shellescape(join(g:gutentags_ctags_extra_args))
+    endif
+    if !empty(g:gutentags_ctags_post_process_cmd)
+        let l:cmd .= ' -P '.shellescape(g:gutentags_ctags_post_process_cmd)
+    endif
+    let l:proj_options_file = a:proj_dir . '/' .
+                \g:gutentags_ctags_options_file
+    if filereadable(l:proj_options_file)
+        let l:proj_options_file = s:process_options_file(
+                    \a:proj_dir, l:proj_options_file)
+        let l:cmd .= ' -o "' . l:proj_options_file . '"'
+    endif
+    if g:gutentags_ctags_exclude_wildignore
+        for ign in split(&wildignore, ',')
+            let l:cmd .= ' -x ' . shellescape(ign, 1)
         endfor
-        if g:gutentags_pause_after_update
-            let l:cmd .= ' -c'
-        endif
-        if g:gutentags_trace
-            if has('win32')
-                let l:cmd .= ' -l "' . l:actual_tags_file . '.log"'
-            else
-                let l:cmd .= ' ' . printf(s:unix_redir, '"' . l:actual_tags_file . '.log"')
-            endif
+    endif
+    for exc in g:gutentags_ctags_exclude
+        let l:cmd .= ' -x ' . '"' . exc . '"'
+    endfor
+    if g:gutentags_pause_after_update
+        let l:cmd .= ' -c'
+    endif
+    if g:gutentags_trace
+        if has('win32')
+            let l:cmd .= ' -l "' . l:actual_tags_file . '.log"'
         else
-            if !has('win32')
-                let l:cmd .= ' ' . printf(s:unix_redir, '/dev/null')
-            endif
+            let l:cmd .= ' ' . printf(s:unix_redir, '"' . l:actual_tags_file . '.log"')
         endif
-        let l:cmd .= gutentags#get_execute_cmd_suffix()
+    else
+        if !has('win32')
+            let l:cmd .= ' ' . printf(s:unix_redir, '/dev/null')
+        endif
+    endif
+    let l:cmd .= gutentags#get_execute_cmd_suffix()
 
-        call gutentags#trace("Running: " . l:cmd)
-        call gutentags#trace("In:      " . getcwd())
-        if !g:gutentags_fake
-            " Run the background process.
-            if !g:gutentags_trace
-                silent execute l:cmd
-            else
-                execute l:cmd
-            endif
-
-            " Flag this tags file as being in progress
-            let l:full_tags_file = fnamemodify(a:tags_file, ':p')
-            call gutentags#add_progress('ctags', l:full_tags_file)
+    call gutentags#trace("Running: " . l:cmd)
+    call gutentags#trace("In:      " . getcwd())
+    if !g:gutentags_fake
+        " Run the background process.
+        if !g:gutentags_trace
+            silent execute l:cmd
         else
-            call gutentags#trace("(fake... not actually running)")
+            execute l:cmd
         endif
-        call gutentags#trace("")
-    finally
-        " Restore the previous working directory.
-        call gutentags#chdir(fnameescape(l:prev_cwd))
-    endtry
+
+        " Flag this tags file as being in progress
+        let l:full_tags_file = fnamemodify(a:tags_file, ':p')
+        call gutentags#add_progress('ctags', l:full_tags_file)
+    else
+        call gutentags#trace("(fake... not actually running)")
+    endif
+    call gutentags#trace("")
 endfunction
 
 " }}}

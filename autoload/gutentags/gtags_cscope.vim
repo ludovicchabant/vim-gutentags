@@ -52,9 +52,9 @@ endfunction
 function! gutentags#gtags_cscope#init(project_root) abort
 	let l:db_path = gutentags#get_cachefile(
 				\ a:project_root, g:gutentags_gtags_dbpath )
-    let l:db_path = gutentags#stripslash(l:db_path)
-    let l:db_file = l:db_path . '/GTAGS'
-    let l:db_file = gutentags#normalizepath(l:db_file)
+	let l:db_path = gutentags#stripslash(l:db_path)
+	let l:db_file = l:db_path . '/GTAGS'
+	let l:db_file = gutentags#normalizepath(l:db_file)
 
 	if !isdirectory(l:db_path)
 		call mkdir(l:db_path, 'p')
@@ -149,48 +149,40 @@ function! gutentags#gtags_cscope#generate(proj_dir, db_file, write_mode) abort
 	endif
 
 	let l:use_jobs = has('job')
+	if has('win32')
+		let l:cmd = s:get_win32_cmd(l:use_jobs, l:proj_options, l:db_path)
+	else
+		let l:cmd = s:get_unix_cmd(l:use_jobs, l:proj_options, l:db_path)
+	endif
 
-	let l:prev_cwd = getcwd()
-	call gutentags#chdir(fnameescape(a:proj_dir))
-	try
-		if has('win32')
-			let l:cmd = s:get_win32_cmd(l:use_jobs, l:proj_options, l:db_path)
+	call gutentags#trace("Running: " . string(l:cmd))
+	call gutentags#trace("In:      " . getcwd())
+	if !g:gutentags_fake
+		if l:use_jobs
+			let l:job_opts = {
+						\'exit_cb': 'gutentags#gtags_cscope#on_job_exit',
+						\'out_cb': 'gutentags#gtags_cscope#on_job_out',
+						\'err_cb': 'gutentags#gtags_cscope#on_job_out'
+						\}
+			let l:job = job_start(l:cmd, job_opts)
+			call add(s:job_db_files, [l:job, a:db_file])
 		else
-			let l:cmd = s:get_unix_cmd(l:use_jobs, l:proj_options, l:db_path)
-		endif
-
-		call gutentags#trace("Running: " . string(l:cmd))
-		call gutentags#trace("In:      " . getcwd())
-		if !g:gutentags_fake
-			if l:use_jobs
-				let l:job_opts = {
-							\'exit_cb': 'gutentags#gtags_cscope#on_job_exit',
-							\'out_cb': 'gutentags#gtags_cscope#on_job_out',
-							\'err_cb': 'gutentags#gtags_cscope#on_job_out'
-							\}
-				let l:job = job_start(l:cmd, job_opts)
-				call add(s:job_db_files, [l:job, a:db_file])
+			if !g:gutentags_trace
+				silent execute l:cmd
 			else
-				if !g:gutentags_trace
-					silent execute l:cmd
-				else
-					execute l:cmd
-				endif
-				if g:gutentags_auto_add_gtags_cscope
-					call s:add_db(a:db_file)
-				endif
+				execute l:cmd
 			endif
-
-			let l:full_gtags_file = fnamemodify(l:db_path, ':p')
-			call gutentags#add_progress('gtags_cscope', a:db_file)
-		else
-			call gutentags#trace("(fake... not actually running)")
+			if g:gutentags_auto_add_gtags_cscope
+				call s:add_db(a:db_file)
+			endif
 		endif
-		call gutentags#trace("")
-    finally
-        " Restore the previous working directory.
-        call gutentags#chdir(fnameescape(l:prev_cwd))
-    endtry
+
+		let l:full_gtags_file = fnamemodify(l:db_path, ':p')
+		call gutentags#add_progress('gtags_cscope', a:db_file)
+	else
+		call gutentags#trace("(fake... not actually running)")
+	endif
+	call gutentags#trace("")
 endfunction
 
 " }}}
