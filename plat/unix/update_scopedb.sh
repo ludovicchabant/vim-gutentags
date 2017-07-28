@@ -69,10 +69,10 @@ if [ -n "${FILE_LIST_CMD}" ]; then
             echo "${PROJECT_ROOT%/}/${l}"
         done > "${DB_FILE}.files"
     fi
-    CSCOPE_ARGS="${CSCOPE_ARGS} -i ${DB_FILE}.files"
 else
-    CSCOPE_ARGS="${CSCOPE_ARGS} -R"
+    find . -type f > "${DB_FILE}.files"
 fi
+CSCOPE_ARGS="${CSCOPE_ARGS} -i ${DB_FILE}.files"
 
 echo "Running cscope"
 echo "$CSCOPE_EXE $CSCOPE_ARGS -b -k -f \"$DB_FILE.temp\""
