@@ -177,8 +177,7 @@ function! gutentags#gtags_cscope#generate(proj_dir, db_file, write_mode) abort
 			endif
 		endif
 
-		let l:full_gtags_file = fnamemodify(l:db_path, ':p')
-		call gutentags#add_progress('gtags_cscope', a:db_file)
+		call gutentags#add_progress('gtags_cscope', l:db_path)
 	else
 		call gutentags#trace("(fake... not actually running)")
 	endif

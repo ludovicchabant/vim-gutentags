@@ -311,7 +311,8 @@ endfor
 
 " Make a given file known as being currently generated or updated.
 function! gutentags#add_progress(module, file) abort
-    let s:maybe_in_progress[a:module][a:file] = localtime()
+    let l:abs_file = fnamemodify(a:file, ':p')
+    let s:maybe_in_progress[a:module][l:abs_file] = localtime()
 endfunction
 
 " Get how to execute an external command depending on debug settings.
@@ -463,8 +464,10 @@ endfunction
 
 function! gutentags#inprogress()
     echom "gutentags: generations in progress:"
-    for mip in keys(s:maybe_in_progress)
-        echom mip
+    for mod_name in keys(s:maybe_in_progress)
+        for mib in keys(s:maybe_in_progress[mod_name])
+            echom mod_name.":  ".mib
+        endfor
     endfor
     echom ""
 endfunction
@@ -505,7 +508,7 @@ function! gutentags#statusline(...) abort
         let l:progress_queue = s:maybe_in_progress[module]
         let l:timestamp = get(l:progress_queue, l:abs_tag_file)
         if l:timestamp == 0
-            return ''
+            continue
         endif
         " It's maybe generating! Check if the lock file is still there... but
         " don't do it too soon after the script was originally launched, because
@@ -514,19 +517,21 @@ function! gutentags#statusline(...) abort
         if (localtime() - l:timestamp) > 1 &&
                     \!filereadable(l:abs_tag_file . '.lock')
             call remove(l:progress_queue, l:abs_tag_file)
-            return ''
+            continue
         endif
         call add(l:modules_in_progress, module)
     endfor
+
+    if len(l:modules_in_progress) == 0
+        return ''
+    endif
 
     " It's still there! So probably `ctags` is still running...
     " (although there's a chance it crashed, or the script had a problem, and
     " the lock file has been left behind... we could try and run some
     " additional checks here to see if it's legitimately running, and
     " otherwise delete the lock file... maybe in the future...)
-    if len(g:gutentags_modules) > 1
-        let l:gen_msg .= '['.join(l:modules_in_progress, ',').']'
-    endif
+    let l:gen_msg .= '['.join(l:modules_in_progress, ',').']'
     return l:gen_msg
 endfunction
 

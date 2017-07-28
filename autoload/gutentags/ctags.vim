@@ -179,8 +179,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         endif
 
         " Flag this tags file as being in progress
-        let l:full_tags_file = fnamemodify(a:tags_file, ':p')
-        call gutentags#add_progress('ctags', l:full_tags_file)
+        call gutentags#add_progress('ctags', a:tags_file)
     else
         call gutentags#trace("(fake... not actually running)")
     endif

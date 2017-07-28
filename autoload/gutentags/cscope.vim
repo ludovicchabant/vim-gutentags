@@ -93,8 +93,7 @@ function! gutentags#cscope#generate(proj_dir, tags_file, write_mode) abort
             let job_id = jobstart(job_cmd, job_dict)
         endif
 
-        let l:full_scopedb_file = fnamemodify(a:tags_file, ':p')
-        call gutentags#add_progress('cscope', l:full_scopedb_file)
+        call gutentags#add_progress('cscope', a:tags_file)
     else
         call gutentags#trace("(fake... not actually running)")
     endif
