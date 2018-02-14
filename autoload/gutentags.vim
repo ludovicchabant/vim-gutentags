@@ -87,6 +87,9 @@ let s:known_projects = {}
 function! s:cache_project_root(path) abort
     let l:result = {}
 
+    if g:gutentags_project_info_finder != ''
+        let l:result = call(g:gutentags_project_info_finder, [a:path])
+    else
     for proj_info in g:gutentags_project_info
         let l:filematch = get(proj_info, 'file', '')
         if l:filematch != '' && filereadable(a:path . '/'. l:filematch)
@@ -100,6 +103,7 @@ function! s:cache_project_root(path) abort
             break
         endif
     endfor
+    endif
 
     let s:known_projects[a:path] = l:result
 endfunction
@@ -111,26 +115,36 @@ function! gutentags#validate_cmd(cmd) abort
     return ""
 endfunction
 
-function! gutentags#get_project_file_list_cmd(path) abort
+function! gutentags#get_project_file_list_cmd(proj_dir) abort
     if type(g:gutentags_file_list_command) == type("")
         return gutentags#validate_cmd(g:gutentags_file_list_command)
     elseif type(g:gutentags_file_list_command) == type({})
-        let l:markers = get(g:gutentags_file_list_command, 'markers', [])
+        let l:markers = get(g:gutentags_file_list_command, 'markers', {})
         if type(l:markers) == type({})
             for [marker, file_list_cmd] in items(l:markers)
-                if !empty(globpath(a:path, marker, 1))
+                if !empty(globpath(a:proj_dir, marker, 1))
                     return gutentags#validate_cmd(file_list_cmd)
                 endif
             endfor
         endif
-        return get(g:gutentags_file_list_command, 'default', "")
+        let l:types = get(g:gutentags_file_list_command, 'types', {})
+        if !empty(l:types) && type(l:types) == type({})
+            let l:proj_info = gutentags#get_project_info(a:proj_dir)
+            if l:proj_info != {}
+                let l:file_list_cmd = get(l:types, l:proj_info['type'], '')
+                if !empty(l:file_list_cmd)
+                    return gutentags#validate_cmd(l:file_list_cmd)
+                endif
+            endif
+        endif
+        return gutentags#validate_cmd(get(g:gutentags_file_list_command, 'default', ""))
     endif
     return ""
 endfunction
 
 " Finds the first directory with a project marker by walking up from the given
 " file path.
-function! gutentags#get_project_root(path) abort
+function! gutentags#get_project_root(path, throw) abort
     if g:gutentags_project_root_finder != ''
         return call(g:gutentags_project_root_finder, [a:path])
     endif
@@ -151,20 +165,28 @@ function! gutentags#get_project_root(path) abort
                 let l:proj_dir = simplify(fnamemodify(l:path, ':p'))
                 let l:proj_dir = gutentags#stripslash(l:proj_dir)
                 if l:proj_dir == ''
-                    call gutentags#trace("Found project marker '" . root .
-                                \"' at the root of your file-system! " .
-                                \" That's probably wrong, disabling " .
-                                \"gutentags for this file...",
-                                \1)
-                    call gutentags#throw("Marker found at root, aborting.")
+                    if a:throw 
+                        call gutentags#trace("Found project marker '" . root .
+                                    \"' at the root of your file-system! " .
+                                    \" That's probably wrong, disabling " .
+                                    \"gutentags for this file...",
+                                    \1)
+                        call gutentags#throw("Marker found at root, aborting.")
+                    else
+                        return ""
+                    endif
                 endif
                 for ign in g:gutentags_exclude_project_root
                     if l:proj_dir == ign
-                        call gutentags#trace(
-                                    \"Ignoring project root '" . l:proj_dir .
-                                    \"' because it is in the list of ignored" .
-                                    \" projects.")
-                        call gutentags#throw("Ignore project: " . l:proj_dir)
+                        if a:throw 
+                            call gutentags#trace(
+                                        \"Ignoring project root '" . l:proj_dir .
+                                        \"' because it is in the list of ignored" .
+                                        \" projects.")
+                            call gutentags#throw("Ignore project: " . l:proj_dir)
+                        else
+                            return ""
+                        endif
                     endif
                 endfor
                 return l:proj_dir
@@ -173,7 +195,11 @@ function! gutentags#get_project_root(path) abort
         let l:previous_path = l:path
         let l:path = fnamemodify(l:path, ':h')
     endwhile
-    call gutentags#throw("Can't figure out what tag file to use for: " . a:path)
+    if a:throw 
+        call gutentags#throw("Can't figure out what tag file to use for: " . a:path)
+    else
+        return ""
+    endif
 endfunction
 
 " Get info on the project we're inside of.
@@ -231,7 +257,7 @@ function! gutentags#setup_gutentags() abort
             let l:buf_dir = fnamemodify(resolve(expand('%:p', 1)), ':p:h')
         endif
         if !exists('b:gutentags_root')
-            let b:gutentags_root = gutentags#get_project_root(l:buf_dir)
+            let b:gutentags_root = gutentags#get_project_root(l:buf_dir, 1)
         endif
         if filereadable(b:gutentags_root . '/.notags')
             call gutentags#trace("'.notags' file found... no gutentags support.")

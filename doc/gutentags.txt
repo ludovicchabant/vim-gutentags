@@ -461,16 +461,16 @@ g:gutentags_project_info
                         Each dictionary item must contain at least a `type`
                         key, indicating the type of project:
 
-                        {"type": "python"}
+                        {'type': 'python'}
 
                         Other items will be used to figure out if a project is
                         of the given type.
 
-                        "file": any existing file with this path (relative to
+                        'file': any existing file with this path (relative to
                         the project root) will make the current project match
                         the given info.
 
-                        "glob": any result found with this glob pattern
+                        'glob': any result found with this glob pattern
                         (relative to the project root) will make the current
                         project match the given info. See |glob()| for more
                         information.
@@ -484,6 +484,19 @@ g:gutentags_project_info
                         `g:gutentags_ctags_executable_ruby` out of the box.
                         See |gutentags_ctags_executable_{filetype}| for more
                         information.
+
+                                                *gutentags_project_info_finder*
+g:gutentags_project_info_finder
+                        Usually Gutentags uses |g:gutentags_project_info| to
+                        specify the information for a project.  You can
+                        override that behaviour by setting
+                        |g:gutentags_project_info_finder| to the name of a
+                        function. It takes as an argument the path to the root
+                        of the project and should return a |Dictionary|
+                        containing at least a 'type'.  Note: when set, the
+                        called implementation will ignore
+                        |g:gutentags_project_info|. As such the 'glob' and
+                        'file' tags will be ignored.  Defaults to `''`.  
 
                                             *gutentags_file_list_command*
 g:gutentags_file_list_command
@@ -507,13 +520,29 @@ g:gutentags_file_list_command
                         as a mapping of project root markers to the desired
                         file list command for that root marker. (See
                         |gutentags_project_root| for how Gutentags uses root
-                        markers to locate the project.) For example: >
+                        markers to locate the project.) 
+                        The |Dictionary| can have a 'markers' key, which is a
+                        dictionary of project markers to commands.
+                        The |Dictionary| can have a 'types' key, which is a
+                        dictionary of project types to commands. Note that
+                        'markers' take precidnt over the 'kinds' key.
+                        The |Dictionary| may have a 'default' key, which will
+                        be used if there is no matching marker.  
+                        If a valid marker is found it will be used. Otherwise
+                        if a valid type is found that will be used. Finally
+                        the default will be used.
+
+                        For example: >
 
                          let g:gutentags_file_list_command = {
                              \ 'markers': {
                                  \ '.git': 'git ls-files',
                                  \ '.hg': 'hg files',
                                  \ },
+                             \ 'types': {
+                                 \ 'python': 'find . -name "*.py"'
+                                 \ },
+                             \ 'default': 'find . -type f'
                              \ }
 <
                         Note: If a custom ctags executable is specified, it
