@@ -105,6 +105,8 @@ function! s:cache_project_root(path) abort
     endfor
     endif
 
+    call gutentags#trace("Adding ".a:path." to known projects: ".get(l:result,'type','no type'))
+
     let s:known_projects[a:path] = l:result
 endfunction
 
@@ -123,20 +125,25 @@ function! gutentags#get_project_file_list_cmd(proj_dir) abort
         if type(l:markers) == type({})
             for [marker, file_list_cmd] in items(l:markers)
                 if !empty(globpath(a:proj_dir, marker, 1))
+                    call gutentags#trace("Found marker matching project: ".marker.". using file list command: '".file_list_cmd."'.")
                     return gutentags#validate_cmd(file_list_cmd)
                 endif
             endfor
         endif
         let l:types = get(g:gutentags_file_list_command, 'types', {})
         if !empty(l:types) && type(l:types) == type({})
-            let l:proj_info = gutentags#get_project_info(a:proj_dir)
+            let l:proj_dir = gutentags#stripslash(simplify(fnamemodify(a:proj_dir, ":p")))
+            let l:proj_info = gutentags#get_project_info(l:proj_dir)
+            call gutentags#trace("Found project info: type: ".get(l:proj_info, 'type', 'empty'))
             if l:proj_info != {}
                 let l:file_list_cmd = get(l:types, l:proj_info['type'], '')
                 if !empty(l:file_list_cmd)
+                    call gutentags#trace("Found type matching project: ".l:proj_info['type'].". using file list command: '".l:file_list_cmd."'.")
                     return gutentags#validate_cmd(l:file_list_cmd)
                 endif
             endif
         endif
+        call gutentags#trace("Using default find command '".get(g:gutentags_file_list_command, 'default', "")."'.")
         return gutentags#validate_cmd(get(g:gutentags_file_list_command, 'default', ""))
     endif
     return ""
