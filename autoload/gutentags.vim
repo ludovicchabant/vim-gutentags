@@ -3,12 +3,12 @@
 " Utilities {{{
 
 function! gutentags#chdir(path)
-  if has('nvim')
-    let chdir = haslocaldir() ? 'lcd' : haslocaldir(-1, 0) ? 'tcd' : 'cd'
-  else
-    let chdir = haslocaldir() ? 'lcd' : 'cd'
-  endif
-  execute chdir a:path
+    if has('nvim')
+        let chdir = haslocaldir() ? 'lcd' : haslocaldir(-1, 0) ? 'tcd' : 'cd'
+    else
+        let chdir = haslocaldir() ? 'lcd' : 'cd'
+    endif
+    execute chdir a:path
 endfunction
 
 " Throw an exception message.
@@ -24,10 +24,10 @@ endfunction
 
 " Prints a message if debug tracing is enabled.
 function! gutentags#trace(message, ...)
-   if g:gutentags_trace || (a:0 && a:1)
-       let l:message = "gutentags: " . a:message
-       echom l:message
-   endif
+    if g:gutentags_trace || (a:0 && a:1)
+        let l:message = "gutentags: " . a:message
+        echom l:message
+    endif
 endfunction
 
 " Strips the ending slash in a path.
@@ -48,11 +48,11 @@ endfunction
 
 " Shell-slashes the path (opposite of `normalizepath`).
 function! gutentags#shellslash(path)
-  if exists('+shellslash') && !&shellslash
-    return substitute(a:path, '\v\\', '/', 'g')
-  else
-    return a:path
-  endif
+    if exists('+shellslash') && !&shellslash
+        return substitute(a:path, '\v\\', '/', 'g')
+    else
+        return a:path
+    endif
 endfunction
 
 " Gets a file path in the correct `plat` folder.
@@ -67,14 +67,14 @@ endfunction
 
 " Returns whether a path is rooted.
 if has('win32') || has('win64')
-function! gutentags#is_path_rooted(path) abort
-  return len(a:path) >= 2 && (
-        \a:path[0] == '/' || a:path[0] == '\' || a:path[1] == ':')
-endfunction
+    function! gutentags#is_path_rooted(path) abort
+        return len(a:path) >= 2 && (
+                    \a:path[0] == '/' || a:path[0] == '\' || a:path[1] == ':')
+    endfunction
 else
-function! gutentags#is_path_rooted(path) abort
-  return !empty(a:path) && a:path[0] == '/'
-endfunction
+    function! gutentags#is_path_rooted(path) abort
+        return !empty(a:path) && a:path[0] == '/'
+    endfunction
 endif
 
 " }}}
@@ -87,11 +87,24 @@ let s:known_projects = {}
 function! s:cache_project_root(path) abort
     let l:result = {}
 
-    if g:gutentags_project_info_finder != ''
-        let l:result = call(g:gutentags_project_info_finder, [a:path])
-    else
+    let l:result = call(g:gutentags_project_info_finder, [a:path])
+
+    call gutentags#trace("Adding ".a:path." to known projects: ".get(l:result,'type','no type'))
+
+    let s:known_projects[a:path] = l:result
+endfunction
+
+function! s:get_project_info(path) abort
+    return get(s:known_projects, a:path, {})
+endfunction
+
+" Get info on the project we're inside of.
+function! gutentags#get_project_info(path) abort
+    let l:result = {}
+
     for proj_info in g:gutentags_project_info
         let l:filematch = get(proj_info, 'file', '')
+        let l:type = get(proj_info, 'type', '')
         if l:filematch != '' && filereadable(a:path . '/'. l:filematch)
             let l:result = copy(proj_info)
             break
@@ -103,11 +116,8 @@ function! s:cache_project_root(path) abort
             break
         endif
     endfor
-    endif
 
-    call gutentags#trace("Adding ".a:path." to known projects: ".get(l:result,'type','no type'))
-
-    let s:known_projects[a:path] = l:result
+    return l:result
 endfunction
 
 function! gutentags#validate_cmd(cmd) abort
@@ -117,14 +127,15 @@ function! gutentags#validate_cmd(cmd) abort
     return ""
 endfunction
 
-function! gutentags#get_project_file_list_cmd(proj_dir) abort
+function! gutentags#get_project_file_list_cmd(proj_root, proj_type) abort
+
     if type(g:gutentags_file_list_command) == type("")
         return gutentags#validate_cmd(g:gutentags_file_list_command)
     elseif type(g:gutentags_file_list_command) == type({})
         let l:markers = get(g:gutentags_file_list_command, 'markers', {})
         if type(l:markers) == type({})
             for [marker, file_list_cmd] in items(l:markers)
-                if !empty(globpath(a:proj_dir, marker, 1))
+                if !empty(globpath(a:proj_root, marker, 1))
                     call gutentags#trace("Found marker matching project: ".marker.". using file list command: '".file_list_cmd."'.")
                     return gutentags#validate_cmd(file_list_cmd)
                 endif
@@ -132,15 +143,10 @@ function! gutentags#get_project_file_list_cmd(proj_dir) abort
         endif
         let l:types = get(g:gutentags_file_list_command, 'types', {})
         if !empty(l:types) && type(l:types) == type({})
-            let l:proj_dir = gutentags#stripslash(simplify(fnamemodify(a:proj_dir, ":p")))
-            let l:proj_info = gutentags#get_project_info(l:proj_dir)
-            call gutentags#trace("Found project info: type: ".get(l:proj_info, 'type', 'empty'))
-            if l:proj_info != {}
-                let l:file_list_cmd = get(l:types, l:proj_info['type'], '')
-                if !empty(l:file_list_cmd)
-                    call gutentags#trace("Found type matching project: ".l:proj_info['type'].". using file list command: '".l:file_list_cmd."'.")
-                    return gutentags#validate_cmd(l:file_list_cmd)
-                endif
+            let l:file_list_cmd = get(l:types, a:proj_type, '')
+            if !empty(l:file_list_cmd)
+                call gutentags#trace("Found type matching project: ".l:proj_info['type'].". using file list command: '".l:file_list_cmd."'.")
+                return gutentags#validate_cmd(l:file_list_cmd)
             endif
         endif
         call gutentags#trace("Using default find command '".get(g:gutentags_file_list_command, 'default', "")."'.")
@@ -151,11 +157,7 @@ endfunction
 
 " Finds the first directory with a project marker by walking up from the given
 " file path.
-function! gutentags#get_project_root(path, throw) abort
-    if g:gutentags_project_root_finder != ''
-        return call(g:gutentags_project_root_finder, [a:path])
-    endif
-
+function! gutentags#get_project_root(path) abort
     let l:path = gutentags#stripslash(a:path)
     let l:previous_path = ""
     let l:markers = g:gutentags_project_root[:]
@@ -172,28 +174,20 @@ function! gutentags#get_project_root(path, throw) abort
                 let l:proj_dir = simplify(fnamemodify(l:path, ':p'))
                 let l:proj_dir = gutentags#stripslash(l:proj_dir)
                 if l:proj_dir == ''
-                    if a:throw 
-                        call gutentags#trace("Found project marker '" . root .
-                                    \"' at the root of your file-system! " .
-                                    \" That's probably wrong, disabling " .
-                                    \"gutentags for this file...",
-                                    \1)
-                        call gutentags#throw("Marker found at root, aborting.")
-                    else
-                        return ""
-                    endif
+                    call gutentags#trace("Found project marker '" . root .
+                                \"' at the root of your file-system! " .
+                                \" That's probably wrong, disabling " .
+                                \"gutentags for this file...",
+                                \1)
+                    call gutentags#throw("Marker found at root, aborting.")
                 endif
                 for ign in g:gutentags_exclude_project_root
                     if l:proj_dir == ign
-                        if a:throw 
-                            call gutentags#trace(
-                                        \"Ignoring project root '" . l:proj_dir .
-                                        \"' because it is in the list of ignored" .
-                                        \" projects.")
-                            call gutentags#throw("Ignore project: " . l:proj_dir)
-                        else
-                            return ""
-                        endif
+                        call gutentags#trace(
+                                    \"Ignoring project root '" . l:proj_dir .
+                                    \"' because it is in the list of ignored" .
+                                    \" projects.")
+                        call gutentags#throw("Ignore project: " . l:proj_dir)
                     endif
                 endfor
                 return l:proj_dir
@@ -202,16 +196,7 @@ function! gutentags#get_project_root(path, throw) abort
         let l:previous_path = l:path
         let l:path = fnamemodify(l:path, ':h')
     endwhile
-    if a:throw 
-        call gutentags#throw("Can't figure out what tag file to use for: " . a:path)
-    else
-        return ""
-    endif
-endfunction
-
-" Get info on the project we're inside of.
-function! gutentags#get_project_info(path) abort
-    return get(s:known_projects, a:path, {})
+    call gutentags#throw("Can't figure out what tag file to use for: " . a:path)
 endfunction
 
 " Generate a path for a given filename in the cache directory.
@@ -244,7 +229,7 @@ function! gutentags#setup_gutentags() abort
     " Also don't do anything for the default `[No Name]` buffer you get
     " after starting Vim.
     if &buftype != '' || 
-          \(bufname('%') == '' && !g:gutentags_generate_on_empty_buffer)
+                \(bufname('%') == '' && !g:gutentags_generate_on_empty_buffer)
         return
     endif
 
@@ -264,7 +249,7 @@ function! gutentags#setup_gutentags() abort
             let l:buf_dir = fnamemodify(resolve(expand('%:p', 1)), ':p:h')
         endif
         if !exists('b:gutentags_root')
-            let b:gutentags_root = gutentags#get_project_root(l:buf_dir, 1)
+            let b:gutentags_root = call( g:gutentags_project_root_finder, [l:buf_dir])
         endif
         if filereadable(b:gutentags_root . '/.notags')
             call gutentags#trace("'.notags' file found... no gutentags support.")
@@ -274,10 +259,13 @@ function! gutentags#setup_gutentags() abort
         if !has_key(s:known_projects, b:gutentags_root)
             call s:cache_project_root(b:gutentags_root)
         endif
+        if !exists('b:gutentags_proj_type')
+            let l:proj_info = s:get_project_info(b:gutentags_root)
+            let b:gutentags_proj_type = get(l:proj_info, 'type', '')
+        endif
         if g:gutentags_trace
-            let l:projnfo = gutentags#get_project_info(b:gutentags_root)
-            if l:projnfo != {}
-                call gutentags#trace("Setting project type to ".l:projnfo['type'])
+            if b:gutentags_proj_type != ''
+                call gutentags#trace("Setting project type to ".b:gutentags_proj_type)
             else
                 call gutentags#trace("No specific project type.")
             endif
@@ -285,7 +273,7 @@ function! gutentags#setup_gutentags() abort
 
         let b:gutentags_files = {}
         for module in g:gutentags_modules
-            call call("gutentags#".module."#init", [b:gutentags_root])
+            call call("gutentags#".module."#init", [b:gutentags_root, b:gutentags_proj_type])
         endfor
     catch /^gutentags\:/
         call gutentags#trace("No gutentags support for this buffer.")
@@ -402,7 +390,8 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
     " Figure out where to save.
     let l:buf_gutentags_files = getbufvar(a:bufno, 'gutentags_files')
     let l:tags_file = l:buf_gutentags_files[a:module]
-    let l:proj_dir = getbufvar(a:bufno, 'gutentags_root')
+    let l:proj_root = getbufvar(a:bufno, 'gutentags_root')
+    let l:proj_type = getbufvar(a:bufno, 'gutentags_proj_type')
 
     " Check that there's not already an update in progress.
     let l:lock_file = l:tags_file . '.lock'
@@ -430,10 +419,10 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
     " it possible to get the relative path of the filename to parse if we're
     " doing an incremental update.
     let l:prev_cwd = getcwd()
-    call gutentags#chdir(fnameescape(l:proj_dir))
+    call gutentags#chdir(fnameescape(l:proj_root))
     try
         call call("gutentags#".a:module."#generate",
-                    \[l:proj_dir, l:tags_file, a:write_mode])
+                    \[l:proj_root, l:proj_type, l:tags_file, a:write_mode])
     catch /^gutentags\:/
         echom "Error while generating ".a:module." file:"
         echom v:exception
