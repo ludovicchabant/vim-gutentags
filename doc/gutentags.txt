@@ -332,7 +332,7 @@ g:gutentags_ctags_extra_args
                         Defaults to `[]` (an empty |List|).
 
                                                 *gutentags_ctags_extra_tags_finder*
-g:gutentags_ctags_exclude_finder
+g:gutentags_ctags_extra_tags_finder
                         The name of a function which will be called with two
                         strings, first the project root then the project type.
                         It should return a list like

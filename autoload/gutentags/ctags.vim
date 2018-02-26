@@ -15,6 +15,8 @@ let g:gutentags_ctags_extra_args_finder = get(g:, 'gutentags_ctags_extra_args_fi
 let g:gutentags_ctags_extra_args = get(g:, 'gutentags_ctags_extra_args', [])
 
 " ctags post process cmd
+let g:gutentags_ctags_post_process_cmd_finder = get(g:, 'gutentags_ctags_post_process_cmd_finder', 
+            \'')
 let g:gutentags_ctags_post_process_cmd = get(g:, 'gutentags_ctags_post_process_cmd', '')
 
 " ctags exclude
@@ -154,8 +156,14 @@ function! gutentags#ctags#generate(proj_root, proj_type, tags_file, write_mode) 
         let l:cmd .= ' -O '.shellescape(join(l:extra_args), 1)
     endif
     " ctags post process cmd
-    if !empty(g:gutentags_ctags_post_process_cmd)
-        let l:cmd .= ' -P '.shellescape(g:gutentags_ctags_post_process_cmd)
+    let l:post_process_cmd=''
+    if g:gutentags_ctags_post_process_cmd_finder != ''
+        let l:post_process_cmd = call(g:gutentags_ctags_post_process_cmd_finder, [a:proj_root, a:proj_type])
+    elseif !empty(g:gutentags_ctags_post_process_cmd)
+        let l:post_process_cmd = g:gutentags_ctags_post_process_cmd
+    endif
+    if !empty(l:post_process_cmd)
+        let l:cmd .= ' -P '.shellescape(l:post_process_cmd)
     endif
     let l:proj_options_file = a:proj_root . '/' .
                 \g:gutentags_ctags_options_file
