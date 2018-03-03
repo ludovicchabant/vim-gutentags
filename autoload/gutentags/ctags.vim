@@ -8,10 +8,22 @@ let g:gutentags_ctags_auto_set_tags = get(g:, 'gutentags_ctags_auto_set_tags', 1
 
 let g:gutentags_ctags_options_file = get(g:, 'gutentags_ctags_options_file', '.gutctags')
 let g:gutentags_ctags_check_tagfile = get(g:, 'gutentags_ctags_check_tagfile', 0)
+
+" ctags extra args 
+let g:gutentags_ctags_extra_args_finder = get(g:, 'gutentags_ctags_extra_args_finder', 
+            \'')
 let g:gutentags_ctags_extra_args = get(g:, 'gutentags_ctags_extra_args', [])
+
+" ctags post process cmd
+let g:gutentags_ctags_post_process_cmd_finder = get(g:, 'gutentags_ctags_post_process_cmd_finder', 
+            \'')
 let g:gutentags_ctags_post_process_cmd = get(g:, 'gutentags_ctags_post_process_cmd', '')
 
+" ctags exclude
+let g:gutentags_ctags_exclude_finder = get(g:, 'gutentags_ctags_exclude_finder', 
+            \'')
 let g:gutentags_ctags_exclude = get(g:, 'gutentags_ctags_exclude', [])
+
 let g:gutentags_ctags_exclude_wildignore = get(g:, 'gutentags_ctags_exclude_wildignore', 1)
 
 " Backwards compatibility.
@@ -39,7 +51,7 @@ let s:did_check_exe = 0
 let s:runner_exe = gutentags#get_plat_file('update_tags')
 let s:unix_redir = (&shellredir =~# '%s') ? &shellredir : &shellredir . ' %s'
 
-function! gutentags#ctags#init(project_root) abort
+function! gutentags#ctags#init(proj_root, proj_type) abort
     " Figure out the path to the tags file.
     " Check the old name for this option, too, before falling back to the
     " globally defined name.
@@ -47,7 +59,7 @@ function! gutentags#ctags#init(project_root) abort
                 \getbufvar("", 'gutentags_tagfile', 
                 \g:gutentags_ctags_tagfile))
     let b:gutentags_files['ctags'] = gutentags#get_cachefile(
-                \a:project_root, l:tagfile)
+                \a:proj_root, l:tagfile)
 
     " Set the tags file for Vim to use.
     if g:gutentags_ctags_auto_set_tags
@@ -56,9 +68,10 @@ function! gutentags#ctags#init(project_root) abort
 
     " Check if the ctags executable exists.
     if s:did_check_exe == 0
-        if g:gutentags_enabled && executable(expand(g:gutentags_ctags_executable, 1)) == 0
+        let l:gutentags_ctags_executable =  s:get_ctags_executable(a:proj_root, a:proj_type)
+        if g:gutentags_enabled && executable(expand(l:gutentags_ctags_executable, 1)) == 0
             let g:gutentags_enabled = 0
-            echoerr "Executable '".g:gutentags_ctags_executable."' can't be found. "
+            echoerr "Executable '".l:gutentags_ctags_executable."' can't be found. "
                         \."Gutentags will be disabled. You can re-enable it by "
                         \."setting g:gutentags_enabled back to 1."
         endif
@@ -66,7 +79,8 @@ function! gutentags#ctags#init(project_root) abort
     endif
 endfunction
 
-function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
+function! gutentags#ctags#generate(proj_root, proj_type, tags_file, write_mode) abort
+    call gutentags#trace("updateing tags with: ".a:proj_root.", ".a:proj_type)
     let l:tags_file_exists = filereadable(a:tags_file)
     let l:tags_file_relative = fnamemodify(a:tags_file, ':.')
     let l:tags_file_is_local = len(l:tags_file_relative) < len(a:tags_file)
@@ -96,13 +110,13 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
     else
         " else: the tags file goes in a cache directory, so we need to specify
         " all the paths absolutely for `ctags` to do its job correctly.
-        let l:actual_proj_dir = a:proj_dir
+        let l:actual_proj_dir = a:proj_root
         let l:actual_tags_file = a:tags_file
     endif
 
     " Build the command line.
     let l:cmd = gutentags#get_execute_cmd() . s:runner_exe
-    let l:cmd .= ' -e "' . s:get_ctags_executable(a:proj_dir) . '"'
+    let l:cmd .= ' -e "' . s:get_ctags_executable(a:proj_root, a:proj_type) . '"'
     let l:cmd .= ' -t "' . l:actual_tags_file . '"'
     let l:cmd .= ' -p "' . l:actual_proj_dir . '"'
     if a:write_mode == 0 && l:tags_file_exists
@@ -112,7 +126,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         endif
         let l:cmd .= ' -s "' . l:cur_file_path . '"'
     else
-        let l:file_list_cmd = gutentags#get_project_file_list_cmd(l:actual_proj_dir)
+        let l:file_list_cmd =call(g:gutentags_project_file_list_cmd_finder,[a:proj_root, a:proj_type])
         if !empty(l:file_list_cmd)
             if match(l:file_list_cmd, '///') > 0
                 let l:suffopts = split(l:file_list_cmd, '///')
@@ -122,7 +136,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
                     let l:cmd .= ' -A'
                 endif
             endif
-            let l:cmd .= ' -L ' . '"' . l:file_list_cmd. '"'
+            let l:cmd .= ' -L ' . shellescape(l:file_list_cmd)
         endif
     endif
     if empty(get(l:, 'file_list_cmd', ''))
@@ -131,27 +145,50 @@ function! gutentags#ctags#generate(proj_dir, tags_file, write_mode) abort
         " Omit --recursive if this project uses a file list command.
         let l:cmd .= ' -o "' . gutentags#get_res_file('ctags_recursive.options') . '"'
     endif
-    if !empty(g:gutentags_ctags_extra_args)
-        let l:cmd .= ' -O '.shellescape(join(g:gutentags_ctags_extra_args))
+    " ctags extra args
+    let l:extra_args = []
+    if g:gutentags_ctags_extra_args_finder != ''
+        let l:extra_args = call(g:gutentags_ctags_extra_args_finder, [a:proj_root, a:proj_type])
+    elseif !empty(g:gutentags_ctags_extra_args)
+        let l:extra_args = g:gutentags_ctags_extra_args
     endif
-    if !empty(g:gutentags_ctags_post_process_cmd)
-        let l:cmd .= ' -P '.shellescape(g:gutentags_ctags_post_process_cmd)
+    if !empty(l:extra_args)
+        let l:cmd .= ' -O '.shellescape(join(l:extra_args), 1)
     endif
-    let l:proj_options_file = a:proj_dir . '/' .
+    " ctags post process cmd
+    let l:post_process_cmd=''
+    if g:gutentags_ctags_post_process_cmd_finder != ''
+        let l:post_process_cmd = call(g:gutentags_ctags_post_process_cmd_finder, [a:proj_root, a:proj_type])
+    elseif !empty(g:gutentags_ctags_post_process_cmd)
+        let l:post_process_cmd = g:gutentags_ctags_post_process_cmd
+    endif
+    if !empty(l:post_process_cmd)
+        let l:cmd .= ' -P '.shellescape(l:post_process_cmd)
+    endif
+    let l:proj_options_file = a:proj_root . '/' .
                 \g:gutentags_ctags_options_file
     if filereadable(l:proj_options_file)
         let l:proj_options_file = s:process_options_file(
-                    \a:proj_dir, l:proj_options_file)
+                    \a:proj_root, l:proj_options_file)
         let l:cmd .= ' -o "' . l:proj_options_file . '"'
     endif
+    " ctags exclude
+    let l:exclude = []
+    if g:gutentags_ctags_exclude_finder != ''
+        let l:exclude = call(g:gutentags_ctags_exclude_finder, [a:proj_root, a:proj_type])
+    elseif !empty(g:gutentags_ctags_exclude)
+        let l:exclude = g:gutentags_ctags_exclude
+    endif
+    for exc in l:exclude
+        let l:cmd .= ' -x ' . '"' . exc . '"'
+    endfor
+
     if g:gutentags_ctags_exclude_wildignore
         for ign in split(&wildignore, ',')
             let l:cmd .= ' -x ' . shellescape(ign, 1)
         endfor
     endif
-    for exc in g:gutentags_ctags_exclude
-        let l:cmd .= ' -x ' . '"' . exc . '"'
-    endfor
+
     if g:gutentags_pause_after_update
         let l:cmd .= ' -c'
     endif
@@ -191,17 +228,15 @@ endfunction
 " Utilities {{{
 
 " Get final ctags executable depending whether a filetype one is defined
-function! s:get_ctags_executable(proj_dir) abort
+function! s:get_ctags_executable(proj_root, proj_type) abort
     "Only consider the main filetype in cases like 'python.django'
     let l:ftype = get(split(&filetype, '\.'), 0, '')
-    let l:proj_info = gutentags#get_project_info(a:proj_dir)
-    let l:type = get(l:proj_info, 'type', l:ftype)
-    let exepath = exists('g:gutentags_ctags_executable_{l:type}')
-        \ ? g:gutentags_ctags_executable_{l:type} : g:gutentags_ctags_executable
+    let exepath = exists('g:gutentags_ctags_executable_{a:proj_type}')
+                \ ? g:gutentags_ctags_executable_{a:proj_type} : g:gutentags_ctags_executable
     return expand(exepath, 1)
 endfunction
 
-function! s:process_options_file(proj_dir, path) abort
+function! s:process_options_file(proj_root, path) abort
     if empty(g:gutentags_cache_dir)
         " If we're not using a cache directory to store tag files, we can
         " use the options file straight away.
@@ -210,8 +245,8 @@ function! s:process_options_file(proj_dir, path) abort
 
     " See if we need to process the options file.
     let l:do_process = 0
-    let l:proj_dir = gutentags#stripslash(a:proj_dir)
-    let l:out_path = gutentags#get_cachefile(l:proj_dir, 'options')
+    let l:proj_root = gutentags#stripslash(a:proj_root)
+    let l:out_path = gutentags#get_cachefile(l:proj_root, 'options')
     if !filereadable(l:out_path)
         call gutentags#trace("Processing options file '".a:path."' because ".
                     \"it hasn't been processed yet.")
@@ -257,7 +292,7 @@ function! s:process_options_file(proj_dir, path) abort
             continue
         endif
 
-        let l:fullp = l:proj_dir . gutentags#normalizepath('/'.l:exarg)
+        let l:fullp = l:proj_root . gutentags#normalizepath('/'.l:exarg)
         let l:ol = '--exclude='.l:fullp
         call add(l:outlines, l:ol)
     endfor

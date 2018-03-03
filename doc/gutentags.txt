@@ -32,7 +32,8 @@
 2. Commands                 |gutentags-commands|
 3. Status Line              |gutentags-status-line|
 4. Global Settings          |gutentags-settings|
-5. Project Settings         |gutentags-project-settings|
+5. Buffer Variables         |gutentags-buffer-variables|
+6. Project Settings         |gutentags-project-settings|
 
 =============================================================================
 1. Introduction                                 *gutentags-intro*
@@ -311,8 +312,8 @@ g:gutentags_project_root_finder
                         When a buffer is loaded, Gutentags uses a default
                         (internal) implementation to find that file's
                         project's root directory, using settings like
-                        |g:gutentags_project_root|. When you specify
-                        |g:gutentags_project_root_finder|, you can tell
+                        |gutentags_project_root|. When you specify
+                        |gutentags_project_root_finder|, you can tell
                         Gutentags to use a custom implementation, such as
                         `vim-projectroot`. The value of this setting must be
                         the name of a function that takes a single string
@@ -320,8 +321,33 @@ g:gutentags_project_root_finder
                         returns a string value (the project's root directory).
                         Defaults to `''`.
                         Note: when set, the called implementation will most 
-                        likely ignore |g:gutentags_project_root|.
+                        likely ignore |gutentags_project_root|.
 
+                                                *gutentags_ctags_extra_args*
+g:gutentags_ctags_extra_args
+                        A list of strings to pass to the
+                        |gutentags_ctags_executable|. These can be used for
+                        general arguments that ctags will use for 
+                        tags generation.
+                        Defaults to `[]` (an empty |List|).
+
+                                                *gutentags_ctags_extra_tags_finder*
+g:gutentags_ctags_extra_tags_finder
+                        The name of a function which will be called with two
+                        strings, first the project root then the project type.
+                        It should return a list like
+                        |gutentags_ctags_extra_args|.
+                        Defaults to `''` (an empty |String|)
+                        For example:
+                        >
+                            let g:gutentags_ctags_extra_args_finder = 'MyExtraArgs'
+                            function! MyExtraArgs(proj_type)
+                                if a:proj_type == 'cpp'
+                                    return ['--kinds-c++=defgmpstuc', '--fields=+Z+l+p-k+K+z+n+s']
+                                endif
+                                return []
+                            endfunction
+<
                                                 *gutentags_ctags_exclude*
 g:gutentags_ctags_exclude
                         A list of file patterns to pass to the
@@ -330,6 +356,22 @@ g:gutentags_ctags_exclude
                         See also |gutentags_ctags_exclude_wildignore|.
                         Defaults to `[]` (an empty |List|).
 
+                                                *gutentags_ctags_exclude_finder*
+g:gutentags_ctags_exclude_finder
+                        This names a function which will be called with two
+                        strings, first the project root then the project type.
+                        It should return a list like gutentags_ctags_exclude|.
+                        Defaults to `''` (an empty |String|)
+                        For example:
+                        >
+                            let g:gutentags_ctags_exclude_finder = 'MyExcludedFiles'
+                            function! MyExcludedFiles(proj_root, proj_type)
+                                if a:proj_type == 'cpp'
+                                    return ["*.xml", "*.html"]
+                                endif
+                                return []
+                            endfunction
+<
                                                 *gutentags_ctags_exclude_wildignore*
 g:gutentags_ctags_exclude_wildignore
                         When 1, Gutentags will automatically pass your
@@ -442,7 +484,7 @@ g:gutentags_init_user_func
                         `gutentags_enabled_user_func`. The old setting is
                         still used as a fallback.
 
-                        Defaults to "".
+                        Defaults to `''` (an empty |String|).
 
                                             *gutentags_define_advanced_commands*
 g:gutentags_define_advanced_commands
@@ -461,16 +503,16 @@ g:gutentags_project_info
                         Each dictionary item must contain at least a `type`
                         key, indicating the type of project:
 
-                        {"type": "python"}
+                        {'type': 'python'}
 
                         Other items will be used to figure out if a project is
                         of the given type.
 
-                        "file": any existing file with this path (relative to
+                        'file': any existing file with this path (relative to
                         the project root) will make the current project match
                         the given info.
 
-                        "glob": any result found with this glob pattern
+                        'glob': any result found with this glob pattern
                         (relative to the project root) will make the current
                         project match the given info. See |glob()| for more
                         information.
@@ -484,6 +526,33 @@ g:gutentags_project_info
                         `g:gutentags_ctags_executable_ruby` out of the box.
                         See |gutentags_ctags_executable_{filetype}| for more
                         information.
+
+                                                *gutentags_project_info_finder*
+g:gutentags_project_info_finder
+                        Usually Gutentags uses |g:gutentags_project_info| to
+                        specify the information for a project.  You can
+                        override that behaviour by setting
+                        |g:gutentags_project_info_finder| to the name of a
+                        function. It takes as an argument the path to the root
+                        of the project and should return a |Dictionary|
+                        containing at least a 'type'.  Note: when set, the
+                        called implementation will ignore
+                        |g:gutentags_project_info|. As such the 'glob' and
+                        'file' tags will be ignored.  
+                        Defaults to `''` (An empty |String|).  
+
+                        For example:
+                        >
+                        let g:gutentags_project_info_finder = 'GetProjectInfo'
+                        function! GetProjectInfo(proj_root)
+                            if a:proj_root == '~/CppWorkspace'
+                                return { 'type': 'cpp' }
+                            else
+                                return {}
+                            endif
+                        endfunction
+>
+<
 
                                             *gutentags_file_list_command*
 g:gutentags_file_list_command
@@ -507,13 +576,29 @@ g:gutentags_file_list_command
                         as a mapping of project root markers to the desired
                         file list command for that root marker. (See
                         |gutentags_project_root| for how Gutentags uses root
-                        markers to locate the project.) For example: >
+                        markers to locate the project.) 
+                        The |Dictionary| can have a 'markers' key, which is a
+                        dictionary of project markers to commands.
+                        The |Dictionary| can have a 'types' key, which is a
+                        dictionary of project types to commands. Note that
+                        'markers' take precidnt over the 'kinds' key.
+                        The |Dictionary| may have a 'default' key, which will
+                        be used if there is no matching marker.  
+                        If a valid marker is found it will be used. Otherwise
+                        if a valid type is found that will be used. Finally
+                        the default will be used.
+
+                        For example: >
 
                          let g:gutentags_file_list_command = {
                              \ 'markers': {
                                  \ '.git': 'git ls-files',
                                  \ '.hg': 'hg files',
                                  \ },
+                             \ 'types': {
+                                 \ 'python': 'find . -name "*.py"'
+                                 \ },
+                             \ 'default': 'find . -type f'
                              \ }
 <
                         Note: If a custom ctags executable is specified, it
@@ -521,7 +606,30 @@ g:gutentags_file_list_command
                         read the list of files to be examined.
 
 =============================================================================
-5. Project Settings                             *gutentags-project-settings*
+5. Buffer Variables                             *gutentags-buffer-variables*
+
+Gutentafs sets up two significant bufferlocal varaibles. They can be queried
+to provide project information to a=other scripts. Or they can be set
+directly by the in the |gutentags_init_user_finc| to bypass teh usual settup.
+They are:
+
+                                                            *gutentags_root*
+b:gutentags_root
+                        This stores the root directory of the project that
+                        this buffer is in. It is computed either with
+                        internally through the |gutentags_project_root|
+                        setting, or by the user with the function named by 
+                        |gutentags_project_root_finder|.
+
+                                                        *gutentags_proj_type*
+b:gutentags_proj_type
+                        This stores the type of project that this buffer is
+                        in. It is either computed internally with
+                        |gutentags_project_info|, or it by the user with the
+                        function named by |gutentags_project_info_finder|.
+
+=============================================================================
+6. Project Settings                             *gutentags-project-settings*
 
 Gutentags can be customized to some extent on a per-project basis with the
 following files present in the project root directory:
