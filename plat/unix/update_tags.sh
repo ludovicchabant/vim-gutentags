@@ -7,6 +7,7 @@ CTAGS_EXE=ctags
 CTAGS_ARGS=
 TAGS_FILE=tags
 PROJECT_ROOT=
+LOG_FILE=
 FILE_LIST_CMD=
 FILE_LIST_CMD_IS_ABSOLUTE=0
 UPDATED_SOURCE=
@@ -21,6 +22,7 @@ ShowUsage() {
     echo "    -e [exe=ctags]: The ctags executable to run"
     echo "    -t [file=tags]: The path to the ctags file to update"
     echo "    -p [dir=]:      The path to the project root"
+    echo "    -l [file=]:     The path to a log file"
     echo "    -L [cmd=]:      The file list command to run"
     echo "    -A:             Specifies that the file list command returns "
     echo "                    absolute paths"
@@ -34,7 +36,7 @@ ShowUsage() {
 }
 
 
-while getopts "h?e:x:t:p:L:s:o:O:P:cA" opt; do
+while getopts "h?e:x:t:p:l:L:s:o:O:P:cA" opt; do
     case $opt in
         h|\?)
             ShowUsage
@@ -51,6 +53,9 @@ while getopts "h?e:x:t:p:L:s:o:O:P:cA" opt; do
             ;;
         p)
             PROJECT_ROOT=$OPTARG
+            ;;
+        l)
+            LOG_FILE=$OPTARG
             ;;
         L)
             FILE_LIST_CMD=$OPTARG

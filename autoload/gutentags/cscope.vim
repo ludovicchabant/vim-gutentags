@@ -40,64 +40,46 @@ function! gutentags#cscope#init(project_root) abort
     endif
 endfunction
 
-function! gutentags#cscope#command_terminated(job_id, data, event) abort
-    if a:data == 0
-        if index(s:added_dbs, self.db_file) < 0
-            call add(s:added_dbs, self.db_file)
-            silent! execute 'cs add ' . fnameescape(s:db_file)
-        else
-            execute 'cs reset'
-        endif
-    endif
-endfunction
-
-function! gutentags#cscope#generate(proj_dir, tags_file, write_mode) abort
-    let l:cmd = gutentags#get_execute_cmd() . s:runner_exe
-    let l:cmd .= ' -e ' . g:gutentags_cscope_executable
-    let l:cmd .= ' -p ' . a:proj_dir
-    let l:cmd .= ' -f ' . a:tags_file
+function! gutentags#cscope#generate(proj_dir, tags_file, gen_opts) abort
+    let l:cmd = [s:runner_exe]
+    let l:cmd += ['-e', g:gutentags_cscope_executable]
+    let l:cmd += ['-p', a:proj_dir]
+    let l:cmd += ['-f', a:tags_file]
     let l:file_list_cmd =
         \ gutentags#get_project_file_list_cmd(a:proj_dir)
     if !empty(l:file_list_cmd)
-        let l:cmd .= ' -L "' . l:file_list_cmd . '"'
+        let l:cmd += ['-L', '"' . l:file_list_cmd . '"']
     endif
-    if g:gutentags_trace
-        if has('win32')
-            let l:cmd .= ' -l "' . a:tags_file . '.log"'
-        else
-            let l:cmd .= ' ' . printf(s:unix_redir, '"' . a:tags_file . '.log"')
-        endif
-    else
-        if !has('win32')
-            let l:cmd .= ' ' . printf(s:unix_redir, '/dev/null')
-        endif
-    endif
-    let l:cmd .= ' '
-    let l:cmd .= gutentags#get_execute_cmd_suffix()
+    let l:cmd = gutentags#make_args(l:cmd)
 
-    call gutentags#trace("Running: " . l:cmd)
+    call gutentags#trace("Running: " . string(l:cmd))
     call gutentags#trace("In:      " . getcwd())
     if !g:gutentags_fake
-        if !(has('nvim') && exists('*jobwait'))
-            if !g:gutentags_trace
-                silent execute l:cmd
-            else
-                execute l:cmd
-            endif
-        else
-            let job_dict = { 'db_file': a:tags_file, 'on_exit' : function('gutentags#cscope#command_terminated') }
-            let job_cmd = [ s:runner_exe,
-                        \ '-e', g:gutentags_cscope_executable,
-                        \ '-p', a:proj_dir,
-                        \ '-f', a:tags_file ]
-            let job_id = jobstart(job_cmd, job_dict)
-        endif
-
-        call gutentags#add_progress('cscope', a:tags_file)
+		let l:job_opts = gutentags#build_default_job_options('cscope')
+        let l:job = gutentags#start_job(l:cmd, l:job_opts)
+        call gutentags#add_job('cscope', a:tags_file, l:job)
     else
         call gutentags#trace("(fake... not actually running)")
     endif
-    call gutentags#trace("")
+endfunction
+
+function! gutentags#cscope#on_job_exit(job, exit_val) abort
+    let l:job_idx = gutentags#find_job_index_by_data('cscope', a:job)
+    let l:dbfile_path = gutentags#get_job_tags_file('cscope', l:job_idx)
+    call gutentags#remove_job('cscope', l:job_idx)
+
+    if a:exit_val == 0
+        if index(s:added_dbs, l:dbfile_path) < 0
+            call add(s:added_dbs, l:dbfile_path)
+            silent! execute 'cs add ' . fnameescape(l:dbfile_path)
+        else
+            execute 'cs reset'
+        endif
+    else
+        call gutentags#warning(
+                    \"gutentags: cscope job failed, returned: ".
+                    \string(a:exit_val))
+    endif
 endfunction
 
 " }}}

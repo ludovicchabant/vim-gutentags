@@ -172,26 +172,18 @@ Some debugging/troubleshooting commands are also available if the
                         Gutentags redirect the output of the tag generation
                         script to a `.log` file in the project root.
 
-                                                *:GutentagsUnlock*
-:GutentagsUnlock
-                        Gutentags uses a `.lock` file to know when tag
-                        generation is running. If something goes wrong with
-                        that process, that lock file could be left behind. You
-                        could just remove it manually from the root of your
-                        project, but you can also run |:GutentagsUnlock| so
-                        that Vim does it for you.
-                        If you find that you need to use this more than a
-                        couple times ever, there's probably a bug with
-                        Gutentags, or something otherwise wrong or unexpected
-                        with your system. Please file a bug.
-
 
 Gutentags also has some user auto-commands (see |User| and |:doautocmd|):
+
+                                                *GutentagsUpdating*
+GutentagsUpdating
+                        This auto-command is triggered when a background
+                        update job has started.
 
                                                 *GutentagsUpdated*
 GutentagsUpdated
                         This auto-command is triggered when a background
-                        update job has been started.
+                        update job has finished.
 
 
 =============================================================================
@@ -206,17 +198,18 @@ You can display and indicator of tag generation progress in your |status-line|
 with the following function: >
         :set statusline+=%{gutentags#statusline()}
 
-This won't print anything unless Gutentags figures that `ctags` is running in
-the background. This is done by checking a `.lock` file next to the tag file,
-but there's also some optimization before that to not slow down Vim. Note that
-the `.lock` file can sometimes be left around incorrectly by the background
-process, and you may need to clean it up. See |:GutentagsUnlock|.
+Because Gutentags runs the tag generation in the background, the statusline
+indicator might stay there even after the background process has ended. It
+would only go away when Vim decides to refresh the statusline. You can force
+refresh it in a callback on |GutentagsUpdating| and |GutentagsUpdated|.
 
-When Gutentags thinks `ctags` is still running, it will print the string
-"TAGS" by default. You can customize it: >
-        :set statusline+=%{gutentags#statusline('[Generating...]')}
+For instance, with the `lightline` plugin:
 
-This will print the string "[Generating...]" when tags are being generated.
+        augroup MyGutentagsStatusLineRefresher
+            autocmd!
+            autocmd User GutentagsUpdating call lightline#update()
+            autocmd User GutentagsUpdated call lightline#update()
+        augroup END
 
 
 =============================================================================

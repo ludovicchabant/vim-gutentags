@@ -3,12 +3,12 @@
 " Utilities {{{
 
 function! gutentags#chdir(path)
-  if has('nvim')
-    let chdir = haslocaldir() ? 'lcd' : haslocaldir(-1, 0) ? 'tcd' : 'cd'
-  else
-    let chdir = haslocaldir() ? 'lcd' : 'cd'
-  endif
-  execute chdir a:path
+    if has('nvim')
+        let chdir = haslocaldir() ? 'lcd' : haslocaldir(-1, 0) ? 'tcd' : 'cd'
+    else
+        let chdir = haslocaldir() ? 'lcd' : 'cd'
+    endif
+    execute chdir a:path
 endfunction
 
 " Throw an exception message.
@@ -16,10 +16,17 @@ function! gutentags#throw(message)
     throw "gutentags: " . a:message
 endfunction
 
-" Throw an exception message and set Vim's error message variable.
-function! gutentags#throwerr(message)
+" Show an error message.
+function! gutentags#error(message)
     let v:errmsg = "gutentags: " . a:message
-    throw v:errmsg
+    echoerr v:errmsg
+endfunction
+
+" Show a warning message.
+function! gutentags#warning(message)
+    echohl WarningMsg
+    echom "gutentags: " . a:message
+    echohl None
 endfunction
 
 " Prints a message if debug tracing is enabled.
@@ -48,11 +55,11 @@ endfunction
 
 " Shell-slashes the path (opposite of `normalizepath`).
 function! gutentags#shellslash(path)
-  if exists('+shellslash') && !&shellslash
-    return substitute(a:path, '\v\\', '/', 'g')
-  else
-    return a:path
-  endif
+    if exists('+shellslash') && !&shellslash
+        return substitute(a:path, '\v\\', '/', 'g')
+    else
+        return a:path
+    endif
 endfunction
 
 " Gets a file path in the correct `plat` folder.
@@ -65,16 +72,66 @@ function! gutentags#get_res_file(filename) abort
     return g:gutentags_res_dir . a:filename
 endfunction
 
+" Generate a path for a given filename in the cache directory.
+function! gutentags#get_cachefile(root_dir, filename) abort
+    if gutentags#is_path_rooted(a:filename)
+        return a:filename
+    endif
+    let l:tag_path = gutentags#stripslash(a:root_dir) . '/' . a:filename
+    if g:gutentags_cache_dir != ""
+        " Put the tag file in the cache dir instead of inside the
+        " project root.
+        let l:tag_path = g:gutentags_cache_dir . '/' .
+                    \tr(l:tag_path, '\/: ', '---_')
+        let l:tag_path = substitute(l:tag_path, '/\-', '/', '')
+    endif
+    let l:tag_path = gutentags#normalizepath(l:tag_path)
+    return l:tag_path
+endfunction
+
+" Makes sure a given command starts with an executable that's in the PATH.
+function! gutentags#validate_cmd(cmd) abort
+    if !empty(a:cmd) && executable(split(a:cmd)[0])
+        return a:cmd
+    endif
+    return ""
+endfunction
+
+" Makes an appropriate command line for use with `job_start` by converting
+" a list of possibly quoted arguments into a single string on Windows, or
+" into a list of unquoted arguments on Unix/Mac.
+if has('win32') || has('win64')
+    function! gutentags#make_args(cmd) abort
+        return join(a:cmd, ' ')
+    endfunction
+else
+    function! gutentags#make_args(cmd) abort
+        let l:outcmd = []
+        for cmdarg in a:cmd
+            " Thanks Vimscript... you can use negative integers for strings
+            " in the slice notation, but not for indexing characters :(
+            let l:arglen = strlen(cmdarg)
+            if (cmdarg[0] == '"' && cmdarg[l:arglen - 1] == '"') || 
+                        \(cmdarg[0] == "'" && cmdarg[l:arglen - 1] == "'")
+                call add(l:outcmd, cmdarg[1:-2])
+            else
+                call add(l:outcmd, cmdarg)
+            endif
+        endfor
+        return l:outcmd
+    endfunction
+endif
+
 " Returns whether a path is rooted.
 if has('win32') || has('win64')
-function! gutentags#is_path_rooted(path) abort
-  return len(a:path) >= 2 && (
-        \a:path[0] == '/' || a:path[0] == '\' || a:path[1] == ':')
-endfunction
+    function! gutentags#is_path_rooted(path) abort
+        return len(a:path) >= 2 && (
+                    \a:path[0] == '/' || a:path[0] == '\' || a:path[1] == ':')
+    endfunction
 else
-function! gutentags#is_path_rooted(path) abort
-  return !empty(a:path) && a:path[0] == '/'
-endfunction
+    function! gutentags#is_path_rooted(path) abort
+        return !empty(a:path) && a:path[0] == '/'
+    endfunction
 endif
 
 " }}}
@@ -102,13 +159,6 @@ function! s:cache_project_root(path) abort
     endfor
 
     let s:known_projects[a:path] = l:result
-endfunction
-
-function! gutentags#validate_cmd(cmd) abort
-    if !empty(a:cmd) && executable(split(a:cmd)[0])
-        return a:cmd
-    endif
-    return ""
 endfunction
 
 function! gutentags#get_project_file_list_cmd(path) abort
@@ -179,23 +229,6 @@ endfunction
 " Get info on the project we're inside of.
 function! gutentags#get_project_info(path) abort
     return get(s:known_projects, a:path, {})
-endfunction
-
-" Generate a path for a given filename in the cache directory.
-function! gutentags#get_cachefile(root_dir, filename) abort
-    if gutentags#is_path_rooted(a:filename)
-        return a:filename
-    endif
-    let l:tag_path = gutentags#stripslash(a:root_dir) . '/' . a:filename
-    if g:gutentags_cache_dir != ""
-        " Put the tag file in the cache dir instead of inside the
-        " project root.
-        let l:tag_path = g:gutentags_cache_dir . '/' .
-                    \tr(l:tag_path, '\/: ', '---_')
-        let l:tag_path = substitute(l:tag_path, '/\-', '/', '')
-    endif
-    let l:tag_path = gutentags#normalizepath(l:tag_path)
-    return l:tag_path
 endfunction
 
 " Setup gutentags for the current buffer.
@@ -299,43 +332,91 @@ endfunction
 
 " }}}
 
-"  Tags File Management {{{
+"  Job Management {{{
 
 " List of queued-up jobs, and in-progress jobs, per module.
 let s:update_queue = {}
-let s:maybe_in_progress = {}
+let s:update_in_progress = {}
 for module in g:gutentags_modules
     let s:update_queue[module] = []
-    let s:maybe_in_progress[module] = {}
+    let s:update_in_progress[module] = []
 endfor
 
-" Make a given file known as being currently generated or updated.
-function! gutentags#add_progress(module, file) abort
-    let l:abs_file = fnamemodify(a:file, ':p')
-    let s:maybe_in_progress[a:module][l:abs_file] = localtime()
+function! gutentags#add_job(module, tags_file, data) abort
+    call add(s:update_in_progress[a:module], [a:tags_file, a:data])
 endfunction
 
-" Get how to execute an external command depending on debug settings.
-function! gutentags#get_execute_cmd() abort
-    if has('win32')
-        let l:cmd = '!start '
-        if g:gutentags_background_update
-            let l:cmd .= '/b '
+function! gutentags#find_job_index_by_tags_file(module, tags_file) abort
+    let l:idx = -1
+    for upd_info in s:update_in_progress[a:module]
+        let l:idx += 1
+        if upd_info[0] == a:tags_file
+            return l:idx
         endif
-        return l:cmd
+    endfor
+    return -1
+endfunction
+
+function! gutentags#find_job_index_by_data(module, data) abort
+    let l:idx = -1
+    for upd_info in s:update_in_progress[a:module]
+        let l:idx += 1
+        if upd_info[1] == a:data
+            return l:idx
+        endif
+    endfor
+    return -1
+endfunction
+
+function! gutentags#get_job_tags_file(module, job_idx) abort
+    return s:update_in_progress[a:module][a:job_idx][0]
+endfunction
+
+function! gutentags#get_job_data(module, job_idx) abort
+    return s:update_in_progress[a:module][a:job_idx][1]
+endfunction
+
+function! gutentags#remove_job(module, job_idx) abort
+    let l:tags_file = s:update_in_progress[a:module][a:job_idx][0]
+    call remove(s:update_in_progress[a:module], a:job_idx)
+
+    " Run the user callback for finished jobs.
+    silent doautocmd User GutentagsUpdated
+
+    " See if we had any more updates queued up for this.
+    let l:qu_idx = -1
+    for qu_info in s:update_queue[a:module]
+        let l:qu_idx += 1
+        if qu_info[0] == l:tags_file
+            break
+        endif
+    endfor
+    if l:qu_idx >= 0
+        let l:qu_info = s:update_queue[a:module][l:qu_idx]
+        call remove(s:update_queue[a:module], l:qu_idx)
+
+        if bufexists(l:qu_info[1])
+            call gutentags#trace("Finished ".a:module." job, ".
+                        \"running queued update for '".l:tags_file."'.")
+            call s:update_tags(l:qu_info[1], a:module, l:qu_info[2], 2)
+        else
+            call gutentags#trace("Finished ".a:module." job, ".
+                        \"but skipping queued update for '".l:tags_file."' ".
+                        \"because originating buffer doesn't exist anymore.")
+        endif
     else
-        return '!'
+        call gutentags#trace("Finished ".a:module." job.")
     endif
 endfunction
 
-" Get the suffix for how to execute an external command.
-function! gutentags#get_execute_cmd_suffix() abort
-    if has('win32')
-        return ''
-    else
-        return ' &'
-    endif
+function! gutentags#remove_job_by_data(module, data) abort
+    let l:idx = gutentags#find_job_index_by_data(a:module, a:data)
+    call gutentags#remove_job(a:module, l:idx)
 endfunction
+
+" }}}
+
+"  Tags File Management {{{
 
 " (Re)Generate the tags file for the current buffer's file.
 function! s:manual_update_tags(bang) abort
@@ -343,7 +424,7 @@ function! s:manual_update_tags(bang) abort
     for module in g:gutentags_modules
         call s:update_tags(l:bn, module, a:bang, 0)
     endfor
-    silent doautocmd User GutentagsUpdated
+    silent doautocmd User GutentagsUpdating
 endfunction
 
 " (Re)Generate the tags file for a buffer that just go saved.
@@ -353,7 +434,7 @@ function! s:write_triggered_update_tags(bufno) abort
             call s:update_tags(a:bufno, module, 0, 2)
         endfor
     endif
-    silent doautocmd User GutentagsUpdated
+    silent doautocmd User GutentagsUpdating
 endfunction
 
 " Update the tags file for the current buffer's file.
@@ -372,12 +453,20 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
     let l:proj_dir = getbufvar(a:bufno, 'gutentags_root')
 
     " Check that there's not already an update in progress.
-    let l:lock_file = l:tags_file . '.lock'
-    if filereadable(l:lock_file)
+    let l:in_progress_idx = gutentags#find_job_index_by_tags_file(
+                \a:module, l:tags_file)
+    if l:in_progress_idx >= 0
         if a:queue_mode == 2
-            let l:idx = index(s:update_queue[a:module], l:tags_file)
-            if l:idx < 0
-                call add(s:update_queue[a:module], l:tags_file)
+            let l:needs_queuing = 1
+            for qu_info in s:update_queue[a:module]
+                if qu_info[0] == l:tags_file
+                    let l:needs_queuing = 0
+                    break
+                endif
+            endfor
+            if l:needs_queuing
+                call add(s:update_queue[a:module], 
+                            \[l:tags_file, a:bufno, a:write_mode])
             endif
             call gutentags#trace("Tag file '" . l:tags_file . 
                         \"' is already being updated. Queuing it up...")
@@ -388,8 +477,10 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
             echom "gutentags: The tags file is already being updated, " .
                         \"please try again later."
         else
-            call gutentags#throwerr("Unknown queue mode: " . a:queue_mode)
+            call gutentags#throw("Unknown queue mode: " . a:queue_mode)
         endif
+
+        " Don't update the tags right now.
         return
     endif
 
@@ -400,7 +491,10 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
     call gutentags#chdir(fnameescape(l:proj_dir))
     try
         call call("gutentags#".a:module."#generate",
-                    \[l:proj_dir, l:tags_file, a:write_mode])
+                    \[l:proj_dir, l:tags_file,
+                    \ {
+                    \   'write_mode': a:write_mode,
+                    \ }])
     catch /^gutentags\:/
         echom "Error while generating ".a:module." file:"
         echom v:exception
@@ -425,14 +519,6 @@ function! gutentags#rescan(...)
     call gutentags#setup_gutentags()
     if a:0 && a:1
         let g:gutentags_trace = l:trace_backup
-    endif
-endfunction
-
-function! gutentags#delete_lock_files() abort
-    if exists('b:gutentags_files')
-        for tagfile in values(b:gutentags_files)
-            silent call delete(tagfile.'.lock')
-        endfor
     endif
 endfunction
 
@@ -461,6 +547,54 @@ function! gutentags#fake(...)
     endif
     echom ""
 endfunction
+
+function! gutentags#default_io_cb(data) abort
+	call gutentags#trace(a:data)
+endfunction
+
+if has('nvim')
+    " Neovim job API.
+    function! s:nvim_job_exit_wrapper(real_cb, job, exit_code, event_type) abort
+        call call(a:real_cb, [a:job, a:exit_code])
+    endfunction
+
+    function! s:nvim_job_out_wrapper(real_cb, job, lines, event_type) abort
+        call call(a:real_cb, [a:lines])
+    endfunction
+
+    function! gutentags#build_default_job_options(module) abort
+        let l:job_opts = {
+                    \'on_exit': function(
+                    \    '<SID>nvim_job_exit_wrapper',
+                    \    ['gutentags#'.a:module.'#on_job_exit']),
+                    \'on_stdout': function(
+                    \    '<SID>nvim_job_out_wrapper',
+                    \    ['gutentags#default_io_cb']),
+                    \'on_stderr': function(
+                    \    '<SID>nvim_job_out_wrapper',
+                    \    ['gutentags#default_io_cb'])
+                    \}
+        return l:job_opts
+    endfunction
+
+    function! gutentags#start_job(cmd, opts) abort
+        return jobstart(a:cmd, a:opts)
+    endfunction
+else
+    " Vim8 job API.
+    function! gutentags#build_default_job_options(module) abort
+        let l:job_opts = {
+                    \'exit_cb': 'gutentags#'.a:module.'#on_job_exit'
+                    \'out_cb': 'gutentags#default_io_cb',
+                    \'err_cb': 'gutentags#default_io_cb'
+                    \}
+        return l:job_opts
+    endfunction
+
+    function! gutentags#start_job(cmd, opts) abort
+        return job_start(a:cmd, a:opts)
+    endfunction
+endif
 
 function! gutentags#inprogress()
     echom "gutentags: generations in progress:"
@@ -492,45 +626,26 @@ function! gutentags#statusline(...) abort
         return ''
     endif
 
-    " Figure out what the user is customizing.
-    let l:gen_msg = 'TAGS'
-    if a:0 > 0
-        let l:gen_msg = a:1
-    endif
-
-    " To make this function as fast as possible, we first check whether the
-    " current buffer's tags file is 'maybe' being generated. This provides a
-    " nice and quick bail out for 99.9% of cases before we need to this the
-    " file-system to check the lock file.
+    " Find any module that has a job in progress for any of this buffer's
+    " tags files.
     let l:modules_in_progress = []
-    for module in keys(b:gutentags_files)
-        let l:abs_tag_file = fnamemodify(b:gutentags_files[module], ':p')
-        let l:progress_queue = s:maybe_in_progress[module]
-        let l:timestamp = get(l:progress_queue, l:abs_tag_file)
-        if l:timestamp == 0
-            continue
+    for [module, tags_file] in items(b:gutentags_files)
+        let l:jobidx = gutentags#find_job_index_by_tags_file(module, tags_file)
+        if l:jobidx >= 0
+            call add(l:modules_in_progress, module)
         endif
-        " It's maybe generating! Check if the lock file is still there... but
-        " don't do it too soon after the script was originally launched, because
-        " there can be a race condition where we get here just before the script
-        " had a chance to write the lock file.
-        if (localtime() - l:timestamp) > 1 &&
-                    \!filereadable(l:abs_tag_file . '.lock')
-            call remove(l:progress_queue, l:abs_tag_file)
-            continue
-        endif
-        call add(l:modules_in_progress, module)
     endfor
 
+    " Did we find any module? If not, don't print anything.
     if len(l:modules_in_progress) == 0
         return ''
     endif
 
-    " It's still there! So probably `ctags` is still running...
-    " (although there's a chance it crashed, or the script had a problem, and
-    " the lock file has been left behind... we could try and run some
-    " additional checks here to see if it's legitimately running, and
-    " otherwise delete the lock file... maybe in the future...)
+    " W00t, stuff is happening! Let's print what.
+    let l:gen_msg = 'TAGS'
+    if a:0 > 0
+        let l:gen_msg = a:1
+    endif
     let l:gen_msg .= '['.join(l:modules_in_progress, ',').']'
     return l:gen_msg
 endfunction
