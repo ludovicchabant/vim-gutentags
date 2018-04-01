@@ -559,7 +559,7 @@ if has('nvim')
     endfunction
 
     function! s:nvim_job_out_wrapper(real_cb, job, lines, event_type) abort
-        call call(a:real_cb, [a:lines])
+        call call(a:real_cb, [a:job, a:lines])
     endfunction
 
     function! gutentags#build_default_job_options(module) abort
