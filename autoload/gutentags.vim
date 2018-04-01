@@ -596,14 +596,24 @@ else
     endfunction
 endif
 
+" Returns which modules are currently generating something for the
+" current buffer.
 function! gutentags#inprogress()
-    echom "gutentags: generations in progress:"
-    for mod_name in keys(s:maybe_in_progress)
-        for mib in keys(s:maybe_in_progress[mod_name])
-            echom mod_name.":  ".mib
-        endfor
-    endfor
-    echom ""
+   " Does this buffer have gutentags enabled?
+   if !exists('b:gutentags_files')
+      return []
+   endif
+
+   " Find any module that has a job in progress for any of this buffer's
+   " tags files.
+   let l:modules_in_progress = []
+   for [module, tags_file] in items(b:gutentags_files)
+      let l:jobidx = gutentags#find_job_index_by_tags_file(module, tags_file)
+      if l:jobidx >= 0
+         call add(l:modules_in_progress, module)
+      endif
+   endfor
+   return l:modules_in_progress
 endfunction
 
 " }}}
@@ -618,36 +628,45 @@ endfunction
 "   if any, is going to be produced.
 "   (defaults to empty strings)
 " - arg 3 is the text to be shown if tags are currently being generated.
-"   (defaults to 'TAGS')
+"   (defaults to the name(s) of the modules currently generating).
 
 function! gutentags#statusline(...) abort
-    if !exists('b:gutentags_files')
-        " This buffer doesn't have gutentags.
-        return ''
+    let l:modules_in_progress = gutentags#inprogress()
+    if empty(l:modules_in_progress)
+       return ''
     endif
 
-    " Find any module that has a job in progress for any of this buffer's
-    " tags files.
-    let l:modules_in_progress = []
-    for [module, tags_file] in items(b:gutentags_files)
-        let l:jobidx = gutentags#find_job_index_by_tags_file(module, tags_file)
-        if l:jobidx >= 0
-            call add(l:modules_in_progress, module)
-        endif
-    endfor
-
-    " Did we find any module? If not, don't print anything.
-    if len(l:modules_in_progress) == 0
-        return ''
-    endif
-
-    " W00t, stuff is happening! Let's print what.
-    let l:gen_msg = 'TAGS'
+    let l:prefix = ''
+    let l:suffix = ''
     if a:0 > 0
-        let l:gen_msg = a:1
+       let l:prefix = a:1
     endif
-    let l:gen_msg .= '['.join(l:modules_in_progress, ',').']'
-    return l:gen_msg
+    if a:0 > 1
+       let l:suffix = a:2
+    endif
+
+    if a:0 > 2
+       let l:genmsg = a:3
+    else
+       let l:genmsg = join(l:modules_in_progress, ',')
+    endif
+
+    return l:prefix.l:genmsg.l:suffix
+endfunction
+
+" Same as `gutentags#statusline`, but the only parameter is a `Funcref` or
+" function name that will get passed the list of modules currently generating
+" something. This formatter function should return the string to display in
+" the status line.
+
+function! gutentags#statusline_cb(fmt_cb, ...) abort
+    let l:modules_in_progress = gutentags#inprogress()
+
+    if (a:0 == 0 || !a:1) && empty(l:modules_in_progress)
+       return ''
+    endif
+
+    return call(a:fmt_cb, [l:modules_in_progress])
 endfunction
 
 " }}}

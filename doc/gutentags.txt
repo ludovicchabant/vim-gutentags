@@ -194,9 +194,24 @@ enough. In that case, you may want to know when `ctags` is running, so you
 have a heads up if some of the tags aren't recognized yet.
 
                                                 *gutentags#statusline()*
-You can display and indicator of tag generation progress in your |status-line|
+You can display an indicator of tag generation progress in your |status-line|
 with the following function: >
         :set statusline+=%{gutentags#statusline()}
+
+The function will, by default, print a list of modules in the status line. So
+if the `ctags` module (see |g:gutentags_modules|) is currently generating
+a tags file, you will see "ctags" printed in the status line. If nothing is
+happening, nothing will be printed in the status line.
+
+You can pass some parameters to customize this:
+
+1. A prefix string (defaults to `""`).
+2. A suffix string (defaults to `""`).
+3. The text to print (defaults to the names of modules currently generating
+   something).
+
+So using `gutentags#statusline('[', ']')` would print `"[ctags]"` instead of
+`"ctags"`.
 
 Because Gutentags runs the tag generation in the background, the statusline
 indicator might stay there even after the background process has ended. It
@@ -210,6 +225,31 @@ For instance, with the `lightline` plugin:
             autocmd User GutentagsUpdating call lightline#update()
             autocmd User GutentagsUpdated call lightline#update()
         augroup END
+
+                                                *gutentags#statusline_cb*
+As an alternative to the previous function, `gutentags#statusline_cb` takes
+a single parameter which should be a |Funcref| or a function name. This
+function should take a list of active module names, and return a string. This
+lets you completely control what the status line will print.
+
+For instance:
+        function! s:get_gutentags_status(mods) abort
+            let l:msg = ''
+            if index(a:mods, 'ctags') > 0
+               let l:msg .= '♨'
+             endif
+             if index(a:mods, 'cscope') > 0
+               let l:msg .= '♺'
+             endif
+             return l:msg
+        endfunction
+
+        :set statusline+=%{gutentags#statusline_cb(
+                    \function('<SID>get_gutentags_status'))}
+
+By default, the callback function doesn't get called if no tags generation is
+currently happening. You can pass `1` as a second argument so that the
+callback function is always called.
 
 
 =============================================================================
