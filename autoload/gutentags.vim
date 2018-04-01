@@ -548,8 +548,8 @@ function! gutentags#fake(...)
     echom ""
 endfunction
 
-function! gutentags#default_io_cb(data) abort
-	call gutentags#trace(a:data)
+function! gutentags#default_io_cb(chan, msg) abort
+	call gutentags#trace(a:msg)
 endfunction
 
 if has('nvim')
@@ -584,7 +584,7 @@ else
     " Vim8 job API.
     function! gutentags#build_default_job_options(module) abort
         let l:job_opts = {
-                    \'exit_cb': 'gutentags#'.a:module.'#on_job_exit'
+                    \'exit_cb': 'gutentags#'.a:module.'#on_job_exit',
                     \'out_cb': 'gutentags#default_io_cb',
                     \'err_cb': 'gutentags#default_io_cb'
                     \}
