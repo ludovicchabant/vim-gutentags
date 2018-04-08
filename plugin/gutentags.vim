@@ -8,8 +8,8 @@ if (&cp || get(g:, 'gutentags_dont_load', 0))
     finish
 endif
 
-if v:version < 800
-    echoerr "gutentags: this plugin requires vim >= 8.0."
+if v:version < 704
+    echoerr "gutentags: this plugin requires vim >= 7.4."
     finish
 endif
 
