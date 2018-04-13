@@ -235,10 +235,10 @@ lets you completely control what the status line will print.
 For instance:
         function! s:get_gutentags_status(mods) abort
             let l:msg = ''
-            if index(a:mods, 'ctags') > 0
+            if index(a:mods, 'ctags') >= 0
                let l:msg .= '♨'
              endif
-             if index(a:mods, 'cscope') > 0
+             if index(a:mods, 'cscope') >= 0
                let l:msg .= '♺'
              endif
              return l:msg
