@@ -73,7 +73,7 @@ function! gutentags#cscope#on_job_exit(job, exit_val) abort
             call add(s:added_dbs, l:dbfile_path)
             silent! execute 'cs add ' . fnameescape(l:dbfile_path)
         else
-            execute 'cs reset'
+            silent! execute 'cs reset'
         endif
     else
         call gutentags#warning(
