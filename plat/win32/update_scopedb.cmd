@@ -59,13 +59,7 @@ echo locked > "%DB_FILE%.lock"
 
 echo Running cscope >> %LOG_FILE%
 if NOT ["%FILE_LIST_CMD%"]==[""] (
-    if ["%PROJECT_ROOT%"]==["."] (
-        call %FILE_LIST_CMD% > %DB_FILE%.files
-    ) else (
-        rem Potentially useful:
-        rem http://stackoverflow.com/questions/9749071/cmd-iterate-stdin-piped-from-another-command
-        %FILE_LIST_CMD% | for /F "usebackq delims=" %%F in (`findstr "."`) do @echo %PROJECT_ROOT%\%%F > %DB_FILE%.files
-    )
+	call %FILE_LIST_CMD% > %DB_FILE%.files
     set CSCOPE_ARGS=%CSCOPE_ARGS% -i %TAGS_FILE%.files
 ) ELSE (
     set CSCOPE_ARGS=%CSCOPE_ARGS% -R
