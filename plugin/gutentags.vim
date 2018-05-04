@@ -33,11 +33,11 @@ let g:gutentags_modules = get(g:, 'gutentags_modules', ['ctags'])
 let g:gutentags_init_user_func = get(g:, 'gutentags_init_user_func', get(g:, 'gutentags_enabled_user_func', ''))
 
 let g:gutentags_project_root_finder = get(g:, 'gutentags_project_root_finder', 
-            \'gutentags#get_project_root')
+            \'gutentags#defaults#get_project_root')
 let g:gutentags_project_info_finder = get(g:, 'gutentags_project_info_finder', 
-            \'gutentags#get_project_info')
+            \'gutentags#defaults#get_project_info')
 let g:gutentags_project_file_list_cmd_finder = get(g:, 'gutentags_project_file_list_cmd_finder',
-            \'gutentags#get_project_file_list_cmd')
+            \'gutentags#defaults#get_project_file_list_cmd')
 
 " settings for gutentags#get_project_root
 let g:gutentags_add_default_project_roots = get(g:, 'gutentags_add_default_project_roots', 1)
