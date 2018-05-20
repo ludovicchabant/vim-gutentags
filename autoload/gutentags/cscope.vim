@@ -31,11 +31,12 @@ function! gutentags#cscope#init(project_root) abort
     let l:dbfile_path = gutentags#get_cachefile(
                 \a:project_root, g:gutentags_scopefile)
     let b:gutentags_files['cscope'] = l:dbfile_path
+	let s:project_root = a:project_root
 
     if g:gutentags_auto_add_cscope && filereadable(l:dbfile_path)
         if index(s:added_dbs, l:dbfile_path) < 0
             call add(s:added_dbs, l:dbfile_path)
-            silent! execute 'cs add ' . fnameescape(l:dbfile_path)
+            silent! execute 'cs add ' . fnameescape(l:dbfile_path) . ' ' . s:project_root
         endif
     endif
 endfunction
@@ -71,7 +72,7 @@ function! gutentags#cscope#on_job_exit(job, exit_val) abort
     if a:exit_val == 0
         if index(s:added_dbs, l:dbfile_path) < 0
             call add(s:added_dbs, l:dbfile_path)
-            silent! execute 'cs add ' . fnameescape(l:dbfile_path)
+            silent! execute 'cs add ' . fnameescape(l:dbfile_path) . ' ' . s:project_root
         else
             execute 'cs reset'
         endif

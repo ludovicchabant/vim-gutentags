@@ -38,7 +38,7 @@ function! s:add_db(db_file) abort
 		call gutentags#trace(
 					\"Adding cscope DB file: " . a:db_file)
 		set nocscopeverbose
-		execute 'cs add ' . fnameescape(a:db_file)
+		execute 'cs add ' . fnameescape(a:db_file) . ' ' . s:project_root
 		set cscopeverbose
 		let s:added_db_files[a:db_file] = 1
 	else
@@ -68,6 +68,7 @@ function! gutentags#gtags_cscope#init(project_root) abort
 	" paths around and interpreting input correctly.
 	let $GTAGSDBPATH = l:db_path
 	let $GTAGSROOT = a:project_root
+	let s:project_root = a:project_root
 
 	if g:gutentags_auto_add_gtags_cscope && 
 				\!has_key(s:added_db_files, l:db_file)
