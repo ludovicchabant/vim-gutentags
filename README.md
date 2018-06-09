@@ -70,6 +70,12 @@ I hope Gutentags will bring you as much closure as me regarding tag files. I kno
 I don't want to have to think about it, and probably neither do you.
 
 
+# Related Projects
+
+* [gutentags_plus](https://github.com/skywind3000/gutentags_plus): handles
+  switching between `cscope` databases automatically before performing a search
+  query.
+
 [Pathogen]: https://github.com/tpope/vim-pathogen
 [ctrlp]: https://github.com/kien/ctrlp.vim
 

@@ -629,6 +629,11 @@ g:gutentags_auto_add_gtags_cscope
                         generated code database to Vim by running `:cs add`
                         (see |:cscope|).
                         Defaults to 1.
+
+People using `cscope` or `gtags_cscope` across multiple projects in the same
+Vim instance might be interested in the `gutentags_plus` plugin, which handles
+switching databases automatically before performing a query. 
+See https://github.com/skywind3000/gutentags_plus.
       
 =============================================================================
 5. Project Settings                             *gutentags-project-settings*
