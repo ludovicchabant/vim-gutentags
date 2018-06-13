@@ -563,18 +563,19 @@ if has('nvim')
     endfunction
 
     function! gutentags#build_default_job_options(module) abort
-        let l:job_opts = {
-                    \'on_exit': function(
-                    \    '<SID>nvim_job_exit_wrapper',
-                    \    ['gutentags#'.a:module.'#on_job_exit']),
-                    \'on_stdout': function(
-                    \    '<SID>nvim_job_out_wrapper',
-                    \    ['gutentags#default_io_cb']),
-                    \'on_stderr': function(
-                    \    '<SID>nvim_job_out_wrapper',
-                    \    ['gutentags#default_io_cb'])
-                    \}
-        return l:job_opts
+       " Neovim kills jobs on exit, which is what we want.
+       let l:job_opts = {
+                \'on_exit': function(
+                \    '<SID>nvim_job_exit_wrapper',
+                \    ['gutentags#'.a:module.'#on_job_exit']),
+                \'on_stdout': function(
+                \    '<SID>nvim_job_out_wrapper',
+                \    ['gutentags#default_io_cb']),
+                \'on_stderr': function(
+                \    '<SID>nvim_job_out_wrapper',
+                \    ['gutentags#default_io_cb'])
+                \}
+       return l:job_opts
     endfunction
 
     function! gutentags#start_job(cmd, opts) abort
@@ -584,10 +585,11 @@ else
     " Vim8 job API.
     function! gutentags#build_default_job_options(module) abort
         let l:job_opts = {
-                    \'exit_cb': 'gutentags#'.a:module.'#on_job_exit',
-                    \'out_cb': 'gutentags#default_io_cb',
-                    \'err_cb': 'gutentags#default_io_cb'
-                    \}
+                 \'exit_cb': 'gutentags#'.a:module.'#on_job_exit',
+                 \'out_cb': 'gutentags#default_io_cb',
+                 \'err_cb': 'gutentags#default_io_cb',
+                 \'stoponexit': 'term'
+                 \}
         return l:job_opts
     endfunction
 
