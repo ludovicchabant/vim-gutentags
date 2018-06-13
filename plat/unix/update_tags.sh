@@ -117,6 +117,8 @@ if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
             done > "${TAGS_FILE}.files"
         fi
         CTAGS_ARGS="${CTAGS_ARGS} -L ${TAGS_FILE}.files"
+        # Clear project root if we have a file list
+        PROJECT_ROOT=""
     fi
     echo "Running ctags on whole project"
     echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS \"$PROJECT_ROOT\""
