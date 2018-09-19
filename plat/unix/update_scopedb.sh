@@ -62,10 +62,10 @@ fi
 
 if [ -n "${FILE_LIST_CMD}" ]; then
     if [ "${PROJECT_ROOT}" = "." ]; then
-        $FILE_LIST_CMD > "${DB_FILE}.files"
+        eval "$FILE_LIST_CMD" > "${DB_FILE}.files"
     else
         # If using a tags cache directory, use absolute paths
-        $FILE_LIST_CMD | while read -r l; do
+        eval "$FILE_LIST_CMD" | while read -r l; do
             echo "${PROJECT_ROOT%/}/${l}"
         done > "${DB_FILE}.files"
     fi
