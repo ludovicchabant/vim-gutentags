@@ -64,7 +64,7 @@ endfunction
 
 " Gets a file path in the correct `plat` folder.
 function! gutentags#get_plat_file(filename) abort
-    return g:gutentags_plat_dir . a:filename . g:gutentags_script_ext
+    return g:gutentags_shell . g:gutentags_plat_dir . a:filename . g:gutentags_script_ext
 endfunction
 
 " Gets a file path in the resource folder.
