@@ -31,10 +31,10 @@ endfunction
 
 " Prints a message if debug tracing is enabled.
 function! gutentags#trace(message, ...)
-   if g:gutentags_trace || (a:0 && a:1)
-       let l:message = "gutentags: " . a:message
-       echom l:message
-   endif
+    if g:gutentags_trace || (a:0 && a:1)
+        let l:message = "gutentags: " . a:message
+        echom l:message
+    endif
 endfunction
 
 " Strips the ending slash in a path.
@@ -549,7 +549,7 @@ function! gutentags#fake(...)
 endfunction
 
 function! gutentags#default_io_cb(chan, msg) abort
-   call gutentags#trace(string(a:msg))
+    call gutentags#trace(string(a:msg))
 endfunction
 
 if has('nvim')
@@ -601,21 +601,21 @@ endif
 " Returns which modules are currently generating something for the
 " current buffer.
 function! gutentags#inprogress()
-   " Does this buffer have gutentags enabled?
-   if !exists('b:gutentags_files')
-      return []
-   endif
+    " Does this buffer have gutentags enabled?
+    if !exists('b:gutentags_files')
+        return []
+    endif
 
-   " Find any module that has a job in progress for any of this buffer's
-   " tags files.
-   let l:modules_in_progress = []
-   for [module, tags_file] in items(b:gutentags_files)
-      let l:jobidx = gutentags#find_job_index_by_tags_file(module, tags_file)
-      if l:jobidx >= 0
-         call add(l:modules_in_progress, module)
-      endif
-   endfor
-   return l:modules_in_progress
+    " Find any module that has a job in progress for any of this buffer's
+    " tags files.
+    let l:modules_in_progress = []
+    for [module, tags_file] in items(b:gutentags_files)
+        let l:jobidx = gutentags#find_job_index_by_tags_file(module, tags_file)
+        if l:jobidx >= 0
+            call add(l:modules_in_progress, module)
+        endif
+    endfor
+    return l:modules_in_progress
 endfunction
 
 " }}}
