@@ -266,7 +266,21 @@ g:gutentags_enabled
                         re-enable Gutentags, you won't have some buffers
                         mysteriously working while others (those open last)
                         don't.
-                        Defaults to 1.
+                        Defaults to `1`.
+
+                                                *gutentags_trace*
+g:gutentags_trace
+                        When true, Gutentags will spit out debugging
+                        information as Vim messages (which you can later read
+                        with |:messages|). It also runs its background scripts
+                        with extra parameters to log activity to a `tags.log`
+                        file that you can also inspect for more information.
+
+                        Note: you can run `:verbose GutentagsUpdate` to
+                        temporarily set |g:gutentags_trace| to `1` for that
+                        update only.
+
+                        Defaults to `0`.
 
                                                 *gutentags_dont_load*
 g:gutentags_dont_load
