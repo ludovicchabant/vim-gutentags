@@ -160,6 +160,9 @@ Some debugging/troubleshooting commands are also available if the
                         that they can start working again when you re-enable
                         Gutentags.
 
+                        {only available when
+                        |gutentags_define_advanced_commands| is set}
+
                                                 *GutentagsToggleTrace*
 :GutentagsToggleTrace
                         If you want to keep an eye on what Gutentags is doing,
@@ -171,6 +174,9 @@ Some debugging/troubleshooting commands are also available if the
                         In addition to messages in Vim, it will also make
                         Gutentags redirect the output of the tag generation
                         script to a `.log` file in the project root.
+
+                        {only available when
+                        |gutentags_define_advanced_commands| is set}
 
 
 Gutentags also has some user auto-commands (see |User| and |:doautocmd|):
