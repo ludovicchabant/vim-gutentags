@@ -420,11 +420,24 @@ endfunction
 
 " (Re)Generate the tags file for the current buffer's file.
 function! s:manual_update_tags(bang) abort
-    let l:bn = bufnr('%')
-    for module in g:gutentags_modules
-        call s:update_tags(l:bn, module, a:bang, 0)
-    endfor
-    silent doautocmd User GutentagsUpdating
+    let l:restore_prev_trace = 0
+    let l:prev_trace = g:gutentags_trace
+    if &verbose > 0
+        let g:gutentags_trace = 1
+        let l:restore_prev_trace = 1
+    endif
+
+    try
+        let l:bn = bufnr('%')
+        for module in g:gutentags_modules
+            call s:update_tags(l:bn, module, a:bang, 0)
+        endfor
+        silent doautocmd User GutentagsUpdating
+    finally
+        if l:restore_prev_trace
+            let g:gutentags_trace = l:prev_trace
+        endif
+    endtry
 endfunction
 
 " (Re)Generate the tags file for a buffer that just go saved.
