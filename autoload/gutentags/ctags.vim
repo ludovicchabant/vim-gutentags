@@ -38,6 +38,8 @@ call s:_handleOldOptions()
 let s:did_check_exe = 0
 let s:runner_exe = gutentags#get_plat_file('update_tags')
 let s:unix_redir = (&shellredir =~# '%s') ? &shellredir : &shellredir . ' %s'
+let s:wildignores_options_path = ''
+let s:last_wildignores = ''
 
 function! gutentags#ctags#init(project_root) abort
     " Figure out the path to the tags file.
@@ -147,9 +149,8 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
         let l:cmd += ['-o', '"' . l:proj_options_file . '"']
     endif
     if g:gutentags_ctags_exclude_wildignore
-        for ign in split(&wildignore, ',')
-            let l:cmd += ['-x', shellescape(ign, 1)]
-        endfor
+        call s:generate_wildignore_options()
+        let l:cmd += ['-x', shellescape('@'.s:wildignores_options_path, 1)]
     endif
     for exc in g:gutentags_ctags_exclude
         let l:cmd += ['-x', '"' . exc . '"']
@@ -165,7 +166,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
     call gutentags#trace("Running: " . string(l:cmd))
     call gutentags#trace("In:      " . getcwd())
     if !g:gutentags_fake
-		let l:job_opts = gutentags#build_default_job_options('ctags')
+        let l:job_opts = gutentags#build_default_job_options('ctags')
         let l:job = gutentags#start_job(l:cmd, l:job_opts)
         call gutentags#add_job('ctags', a:tags_file, l:job)
     else
@@ -195,6 +196,32 @@ function! s:get_ctags_executable(proj_dir) abort
     let exepath = exists('g:gutentags_ctags_executable_{l:type}')
         \ ? g:gutentags_ctags_executable_{l:type} : g:gutentags_ctags_executable
     return expand(exepath, 1)
+endfunction
+
+function! s:generate_wildignore_options() abort
+    if s:last_wildignores == &wildignore
+        " The 'wildignore' setting didn't change since last time we did this.
+        call gutentags#trace("Wildignore options file is up to date.")
+        return
+    endif
+
+    if s:wildignores_options_path == ''
+        if empty(g:gutentags_cache_dir)
+            let s:wildignores_options_path = tempname()
+        else
+            let s:wildignores_options_path = 
+                        \gutentags#stripslash(g:gutentags_cache_dir).
+                        \'/_wildignore.options'
+        endif
+    endif
+
+    call gutentags#trace("Generating wildignore options: ".s:wildignores_options_path)
+    let l:opt_lines = []
+    for ign in split(&wildignore, ',')
+        call add(l:opt_lines, '--exclude='.ign)
+    endfor
+    call writefile(l:opt_lines, s:wildignores_options_path)
+    let s:last_wildignores = &wildignore
 endfunction
 
 function! s:process_options_file(proj_dir, path) abort
