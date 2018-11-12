@@ -150,7 +150,9 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
     endif
     if g:gutentags_ctags_exclude_wildignore
         call s:generate_wildignore_options()
-        let l:cmd += ['-x', shellescape('@'.s:wildignores_options_path, 1)]
+        if !empty(s:wildignores_options_path)
+            let l:cmd += ['-x', shellescape('@'.s:wildignores_options_path, 1)]
+        endif
     endif
     for exc in g:gutentags_ctags_exclude
         let l:cmd += ['-x', '"' . exc . '"']
