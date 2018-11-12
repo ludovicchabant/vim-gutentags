@@ -107,7 +107,7 @@ if exist "%TAGS_FILE%" (
 )
 if ["%INDEX_WHOLE_PROJECT%"]==["1"] (
     if not ["%FILE_LIST_CMD%"]==[""] (
-        echo Running custom file lister >> %LOG_FILE%
+        echo Running file list command >> %LOG_FILE%
         set use_raw_list=0
         if ["%PROJECT_ROOT%"]==["."] set use_raw_list=1
         if ["%FILE_LIST_CMD_IS_ABSOLUTE%"]==["1"] set use_raw_list=1

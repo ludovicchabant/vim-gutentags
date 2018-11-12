@@ -109,20 +109,25 @@ fi
 if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
     if [ -n "${FILE_LIST_CMD}" ]; then
         if [ "${PROJECT_ROOT}" = "." ] || [ $FILE_LIST_CMD_IS_ABSOLUTE -eq 1 ]; then
+            echo "Running file list command"
+            echo "eval $FILE_LIST_CMD > \"${TAGS_FILE}.files\""
             eval $FILE_LIST_CMD > "${TAGS_FILE}.files"
         else
             # If using a tags cache directory, use absolute paths
+            echo "Running file list command, patching for absolute paths"
+            echo "eval $FILE_LIST_CMD"
             eval $FILE_LIST_CMD | while read -r l; do
                 echo "${PROJECT_ROOT%/}/${l}"
             done > "${TAGS_FILE}.files"
         fi
-        CTAGS_ARGS="${CTAGS_ARGS} -L ${TAGS_FILE}.files"
-        # Clear project root if we have a file list
-        PROJECT_ROOT=""
+        CTAGS_ARGS="${CTAGS_ARGS} -L "${TAGS_FILE}.files""
+    else
+        CTAGS_ARGS="${CTAGS_ARGS} "${PROJECT_ROOT}""
     fi
+
     echo "Running ctags on whole project"
-    echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS \"$PROJECT_ROOT\""
-    $CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS "$PROJECT_ROOT"
+    echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS"
+    $CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS
 else
     echo "Running ctags on \"$UPDATED_SOURCE\""
     echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS --append \"$UPDATED_SOURCE\""
