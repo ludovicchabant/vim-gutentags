@@ -562,7 +562,7 @@ function! gutentags#fake(...)
 endfunction
 
 function! gutentags#default_io_cb(chan, msg) abort
-    call gutentags#trace(string(a:msg))
+    call gutentags#trace('[job output]: '.string(a:msg))
 endfunction
 
 if has('nvim')
