@@ -343,6 +343,14 @@ g:gutentags_add_default_project_roots
                         The default markers are:
                         `['.git', '.hg', '.bzr', '_darcs', '_darcs', '_FOSSIL_', '.fslckout']`
 
+                                                *gutentags_exclude_filetypes*
+g:gutentags_exclude_filetypes
+                        A |List| of file types (see |'filetype'|) that Gutentags
+                        should ignore. When a buffer is opened, if its
+                        'filetype' is found in this list, Gutentags features
+                        won't be available for this buffer.
+                        Defaults to an empty list (`[]`).
+
                                                 *gutentags_exclude_project_root*
 g:gutentags_exclude_project_root
                         A list of project roots to generally ignore. If a file

@@ -50,6 +50,7 @@ let g:gutentags_project_info = get(g:, 'gutentags_project_info', [])
 call add(g:gutentags_project_info, {'type': 'python', 'file': 'setup.py'})
 call add(g:gutentags_project_info, {'type': 'ruby', 'file': 'Gemfile'})
 
+let g:gutentags_exclude_filetypes = get(g:, 'gutentags_exclude_filetypes', [])
 let g:gutentags_exclude_project_root = get(g:, 'gutentags_exclude_project_root', ['/usr/local'])
 let g:gutentags_resolve_symlinks = get(g:, 'gutentags_resolve_symlinks', 0)
 let g:gutentags_generate_on_new = get(g:, 'gutentags_generate_on_new', 1)

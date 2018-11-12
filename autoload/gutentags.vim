@@ -248,6 +248,12 @@ function! gutentags#setup_gutentags() abort
         return
     endif
 
+    " Don't setup gutentags for things that don't need it, or that could
+    " cause problems.
+    if index(g:gutentags_exclude_filetypes, &filetype) >= 0
+        return
+    endif
+
     " Let the user specify custom ways to disable Gutentags.
     if g:gutentags_init_user_func != '' &&
                 \!call(g:gutentags_init_user_func, [expand('%:p')])
