@@ -220,7 +220,7 @@ function! s:generate_wildignore_options() abort
     call gutentags#trace("Generating wildignore options: ".s:wildignores_options_path)
     let l:opt_lines = []
     for ign in split(&wildignore, ',')
-        call add(l:opt_lines, '--exclude='.ign)
+        call add(l:opt_lines, ign)
     endfor
     call writefile(l:opt_lines, s:wildignores_options_path)
     let s:last_wildignores = &wildignore
