@@ -274,6 +274,13 @@ g:gutentags_enabled
                         don't.
                         Defaults to `1`.
 
+                                                *gutentags_enabled_on_missing*
+g:gutentags_enabled_on_missing
+                        Defines whether Gutentags should be enabled when no
+                        tag file is found.  This will naturally overwrite
+                        |gutentags_generate_on_missing|.
+                        Defaults to `1`.
+
                                                 *gutentags_trace*
 g:gutentags_trace
                         When true, Gutentags will spit out debugging
