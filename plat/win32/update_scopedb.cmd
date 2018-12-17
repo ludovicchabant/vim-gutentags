@@ -64,12 +64,12 @@ if NOT ["%FILE_LIST_CMD%"]==[""] (
     ) else (
         rem Potentially useful:
         rem http://stackoverflow.com/questions/9749071/cmd-iterate-stdin-piped-from-another-command
-        %FILE_LIST_CMD% | for /F "usebackq delims=" %%F in (`findstr "."`) do @echo %PROJECT_ROOT%\%%F > %DB_FILE%.files
+        for /F "usebackq delims=" %%F in (`%FILE_LIST_CMD%`) do @echo "%PROJECT_ROOT%\%%F">%DB_FILE%.files
     )
-    set CSCOPE_ARGS=%CSCOPE_ARGS% -i %TAGS_FILE%.files
 ) ELSE (
-    set CSCOPE_ARGS=%CSCOPE_ARGS% -R
+    for /F "usebackq delims=" %%F in (`dir /S /B /A-D .`) do @echo "%%F">%DB_FILE%.files
 )
+set CSCOPE_ARGS=%CSCOPE_ARGS% -i %DB_FILE%.files
 "%CSCOPE_EXE%" %CSCOPE_ARGS% -b -k -f "%DB_FILE%"
 if ERRORLEVEL 1 (
     echo ERROR: Cscope executable returned non-zero code. >> %LOG_FILE%
