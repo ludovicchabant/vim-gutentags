@@ -70,7 +70,7 @@ if [ -n "${FILE_LIST_CMD}" ]; then
         done > "${DB_FILE}.files"
     fi
 else
-    find . -type f > "${DB_FILE}.files"
+    find . -type f ! -name ${DB_FILE} > "${DB_FILE}.files"
 fi
 CSCOPE_ARGS="${CSCOPE_ARGS} -i ${DB_FILE}.files"
 
