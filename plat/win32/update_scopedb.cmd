@@ -36,8 +36,6 @@ if [%1]==[-L] (
 if [%1]==[-l] (
     set LOG_FILE=%~2
     shift
-    goto :LoopParseArgs
-)
 echo Invalid Argument: %1
 goto :Usage
 
@@ -70,6 +68,9 @@ if NOT ["%FILE_LIST_CMD%"]==[""] (
     for /F "usebackq delims=" %%F in (`dir /S /B /A-D .`) do @echo "%%F">%DB_FILE%.files
 )
 set CSCOPE_ARGS=%CSCOPE_ARGS% -i %DB_FILE%.files
+if ["%BUILD_INVERTED_INDEX%"]==["1"] (
+    set CSCOPE_ARGS=%CSCOPE_ARGS% -q
+)
 "%CSCOPE_EXE%" %CSCOPE_ARGS% -b -k -f "%DB_FILE%"
 if ERRORLEVEL 1 (
     echo ERROR: Cscope executable returned non-zero code. >> %LOG_FILE%

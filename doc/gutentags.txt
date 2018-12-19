@@ -643,6 +643,12 @@ g:gutentags_auto_add_cscope
                         (see |:cscope|).
                         Defaults to 1.
 
+                                                *gutentags_cscope_build_inverted_index*
+g:gutentags_cscope_build_inverted_index
+                        If set to 1, Gutentags will make `cscope` build an
+                        inverted index.
+                        Defaults to 0.
+
 
 The following settings are valid for the `gtags_cscope` module.
 

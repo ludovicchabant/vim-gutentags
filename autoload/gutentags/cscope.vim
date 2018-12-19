@@ -19,6 +19,10 @@ if !exists('g:gutentags_auto_add_cscope')
     let g:gutentags_auto_add_cscope = 1
 endif
 
+if !exists('g:gutentags_cscope_build_inverted_index')
+    let g:gutentags_cscope_build_inverted_index = 0
+endif
+
 " }}}
 
 " Gutentags Module Interface {{{
@@ -49,6 +53,9 @@ function! gutentags#cscope#generate(proj_dir, tags_file, gen_opts) abort
         \ gutentags#get_project_file_list_cmd(a:proj_dir)
     if !empty(l:file_list_cmd)
         let l:cmd += ['-L', '"' . l:file_list_cmd . '"']
+    endif
+    if g:gutentags_cscope_build_inverted_index
+        let l:cmd += ['-I']
     endif
     let l:cmd = gutentags#make_args(l:cmd)
 
