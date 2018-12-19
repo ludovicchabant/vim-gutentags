@@ -94,10 +94,10 @@ rem ==========================================
 echo Usage:
 echo    %~n0 ^<options^>
 echo.
-echo    -e [exe=cscope]:     The cscope executable to run
-echo    -f [file=scope.out]: The path to the database file to create
-echo    -p [dir=]:           The path to the project root
-echo    -L [cmd=]:           The file list command to run
-echo    -l [log=]:           The log file to output to
+echo    -e [exe=cscope]:             The cscope executable to run
+echo    -f [file=cscope.out]:        The path to the database file to create
+echo    -p [dir=]:                   The path to the project root
+echo    -L [cmd=]:                   The file list command to run
+echo    -l [log=]:                   The log file to output to
 echo.
 
