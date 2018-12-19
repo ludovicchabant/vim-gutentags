@@ -628,6 +628,14 @@ g:gutentags_cscope_executable
                         to use to generate the code database.
                         Defaults to `"cscope"`.
 
+                                                *gutentags_scopefile*
+g:gutentags_scopefile
+                        Specifies the name of the scope file to create. This
+                        will be appended to the project's root. See
+                        |gutentags_project_root| for how Gutentags locates the
+                        project.
+                        Defaults to `"cscope.out"`.
+
                                                 *gutentags_auto_add_cscope*
 g:gutentags_auto_add_cscope
                         If set to 1, Gutentags will automatically add the
