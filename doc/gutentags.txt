@@ -314,6 +314,9 @@ g:gutentags_modules
                         - `cscope`: generates a code database file using
                           `cscope`.
 
+                        - `pycscope`: generates a code database file using
+                          `pycscope`.
+
                         - `gtags_cscope`: same as `cscope` but uses GNU's
                           `gtags` executable and database.
 
@@ -636,6 +639,22 @@ g:gutentags_auto_add_cscope
                         Defaults to 1.
 
 
+The following settings are valid for the `pycscope` module.
+
+                                                *gutentags_pycscope_executable*
+g:gutentags_pycscope_executable
+                        Specifies the name or path of the `pycscope` executable
+                        to use to generate the code database.
+                        Defaults to `"pycscope"`.
+
+                                                *gutentags_auto_add_pycscope*
+g:gutentags_auto_add_pycscope
+                        If set to 1, Gutentags will automatically add the
+                        generated code database to Vim by running `:cs add`
+                        (see |:pycscope|).
+                        Defaults to 1.
+
+
 The following settings are valid for the `gtags_cscope` module.
 
                                                 *gutentags_gtags_executable*
@@ -658,7 +677,8 @@ g:gutentags_auto_add_gtags_cscope
                         (see |:cscope|).
                         Defaults to 1.
 
-People using `cscope` or `gtags_cscope` across multiple projects in the same
+
+People using `cscope`, `pycscope` or `gtags_cscope` across multiple projects in the same
 Vim instance might be interested in the `gutentags_plus` plugin, which handles
 switching databases automatically before performing a query. 
 See https://github.com/skywind3000/gutentags_plus.
