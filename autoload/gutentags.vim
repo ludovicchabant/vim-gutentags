@@ -272,6 +272,10 @@ function! gutentags#setup_gutentags() abort
         if !exists('b:gutentags_root')
             let b:gutentags_root = gutentags#get_project_root(l:buf_dir)
         endif
+        if !len(b:gutentags_root)
+            call gutentags#trace("no valid project root.. no gutentags support.")
+            return
+        endif
         if filereadable(b:gutentags_root . '/.notags')
             call gutentags#trace("'.notags' file found... no gutentags support.")
             return
