@@ -74,15 +74,19 @@ fi
 
 if [ -n "${FILE_LIST_CMD}" ]; then
     if [ "${PROJECT_ROOT}" = "." ]; then
-        eval "$FILE_LIST_CMD" > "${DB_FILE}.files"
+        eval "$FILE_LIST_CMD" | while read -r l; do
+            echo "\"${l}\""
+        done > "${DB_FILE}.files"
     else
         # If using a tags cache directory, use absolute paths
         eval "$FILE_LIST_CMD" | while read -r l; do
-            echo "${PROJECT_ROOT%/}/${l}"
+            echo "\"${PROJECT_ROOT%/}/${l}\""
         done > "${DB_FILE}.files"
     fi
 else
-    find . -type f ! -name ${DB_FILE} > "${DB_FILE}.files"
+    find . -type f ! -name ${DB_FILE} | while read -r l; do
+        echo "\"${l}\""
+    done > "${DB_FILE}.files"
 fi
 CSCOPE_ARGS="${CSCOPE_ARGS} -i ${DB_FILE}.files"
 
