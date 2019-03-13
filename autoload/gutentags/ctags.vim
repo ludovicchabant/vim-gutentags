@@ -180,7 +180,7 @@ function! gutentags#ctags#on_job_exit(job, exit_val) abort
     call gutentags#remove_job_by_data('ctags', a:job)
 
     if a:exit_val != 0
-        call gutentags#warning("gutentags: ctags job failed, returned: ".
+        call gutentags#warning("ctags job failed, returned: ".
                     \string(a:exit_val))
     endif
 endfunction

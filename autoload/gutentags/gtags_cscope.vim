@@ -113,9 +113,9 @@ function! gutentags#gtags_cscope#on_job_exit(job, exit_val) abort
 	endif
 
 	if a:exit_val != 0
-        call gutentags#warning(
-					\"gutentags: gtags-cscope job failed, returned: ".
-                    \string(a:exit_val))
+	    call gutentags#warning(
+			\"gtags-cscope job failed, returned: ".
+			\string(a:exit_val))
 	endif
 endfunction
 

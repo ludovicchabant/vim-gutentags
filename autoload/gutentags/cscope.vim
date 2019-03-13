@@ -84,7 +84,7 @@ function! gutentags#cscope#on_job_exit(job, exit_val) abort
         endif
     else
         call gutentags#warning(
-                    \"gutentags: cscope job failed, returned: ".
+                    \"cscope job failed, returned: ".
                     \string(a:exit_val))
     endif
 endfunction
