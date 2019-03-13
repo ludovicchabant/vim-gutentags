@@ -188,7 +188,7 @@ function! gutentags#get_project_root(path) abort
     let l:path = gutentags#stripslash(a:path)
     let l:previous_path = ""
     let l:markers = g:gutentags_project_root[:]
-    if exists('g:ctrlp_root_markers')
+    if g:gutentags_add_ctrlp_root_markers && exists('g:ctrlp_root_markers')
         for crm in g:ctrlp_root_markers
             if index(l:markers, crm) < 0
                 call add(l:markers, crm)
