@@ -10,6 +10,7 @@ set CSCOPE_ARGS=
 set DB_FILE=cscope.out
 set FILE_LIST_CMD=
 set LOG_FILE=
+set BUILD_INVERTED_INDEX=0
 
 :ParseArgs
 if [%1]==[] goto :DoneParseArgs
@@ -36,6 +37,12 @@ if [%1]==[-L] (
 if [%1]==[-l] (
     set LOG_FILE=%~2
     shift
+    goto :LoopParseArgs
+)
+if [%1]==[-I] (
+    set BUILD_INVERTED_INDEX=1
+    goto :LoopParseArgs
+)
 echo Invalid Argument: %1
 goto :Usage
 
@@ -100,5 +107,6 @@ echo    -f [file=cscope.out]:        The path to the database file to create
 echo    -p [dir=]:                   The path to the project root
 echo    -L [cmd=]:                   The file list command to run
 echo    -l [log=]:                   The log file to output to
+echo    -I:                          Builds an inverted index
 echo.
 
