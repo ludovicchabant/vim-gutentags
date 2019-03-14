@@ -384,8 +384,11 @@ g:gutentags_project_root_finder
                         argument (the path to the current buffer's file) and
                         returns a string value (the project's root directory).
                         Defaults to `''`.
-                        Note: when set, the called implementation will most 
-                        likely ignore |g:gutentags_project_root|.
+                        Note: when set, the called implementation will
+                        possibly ignore |g:gutentags_project_root|.
+                        Note: an implementation can fallback to the default
+                        behaviour by calling
+                        `gutentags#default_get_project_root`.
 
                                                 *gutentags_generate_on_missing*
 g:gutentags_generate_on_missing

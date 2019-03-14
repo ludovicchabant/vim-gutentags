@@ -184,7 +184,13 @@ function! gutentags#get_project_root(path) abort
     if g:gutentags_project_root_finder != ''
         return call(g:gutentags_project_root_finder, [a:path])
     endif
+    return gutentags#default_get_project_root(a:path)
+endfunction
 
+" Default implementation for finding project markers... useful when a custom
+" finder (`g:gutentags_project_root_finder`) wants to fallback to the default
+" behaviour.
+function! gutentags#default_get_project_root(path) abort
     let l:path = gutentags#stripslash(a:path)
     let l:previous_path = ""
     let l:markers = g:gutentags_project_root[:]
