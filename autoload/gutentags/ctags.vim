@@ -36,7 +36,7 @@ call s:_handleOldOptions()
 " Gutentags Module Interface {{{
 
 let s:did_check_exe = 0
-let s:runner_exe = gutentags#get_plat_file('update_tags')
+let s:runner_exe = '"' . gutentags#get_plat_file('update_tags') . '"'
 let s:unix_redir = (&shellredir =~# '%s') ? &shellredir : &shellredir . ' %s'
 let s:wildignores_options_path = ''
 let s:last_wildignores = ''
