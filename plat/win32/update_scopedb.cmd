@@ -74,6 +74,14 @@ if NOT ["%FILE_LIST_CMD%"]==[""] (
 ) ELSE (
     for /F "usebackq delims=" %%F in (`dir /S /B /A-D .`) do @echo "%%F">%DB_FILE%.files
 )
+
+set FILESIZE=0
+for /F %%F in ("%DB_FILE%.files") do set FILESIZE=%%~zF
+if %FILESIZE% EQU 0 (
+    echo There is no files to generate cscope DB
+    goto :EOF
+)
+
 set CSCOPE_ARGS=%CSCOPE_ARGS% -i %DB_FILE%.files
 if ["%BUILD_INVERTED_INDEX%"]==["1"] (
     set CSCOPE_ARGS=%CSCOPE_ARGS% -q

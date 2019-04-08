@@ -88,6 +88,12 @@ else
         echo "\"${l}\""
     done > "${DB_FILE}.files"
 fi
+
+if [ ! -s "${DB_FILE}.files" ]; then
+    echo "There is no files to generate cscope DB"
+    exit
+fi
+
 CSCOPE_ARGS="${CSCOPE_ARGS} -i ${DB_FILE}.files"
 
 if [ "$BUILD_INVERTED_INDEX" -eq 1 ]; then
