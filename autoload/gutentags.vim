@@ -84,6 +84,7 @@ function! gutentags#get_cachefile(root_dir, filename) abort
         let l:tag_path = g:gutentags_cache_dir . '/' .
                     \tr(l:tag_path, '\/: ', '---_')
         let l:tag_path = substitute(l:tag_path, '/\-', '/', '')
+        let l:tag_path = substitute(l:tag_path, '[\-_]*$', '', '')
     endif
     let l:tag_path = gutentags#normalizepath(l:tag_path)
     return l:tag_path
