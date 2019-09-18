@@ -603,7 +603,8 @@ if has('nvim')
                 \    ['gutentags#default_io_cb']),
                 \'on_stderr': function(
                 \    '<SID>nvim_job_out_wrapper',
-                \    ['gutentags#default_io_cb'])
+                \    ['gutentags#default_io_cb']),
+                \'detach': 1
                 \}
        return l:job_opts
     endfunction
@@ -618,7 +619,7 @@ else
                  \'exit_cb': 'gutentags#'.a:module.'#on_job_exit',
                  \'out_cb': 'gutentags#default_io_cb',
                  \'err_cb': 'gutentags#default_io_cb',
-                 \'stoponexit': 'term'
+                 \'stoponexit': ''
                  \}
         return l:job_opts
     endfunction
