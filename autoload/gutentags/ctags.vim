@@ -179,7 +179,10 @@ endfunction
 function! gutentags#ctags#on_job_exit(job, exit_val) abort
     call gutentags#remove_job_by_data('ctags', a:job)
 
+    " Skip reporting exit codes during exiting of Neovim.
+    " This would report e.g. 141 (for SIGPIPE) since version 0.4.
     if a:exit_val != 0
+          \ && (!exists('v:exiting') || v:exiting is v:null)
         call gutentags#warning("ctags job failed, returned: ".
                     \string(a:exit_val))
     endif
