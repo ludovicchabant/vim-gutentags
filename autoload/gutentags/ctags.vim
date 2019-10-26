@@ -170,7 +170,11 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
         let l:cmd += ['-o', '"' . gutentags#get_res_file('ctags_recursive.options') . '"']
     endif
     if !empty(g:gutentags_ctags_extra_args)
-        let l:cmd += ['-O', shellescape(join(g:gutentags_ctags_extra_args))]
+        let l:extra_args = join(g:gutentags_ctags_extra_args)
+        if l:use_tag_relative_opt
+            let l:extra_args .= " --tag-relative=yes"
+        endif
+        let l:cmd += ['-O', shellescape(l:extra_args)]
     endif
     if !empty(g:gutentags_ctags_post_process_cmd)
         let l:cmd += ['-P', shellescape(g:gutentags_ctags_post_process_cmd)]
@@ -191,9 +195,6 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
     for exc in g:gutentags_ctags_exclude
         let l:cmd += ['-x', '"' . exc . '"']
     endfor
-    if l:use_tag_relative_opt
-        let l:cmd += ['-r']
-    endif
     if g:gutentags_pause_after_update
         let l:cmd += ['-c']
     endif

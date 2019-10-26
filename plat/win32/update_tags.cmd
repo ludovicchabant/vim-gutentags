@@ -66,11 +66,6 @@ if [%1]==[-o] (
     shift
     goto :LoopParseArgs
 )
-if [%1]==[-r] (
-    set CTAGS_ARGS=%CTAGS_ARGS% --tag-relative=yes
-    shift
-    goto :LoopParseArgs
-)
 if [%1]==[-O] (
     set CTAGS_ARGS=%CTAGS_ARGS% %~2
     shift
@@ -186,7 +181,6 @@ echo    -e [exe=ctags]: The ctags executable to run
 echo    -t [file=tags]: The path to the ctags file to update
 echo    -p [dir=]:      The path to the project root
 echo    -l [log=]:      The log file to output to
-echo    -r              Use tag-relative paths
 echo    -L [cmd=]:      The file list command to run
 echo    -A:             Specifies that the file list command returns
 echo                    absolute paths
