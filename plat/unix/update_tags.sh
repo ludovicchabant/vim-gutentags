@@ -5,6 +5,7 @@ set -e
 PROG_NAME=$0
 CTAGS_EXE=ctags
 CTAGS_ARGS=
+CTAGS_ARG_QUOTED_LAST=
 TAGS_FILE=tags
 PROJECT_ROOT=
 LOG_FILE=
@@ -120,14 +121,15 @@ if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
                 echo "${PROJECT_ROOT%/}/${l}"
             done > "${TAGS_FILE}.files"
         fi
-        CTAGS_ARGS="${CTAGS_ARGS} -L "${TAGS_FILE}.files""
+        CTAGS_ARGS="${CTAGS_ARGS} -L"
+        CTAGS_ARG_QUOTED_LAST="${TAGS_FILE}.files"
     else
-        CTAGS_ARGS="${CTAGS_ARGS} "${PROJECT_ROOT}""
+        CTAGS_ARG_QUOTED_LAST="${PROJECT_ROOT}"
     fi
 
     echo "Running ctags on whole project"
-    echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS"
-    $CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS
+    echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS \"$CTAGS_ARG_QUOTED_LAST\""
+    $CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS "$CTAGS_ARG_QUOTED_LAST"
 else
     echo "Running ctags on \"$UPDATED_SOURCE\""
     echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS --append \"$UPDATED_SOURCE\""

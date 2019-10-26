@@ -114,7 +114,9 @@ else
             let l:arglen = strlen(cmdarg)
             if (cmdarg[0] == '"' && cmdarg[l:arglen - 1] == '"') || 
                         \(cmdarg[0] == "'" && cmdarg[l:arglen - 1] == "'")
-                call add(l:outcmd, cmdarg[1:-2])
+                " This was quoted, so there are probably things to escape.
+                let l:escapedarg = cmdarg[1:-2] " substitute(cmdarg[1:-2], '\ ', '\\ ', 'g')
+                call add(l:outcmd, l:escapedarg)
             else
                 call add(l:outcmd, cmdarg)
             endif
