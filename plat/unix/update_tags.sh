@@ -24,6 +24,7 @@ ShowUsage() {
     echo "    -t [file=tags]: The path to the ctags file to update"
     echo "    -p [dir=]:      The path to the project root"
     echo "    -l [file=]:     The path to a log file"
+    echo "    -r              Use tag-relative paths"
     echo "    -L [cmd=]:      The file list command to run"
     echo "    -A:             Specifies that the file list command returns "
     echo "                    absolute paths"
@@ -37,7 +38,7 @@ ShowUsage() {
 }
 
 
-while getopts "h?e:x:t:p:l:L:s:o:O:P:cA" opt; do
+while getopts "h?e:x:t:p:l:L:s:o:O:P:rcA" opt; do
     case $opt in
         h|\?)
             ShowUsage
@@ -72,6 +73,9 @@ while getopts "h?e:x:t:p:l:L:s:o:O:P:cA" opt; do
             ;;
         o)
             CTAGS_ARGS="$CTAGS_ARGS --options=$OPTARG"
+            ;;
+        r)
+            CTAGS_ARGS="$CTAGS_ARGS --tag-relative=yes"
             ;;
         O)
             CTAGS_ARGS="$CTAGS_ARGS $OPTARG"
