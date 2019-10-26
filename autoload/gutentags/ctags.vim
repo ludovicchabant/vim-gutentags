@@ -217,7 +217,7 @@ endfunction
 function! gutentags#ctags#on_job_exit(job, exit_val) abort
     call gutentags#remove_job_by_data('ctags', a:job)
 
-    if a:exit_val != 0
+    if a:exit_val != 0 && !g:__gutentags_vim_is_leaving
         call gutentags#warning("ctags job failed, returned: ".
                     \string(a:exit_val))
     endif

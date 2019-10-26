@@ -112,7 +112,7 @@ function! gutentags#gtags_cscope#on_job_exit(job, exit_val) abort
         call s:add_db(l:dbfile_path)
     endif
 
-    if a:exit_val != 0
+    if a:exit_val != 0 && !g:__gutentags_vim_is_leaving
         call gutentags#warning(
                     \"gtags-cscope job failed, returned: ".
                     \string(a:exit_val))

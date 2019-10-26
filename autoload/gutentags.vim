@@ -349,6 +349,11 @@ function! gutentags#setup_gutentags() abort
     endfor
 endfunction
 
+" Set a variable on exit so that we don't complain when a job gets killed.
+function! gutentags#on_vim_leave_pre() abort
+    let g:__gutentags_vim_is_leaving = 1
+endfunction
+
 " }}}
 
 "  Job Management {{{

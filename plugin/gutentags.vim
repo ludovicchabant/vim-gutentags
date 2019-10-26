@@ -87,6 +87,8 @@ else
     let g:gutentags_script_ext = '.sh'
 endif
 
+let g:__gutentags_vim_is_leaving = 0
+
 " }}}
 
 " Gutentags Setup {{{
@@ -95,6 +97,7 @@ augroup gutentags_detect
     autocmd!
     autocmd BufNewFile,BufReadPost *  call gutentags#setup_gutentags()
     autocmd VimEnter               *  if expand('<amatch>')==''|call gutentags#setup_gutentags()|endif
+    autocmd VimLeavePre            *  call gutentags#on_vim_leave_pre()
 augroup end
 
 " }}}

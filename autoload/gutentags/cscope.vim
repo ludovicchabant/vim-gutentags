@@ -82,7 +82,7 @@ function! gutentags#cscope#on_job_exit(job, exit_val) abort
         else
             silent! execute 'cs reset'
         endif
-    else
+    elseif !g:__gutentags_vim_is_leaving
         call gutentags#warning(
                     \"cscope job failed, returned: ".
                     \string(a:exit_val))
