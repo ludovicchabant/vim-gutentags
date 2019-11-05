@@ -146,9 +146,13 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
     if l:write_mode == 0 && l:tags_file_exists
         let l:cur_file_path = expand('%:p')
         if empty(g:gutentags_cache_dir) && l:tags_file_is_local
+            let l:alt_file_path = l:cur_file_path
             let l:cur_file_path = fnamemodify(l:cur_file_path, ':.')
+        else
+            let l:alt_file_path = fnamemodify(l:cur_file_path, ':.')
         endif
         let l:cmd += ['-s', '"' . l:cur_file_path . '"']
+        let l:cmd += ['-a', '"' . l:alt_file_path . '"']
     else
         let l:file_list_cmd = gutentags#get_project_file_list_cmd(l:actual_proj_dir)
         if !empty(l:file_list_cmd)

@@ -12,6 +12,7 @@ set PROJECT_ROOT=
 set FILE_LIST_CMD=
 set FILE_LIST_CMD_IS_ABSOLUTE=0
 set UPDATED_SOURCE=
+set ALT_UPDATED_SOURCE=
 set POST_PROCESS_CMD=
 set PAUSE_BEFORE_EXIT=0
 set LOG_FILE=
@@ -49,6 +50,11 @@ if [%1]==[-A] (
 )
 if [%1]==[-s] (
     set UPDATED_SOURCE=%~2
+    shift
+    goto :LoopParseArgs
+)
+if [%1]==[-a] (
+    set ALT_UPDATED_SOURCE=%~2
     shift
     goto :LoopParseArgs
 )
@@ -101,6 +107,7 @@ if exist "%TAGS_FILE%" (
         echo Removing references to: %UPDATED_SOURCE% >> %LOG_FILE%
         echo findstr /V /C:"%UPDATED_SOURCE%" "%TAGS_FILE%" ^> "%TAGS_FILE%.temp" >> %LOG_FILE%
         findstr /V /C:"%UPDATED_SOURCE%" "%TAGS_FILE%" > "%TAGS_FILE%.temp"
+        rem XXX should also remove %ALT_UPDATED_SOURCE%
         set CTAGS_ARGS=%CTAGS_ARGS% --append "%UPDATED_SOURCE%"
         set INDEX_WHOLE_PROJECT=0
     )

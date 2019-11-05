@@ -12,6 +12,7 @@ LOG_FILE=
 FILE_LIST_CMD=
 FILE_LIST_CMD_IS_ABSOLUTE=0
 UPDATED_SOURCE=
+ALT_UPDATED_SOURCE=
 POST_PROCESS_CMD=
 PAUSE_BEFORE_EXIT=0
 
@@ -28,6 +29,8 @@ ShowUsage() {
     echo "    -A:             Specifies that the file list command returns "
     echo "                    absolute paths"
     echo "    -s [file=]:     The path to the source file that needs updating"
+    echo "    -a [file=]:     Alternative path to the source file that needs"
+    echo "                    to be removed from the tags file"
     echo "    -x [pattern=]:  A pattern of files to exclude"
     echo "    -o [options=]:  An options file to read additional options from"
     echo "    -O [params=]:   Parameters to pass to ctags"
@@ -37,7 +40,7 @@ ShowUsage() {
 }
 
 
-while getopts "h?e:x:t:p:l:L:s:o:O:P:cA" opt; do
+while getopts "h?e:x:t:p:l:L:s:a:o:O:P:cA" opt; do
     case $opt in
         h|\?)
             ShowUsage
@@ -66,6 +69,9 @@ while getopts "h?e:x:t:p:l:L:s:o:O:P:cA" opt; do
             ;;
         s)
             UPDATED_SOURCE=$OPTARG
+            ;;
+        a)
+            ALT_UPDATED_SOURCE=$OPTARG
             ;;
         c)
             PAUSE_BEFORE_EXIT=1
@@ -99,8 +105,14 @@ INDEX_WHOLE_PROJECT=1
 if [ -f "$TAGS_FILE" ]; then
     if [ "$UPDATED_SOURCE" != "" ]; then
         echo "Removing references to: $UPDATED_SOURCE"
+        if [ "$ALT_UPDATED_SOURCE" != "" ]; then
+            echo "Removing references to: $ALT_UPDATED_SOURCE"
+            regex="($UPDATED_SOURCE|$ALT_UPDATED_SOURCE)"
+        else
+            regex=$UPDATED_SOURCE
+        fi
         tab="	"
-        cmd="grep --text -Ev '^[^$tab]+$tab$UPDATED_SOURCE$tab' '$TAGS_FILE' > '$TAGS_FILE.temp'"
+        cmd="grep --text -Ev '^[^$tab]+$tab$regex$tab' '$TAGS_FILE' > '$TAGS_FILE.temp'"
         echo "$cmd"
         eval "$cmd" || true
         INDEX_WHOLE_PROJECT=0
