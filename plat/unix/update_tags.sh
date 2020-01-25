@@ -71,7 +71,7 @@ while getopts "h?e:x:t:p:l:L:s:o:O:P:cA" opt; do
             PAUSE_BEFORE_EXIT=1
             ;;
         o)
-            CTAGS_ARGS="$CTAGS_ARGS --options=$OPTARG"
+            CTAGS_ARGS="$CTAGS_ARGS $(tr '\n' ' ' < $OPTARG)"
             ;;
         O)
             CTAGS_ARGS="$CTAGS_ARGS $OPTARG"
