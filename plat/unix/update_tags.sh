@@ -36,7 +36,7 @@ ShowUsage() {
     echo ""
 }
 
-
+CTAGS_QUOTED_OPTIONS='--options=/dev/null'
 while getopts "h?e:x:t:p:l:L:s:o:O:P:cA" opt; do
     case $opt in
         h|\?)
@@ -44,40 +44,40 @@ while getopts "h?e:x:t:p:l:L:s:o:O:P:cA" opt; do
             exit 0
             ;;
         e)
-            CTAGS_EXE=$OPTARG
+            CTAGS_EXE="$OPTARG"
             ;;
         x)
             CTAGS_ARGS="$CTAGS_ARGS --exclude=$OPTARG"
             ;;
         t)
-            TAGS_FILE=$OPTARG
+            TAGS_FILE="$OPTARG"
             ;;
         p)
-            PROJECT_ROOT=$OPTARG
+            PROJECT_ROOT="$OPTARG"
             ;;
         l)
-            LOG_FILE=$OPTARG
+            LOG_FILE="$OPTARG"
             ;;
         L)
-            FILE_LIST_CMD=$OPTARG
+            FILE_LIST_CMD="$OPTARG"
             ;;
         A)
             FILE_LIST_CMD_IS_ABSOLUTE=1
             ;;
         s)
-            UPDATED_SOURCE=$OPTARG
+            UPDATED_SOURCE="$OPTARG"
             ;;
         c)
             PAUSE_BEFORE_EXIT=1
             ;;
         o)
-            CTAGS_ARGS="$CTAGS_ARGS --options=$OPTARG"
+            CTAGS_QUOTED_OPTIONS="--options=$OPTARG"
             ;;
         O)
             CTAGS_ARGS="$CTAGS_ARGS $OPTARG"
             ;;
         P)
-            POST_PROCESS_CMD=$OPTARG
+            POST_PROCESS_CMD="$OPTARG"
             ;;
     esac
 done
@@ -129,11 +129,11 @@ if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
 
     echo "Running ctags on whole project"
     echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS \"$CTAGS_ARG_QUOTED_LAST\""
-    $CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS "$CTAGS_ARG_QUOTED_LAST"
+    "$CTAGS_EXE" -f "$TAGS_FILE.temp" $CTAGS_ARGS "$CTAGS_QUOTED_OPTIONS" "$CTAGS_ARG_QUOTED_LAST"
 else
     echo "Running ctags on \"$UPDATED_SOURCE\""
     echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS --append \"$UPDATED_SOURCE\""
-    $CTAGS_EXE -f "$TAGS_FILE.temp" $CTAGS_ARGS --append "$UPDATED_SOURCE"
+    "$CTAGS_EXE" -f "$TAGS_FILE.temp" $CTAGS_ARGS "$CTAGS_QUOTED_OPTIONS" --append "$UPDATED_SOURCE"
 fi
 
 if [ "$POST_PROCESS_CMD" != "" ]; then
