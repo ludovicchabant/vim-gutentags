@@ -169,13 +169,12 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
         " Omit --recursive if this project uses a file list command.
         let l:cmd += ['-o', '"' . gutentags#get_res_file('ctags_recursive.options') . '"']
     endif
-    if !empty(g:gutentags_ctags_extra_args)
-        let l:extra_args = join(g:gutentags_ctags_extra_args)
-        if l:use_tag_relative_opt
-            let l:extra_args .= " --tag-relative=yes"
-        endif
-        let l:cmd += ['-O', shellescape(l:extra_args)]
+    if l:use_tag_relative_opt
+        let l:cmd += ['-O', shellescape("--tag-relative=yes")]
     endif
+    for extra_arg in g:gutentags_ctags_extra_args
+        let l:cmd += ['-O', shellescape(extra_arg)]
+    endfor
     if !empty(g:gutentags_ctags_post_process_cmd)
         let l:cmd += ['-P', shellescape(g:gutentags_ctags_post_process_cmd)]
     endif
