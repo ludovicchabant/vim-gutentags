@@ -5,7 +5,7 @@ set -e
 PROG_NAME=$0
 CTAGS_EXE=ctags
 CTAGS_ARGS=
-CTAGS_ARG_QUOTED_LAST=
+CTAGS_OPT_FILE=
 TAGS_FILE=tags
 PROJECT_ROOT=
 LOG_FILE=
@@ -36,7 +36,6 @@ ShowUsage() {
     echo ""
 }
 
-CTAGS_QUOTED_OPTIONS='--options=/dev/null'
 while getopts "h?e:x:t:p:l:L:s:o:O:P:cA" opt; do
     case $opt in
         h|\?)
@@ -71,7 +70,7 @@ while getopts "h?e:x:t:p:l:L:s:o:O:P:cA" opt; do
             PAUSE_BEFORE_EXIT=1
             ;;
         o)
-            CTAGS_QUOTED_OPTIONS="--options=$OPTARG"
+            CTAGS_OPT_FILE="--options=$OPTARG"
             ;;
         O)
             CTAGS_ARGS="$CTAGS_ARGS $OPTARG"
@@ -122,18 +121,18 @@ if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
             done > "${TAGS_FILE}.files"
         fi
         CTAGS_ARGS="${CTAGS_ARGS} -L"
-        CTAGS_ARG_QUOTED_LAST="${TAGS_FILE}.files"
+        CTAGS_ARG_LAST="${TAGS_FILE}.files"
     else
-        CTAGS_ARG_QUOTED_LAST="${PROJECT_ROOT}"
+        CTAGS_ARG_LAST="${PROJECT_ROOT}"
     fi
 
     echo "Running ctags on whole project"
-    echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS \"$CTAGS_ARG_QUOTED_LAST\""
-    "$CTAGS_EXE" -f "$TAGS_FILE.temp" $CTAGS_ARGS "$CTAGS_QUOTED_OPTIONS" "$CTAGS_ARG_QUOTED_LAST"
+    echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" \"$CTAGS_OPT_FILE\" $CTAGS_ARGS \"$CTAGS_ARG_LAST\""
+    "$CTAGS_EXE" -f "$TAGS_FILE.temp" "$CTAGS_OPT_FILE" $CTAGS_ARGS "$CTAGS_ARG_LAST"
 else
     echo "Running ctags on \"$UPDATED_SOURCE\""
-    echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS --append \"$UPDATED_SOURCE\""
-    "$CTAGS_EXE" -f "$TAGS_FILE.temp" $CTAGS_ARGS "$CTAGS_QUOTED_OPTIONS" --append "$UPDATED_SOURCE"
+    echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" \"$CTAGS_OPT_FILE\" $CTAGS_ARGS --append \"$UPDATED_SOURCE\""
+    "$CTAGS_EXE" -f "$TAGS_FILE.temp" "$CTAGS_OPT_FILE" $CTAGS_ARGS --append "$UPDATED_SOURCE"
 fi
 
 if [ "$POST_PROCESS_CMD" != "" ]; then
