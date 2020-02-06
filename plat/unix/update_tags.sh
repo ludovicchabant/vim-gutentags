@@ -129,7 +129,7 @@ if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
 
     echo "Running ctags on whole project"
     echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS \"$CTAGS_ARG_QUOTED_LAST\""
-    "$CTAGS_EXE" -f "$TAGS_FILE.temp" $CTAGS_ARGS "$CTAGS_QUOTED_OPTIONS" "$CTAGS_ARG_QUOTED_LAST"
+    "$CTAGS_EXE" -f "$TAGS_FILE.temp" $CTAGS_ARGS "$CTAGS_ARG_QUOTED_LAST" "$CTAGS_QUOTED_OPTIONS"
 else
     echo "Running ctags on \"$UPDATED_SOURCE\""
     echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS --append \"$UPDATED_SOURCE\""
