@@ -8,7 +8,7 @@ function! gutentags#chdir(path)
     else
         let chdir = haslocaldir() ? 'lcd' : 'cd'
     endif
-    execute chdir substitute(a:path,'[\\/]\+','/','g')
+    execute chdir a:path
 endfunction
 
 " Throw an exception message.
