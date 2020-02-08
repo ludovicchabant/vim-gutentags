@@ -279,7 +279,7 @@ function! gutentags#setup_gutentags() abort
             let l:buf_dir = fnamemodify(resolve(expand('%:p', 1)), ':p:h')
         endif
         if !exists('b:gutentags_root')
-            let b:gutentags_root = gutentags#get_project_root(l:buf_dir)
+            let b:gutentags_root = substitute(gutentags#get_project_root(l:buf_dir),'\\\@=\S','/','g')
         endif
         if !len(b:gutentags_root)
             call gutentags#trace("no valid project root.. no gutentags support.")
