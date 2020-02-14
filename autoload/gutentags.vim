@@ -6,7 +6,7 @@ function! gutentags#chdir(path)
     if has('nvim')
         let chdir = haslocaldir() ? 'lcd' : haslocaldir(-1, 0) ? 'tcd' : 'cd'
     else
-		let chdir = haslocaldir()? ((haslocaldir() == 1)? 'lcd':'tcd') : 'cd'
+        let chdir = haslocaldir()? ((haslocaldir() == 1)? 'lcd':'tcd') : 'cd'
     endif
     execute chdir fnameescape(a:path)
 endfunction
