@@ -153,7 +153,9 @@ fi
 
 echo "Replacing tags file"
 echo "mv -f \"$TAGS_FILE.temp\" \"$TAGS_FILE\""
-mv -f "$TAGS_FILE.temp" "$TAGS_FILE"
+if [ -f "$TAGS_FILE.temp" ]; then
+    mv -f "$TAGS_FILE.temp" "$TAGS_FILE"
+fi
 
 echo "Unlocking tags file..."
 rm -f "$TAGS_FILE.lock"
