@@ -574,7 +574,7 @@ g:gutentags_ctags_executable_{type}
                         information.
                         IMPORTANT: please see |gutentags-ctags-requirements|.
                         Example: >
-                         let g:gutentags_ctags_executable_ruby = 'foobar'
+                         let g:gutentags_ctags_executable_ruby = 'ripper-tags'
 <
 
                                                 *gutentags_ctags_tagfile*
