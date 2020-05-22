@@ -8,7 +8,7 @@ function! gutentags#chdir(path)
     else
         let chdir = haslocaldir() ? ((haslocaldir() == 1) ? 'lcd' : 'tcd') : 'cd'
     endif
-    execute chdir fnameescape(a:path)
+    execute chdir a:path
 endfunction
 
 " Throw an exception message.
