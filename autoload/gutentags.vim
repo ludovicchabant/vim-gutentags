@@ -525,7 +525,7 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
     " it possible to get the relative path of the filename to parse if we're
     " doing an incremental update.
     let l:prev_cwd = getcwd()
-    call gutentags#chdir(fnameescape(l:proj_dir))
+    call gutentags#chdir(l:proj_dir)
     try
         call call("gutentags#".a:module."#generate",
                     \[l:proj_dir, l:tags_file,
@@ -537,7 +537,7 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
         echom v:exception
     finally
         " Restore the current directory...
-        call gutentags#chdir(fnameescape(l:prev_cwd))
+        call gutentags#chdir(l:prev_cwd)
     endtry
 endfunction
 
