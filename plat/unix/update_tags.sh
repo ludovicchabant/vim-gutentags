@@ -70,7 +70,7 @@ while getopts "h?e:x:t:p:l:L:s:o:O:P:cA" opt; do
             PAUSE_BEFORE_EXIT=1
             ;;
         o)
-            CTAGS_OPT_FILE="--options=$OPTARG"
+            CTAGS_OPT_FILE="$CTAGS_OPT_FILE --options=$OPTARG"
             ;;
         O)
             CTAGS_ARGS="$CTAGS_ARGS $OPTARG"
@@ -129,7 +129,7 @@ if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
     echo "Running ctags on whole project"
     if [ "$CTAGS_OPT_FILE" != "" ]; then
         echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" \"$CTAGS_OPT_FILE\" $CTAGS_ARGS \"$CTAGS_ARG_LAST\""
-        "$CTAGS_EXE" -f "$TAGS_FILE.temp" "$CTAGS_OPT_FILE" $CTAGS_ARGS "$CTAGS_ARG_LAST"
+        "$CTAGS_EXE" -f "$TAGS_FILE.temp" $CTAGS_OPT_FILE $CTAGS_ARGS "$CTAGS_ARG_LAST"
     else
         echo "$CTAGS_EXE -f \"$TAGS_FILE.temp\" $CTAGS_ARGS \"$CTAGS_ARG_LAST\""
         "$CTAGS_EXE" -f "$TAGS_FILE.temp" $CTAGS_ARGS "$CTAGS_ARG_LAST"
