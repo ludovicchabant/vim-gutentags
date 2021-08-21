@@ -88,6 +88,14 @@ if [ "$1" != "" ]; then
     exit 1
 fi
 
+# Redirect output to log file
+if [ "$LOG_FILE" != "" ]; then
+    exec 1<&-
+    exec 2<&-
+    exec 1<>$LOG_FILE
+    exec 2>&1
+fi
+
 echo "Locking tags file..."
 echo $$ > "$TAGS_FILE.lock"
 
@@ -98,8 +106,7 @@ INDEX_WHOLE_PROJECT=1
 if [ -f "$TAGS_FILE" ]; then
     if [ "$UPDATED_SOURCE" != "" ]; then
         echo "Removing references to: $UPDATED_SOURCE"
-        tab="	"
-        cmd="grep --text -Ev '^[^$tab]+$tab$UPDATED_SOURCE$tab' '$TAGS_FILE' > '$TAGS_FILE.temp'"
+        cmd="grep --text -Ev '^[[:alnum:]_]+[[:space:]]$UPDATED_SOURCE[[:space:]]' '$TAGS_FILE' > '$TAGS_FILE.temp'"
         echo "$cmd"
         eval "$cmd" || true
         INDEX_WHOLE_PROJECT=0
