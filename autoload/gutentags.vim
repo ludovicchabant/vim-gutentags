@@ -1,7 +1,6 @@
 " gutentags.vim - Automatic ctags management for Vim
 
 " Utilities {{{
-
 function! gutentags#chdir(path)
     if has('nvim')
         let chdir = haslocaldir() ? 'lcd' : haslocaldir(-1, 0) ? 'tcd' : 'cd'
@@ -9,6 +8,14 @@ function! gutentags#chdir(path)
         let chdir = haslocaldir() ? ((haslocaldir() == 1) ? 'lcd' : 'tcd') : 'cd'
     endif
     execute chdir fnameescape(a:path)
+endfunction
+
+function! gutentags#root()
+    if !exists('b:gutentags_root')
+        return
+    endif
+
+    call gutentags#chdir(b:gutentags_root)
 endfunction
 
 " Throw an exception message.
@@ -241,6 +248,7 @@ function! gutentags#get_project_info(path) abort
 endfunction
 
 " Setup gutentags for the current buffer.
+
 function! gutentags#setup_gutentags() abort
     if exists('b:gutentags_files') && !g:gutentags_debug
         " This buffer already has gutentags support.
@@ -267,7 +275,7 @@ function! gutentags#setup_gutentags() abort
     if g:gutentags_init_user_func != '' &&
                 \!call(g:gutentags_init_user_func, [expand('%:p')])
         call gutentags#trace("Ignoring '" . bufname('%') . "' because of " .
-                    \"custom user function.")
+                    \"custom `init` user function.")
         return
     endif
 
@@ -279,15 +287,43 @@ function! gutentags#setup_gutentags() abort
             let l:buf_dir = fnamemodify(resolve(expand('%:p', 1)), ':p:h')
         endif
         if !exists('b:gutentags_root')
+            let b:has_located = 0
             let b:gutentags_root = gutentags#get_project_root(l:buf_dir)
+        else
+            let b:has_located = 1
         endif
+
         if !len(b:gutentags_root)
             call gutentags#trace("no valid project root.. no gutentags support.")
+            " Let the user do something in the buffer directory.
+            if !b:has_located && g:gutentags_root_located_user_func != '' &&
+                        \!call(g:gutentags_root_located_user_func, [l:buf_dir, 0])
+                call gutentags#trace("Ignoring '" . bufname('%') . "' because of " .
+                            \"custom `root_located` user function.")
+                return
+            endif
             return
         endif
+
         if filereadable(b:gutentags_root . '/.notags')
             call gutentags#trace("'.notags' file found... no gutentags support.")
+            " Let the user do something in the project root.
+            if !b:has_located && g:gutentags_root_located_user_func != '' &&
+                        \!call(g:gutentags_root_located_user_func, [b:gutentags_root, 0])
+                call gutentags#trace("Ignoring '" . bufname('%') . "' because of " .
+                            \"custom `root_located` user function.")
+                return
+            endif
+
             return
+        else
+            " Let the user do something in the project root.
+            if !b:has_located && g:gutentags_root_located_user_func != '' &&
+                        \!call(g:gutentags_root_located_user_func, [b:gutentags_root, 1])
+                call gutentags#trace("Ignoring '" . bufname('%') . "' because of " .
+                            \"custom `root_located` user function.")
+                return
+            endif
         endif
 
         if !has_key(s:known_projects, b:gutentags_root)
@@ -544,7 +580,6 @@ endfunction
 " }}}
 
 " Utility Functions {{{
-
 function! gutentags#rescan(...)
     if exists('b:gutentags_files')
         unlet b:gutentags_files
