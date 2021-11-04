@@ -119,7 +119,7 @@ else
             " Thanks Vimscript... you can use negative integers for strings
             " in the slice notation, but not for indexing characters :(
             let l:arglen = strlen(cmdarg)
-            if (cmdarg[0] == '"' && cmdarg[l:arglen - 1] == '"') || 
+            if (cmdarg[0] == '"' && cmdarg[l:arglen - 1] == '"') ||
                         \(cmdarg[0] == "'" && cmdarg[l:arglen - 1] == "'")
                 " This was quoted, so there are probably things to escape.
                 let l:escapedarg = cmdarg[1:-2] " substitute(cmdarg[1:-2], '\ ', '\\ ', 'g')
@@ -367,25 +367,27 @@ function! gutentags#setup_gutentags() abort
     " Add these tags files to the known tags files.
     for module in keys(b:gutentags_files)
         let l:tagfile = b:gutentags_files[module]
-        let l:found = index(s:known_files, l:tagfile)
-        if l:found < 0
-            call add(s:known_files, l:tagfile)
+        if index(s:known_files, l:tagfile) >= 0
+            " the tag file has been found
+            continue
+        endif
 
-            " Generate this new file depending on settings and stuff.
-            if !g:gutentags_enabled
-                continue
-            endif
+        call add(s:known_files, l:tagfile)
 
-            if !filereadable(l:tagfile)
-                if g:gutentags_generate_on_missing
-                    call gutentags#trace("Generating missing tags file: " . l:tagfile)
-                    call s:update_tags(l:bn, module, 1, 1)
-                endif
-            elseif g:gutentags_generate_on_new
-                " Invariant: the tag file already exists and `gen_on_new` is true
-                call gutentags#trace("Updating tags file: " . l:tagfile)
+        " Generate this new file depending on settings and stuff.
+        if !g:gutentags_enabled
+            continue
+        endif
+
+        if !filereadable(l:tagfile)
+            if g:gutentags_generate_on_missing
+                call gutentags#trace("Generating missing tags file: " . l:tagfile)
                 call s:update_tags(l:bn, module, 1, 1)
             endif
+        elseif g:gutentags_generate_on_new
+            " Invariant: the tag file already exists and `gen_on_new` is true
+            call gutentags#trace("Updating tags file: " . l:tagfile)
+            call s:update_tags(l:bn, module, 1, 1)
         endif
     endfor
 endfunction
@@ -546,7 +548,7 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
                 call add(s:update_queue[a:module], 
                             \[l:tags_file, a:bufno, a:write_mode])
             endif
-            call gutentags#trace("Tag file '" . l:tags_file . 
+            call gutentags#trace("Tag file '" . l:tags_file .
                         \"' is already being updated. Queuing it up...")
         elseif a:queue_mode == 1
             call gutentags#trace("Tag file '" . l:tags_file .

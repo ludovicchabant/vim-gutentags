@@ -92,7 +92,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
         endif
     endif
 
-    " Get a tags file path relative to the current directory, which 
+    " Get a tags file path relative to the current directory, which
     " happens to be the project root in this case.
     " Since the given tags file path is absolute, and since Vim won't
     " change the path if it is not inside the current directory, we
