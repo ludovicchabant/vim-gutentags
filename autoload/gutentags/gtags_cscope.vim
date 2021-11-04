@@ -69,7 +69,7 @@ function! gutentags#gtags_cscope#init(project_root) abort
     let $GTAGSDBPATH = l:db_path
     let $GTAGSROOT = a:project_root
 
-    if g:gutentags_auto_add_gtags_cscope && 
+    if g:gutentags_auto_add_gtags_cscope &&
                 \!has_key(s:added_db_files, l:db_file)
         let s:added_db_files[l:db_file] = 0
         call s:add_db(l:db_file)
@@ -89,6 +89,19 @@ function! gutentags#gtags_cscope#generate(proj_dir, tags_file, gen_opts) abort
         let l:cmd += l:proj_options
     endif
     let l:cmd += ['--incremental', '"'.l:db_path.'"']
+
+    let l:file_list_cmd = gutentags#get_project_file_list_cmd(a:proj_dir)
+    if !empty(l:file_list_cmd)
+        " Pipe `file_list_cmd` to the stdin of gtags-cscope
+        let l:cmd += ['-f', '-']
+        let l:gtags_cmd = l:file_list_cmd . ' | ' . join(l:cmd, ' ')
+        if has('win32') || has('win64')
+            let l:cmd = ['PowerShell', '-Command', l:gtags_cmd]
+        else
+            let l:cmd = ['sh', '-c', l:gtags_cmd]
+        endif
+    endif
+
     let l:cmd = gutentags#make_args(l:cmd)
 
     call gutentags#trace("Running: " . string(l:cmd))

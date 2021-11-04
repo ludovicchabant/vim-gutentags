@@ -260,7 +260,7 @@ function! gutentags#setup_gutentags() abort
     "  other such things)
     " Also don't do anything for the default `[No Name]` buffer you get
     " after starting Vim.
-    if &buftype != '' || 
+    if &buftype != '' ||
           \(bufname('%') == '' && !g:gutentags_generate_on_empty_buffer)
         return
     endif
@@ -545,7 +545,7 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
                 endif
             endfor
             if l:needs_queuing
-                call add(s:update_queue[a:module], 
+                call add(s:update_queue[a:module],
                             \[l:tags_file, a:bufno, a:write_mode])
             endif
             call gutentags#trace("Tag file '" . l:tags_file .

@@ -46,7 +46,7 @@ function! gutentags#ctags#init(project_root) abort
     " Check the old name for this option, too, before falling back to the
     " globally defined name.
     let l:tagfile = getbufvar("", 'gutentags_ctags_tagfile',
-                \getbufvar("", 'gutentags_tagfile', 
+                \getbufvar("", 'gutentags_tagfile',
                 \g:gutentags_ctags_tagfile))
     let b:gutentags_files['ctags'] = gutentags#get_cachefile(
                 \a:project_root, l:tagfile)
@@ -109,7 +109,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
         "
         " Note that if we don't do this and pass a full path for the project
         " root, some `ctags` implementations like Exhuberant Ctags can get
-        " confused if the paths have spaces -- but not if you're *in* the root 
+        " confused if the paths have spaces -- but not if you're *in* the root
         " directory, for some reason... (which will be the case, we're running
         " the jobs from the project root).
         let l:actual_proj_dir = '.'
@@ -117,12 +117,12 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
 
         let l:tags_file_dir = fnamemodify(l:actual_tags_file, ':h')
         if l:tags_file_dir != '.'
-            " Ok so now the tags file is stored in a subdirectory of the 
+            " Ok so now the tags file is stored in a subdirectory of the
             " project root, instead of at the root. This happens if, say,
             " someone set `gutentags_ctags_tagfile` to `.git/tags`, which
             " seems to be fairly popular.
             "
-            " By default, `ctags` writes paths relative to the current 
+            " By default, `ctags` writes paths relative to the current
             " directory (the project root) but in this case we need it to
             " be relative to the tags file (e.g. adding `../` in front of
             " everything if the tags file is `.git/tags`).
@@ -248,7 +248,7 @@ function! s:generate_wildignore_options() abort
         if empty(g:gutentags_cache_dir)
             let s:wildignores_options_path = tempname()
         else
-            let s:wildignores_options_path = 
+            let s:wildignores_options_path =
                         \gutentags#stripslash(g:gutentags_cache_dir).
                         \'/_wildignore.options'
         endif
