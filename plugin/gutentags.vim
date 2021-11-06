@@ -103,10 +103,10 @@ augroup end
 " }}}
 
 " Toggles and Miscellaneous Commands {{{
-
 if g:gutentags_define_advanced_commands
     command! GutentagsToggleEnabled :let g:gutentags_enabled=!g:gutentags_enabled
     command! GutentagsToggleTrace   :call gutentags#toggletrace()
+    command! GutentagsRoot :call gutentags#root()
 endif
 
 if g:gutentags_debug

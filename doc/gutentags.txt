@@ -97,7 +97,7 @@ I set for myself with Gutentags:
   the tag file, otherwise you will still "see" tags for deleted or renamed
   classes and functions.
 * Automatically create the tag file: you open something from a freshly forked
-  project, it should start indexing it automatically, just like in Sublime Text 
+  project, it should start indexing it automatically, just like in Sublime Text
   or Visual Studio or any other IDE.
 
 
@@ -123,7 +123,7 @@ Gutentags finds a valid project root, it will prepend the tag file's path to
 sure Vim will use that file first.
 
 If a file managed by Gutentags is opened and no tag file already exists,
-Gutentags will start generating it right away in the background, unless 
+Gutentags will start generating it right away in the background, unless
 |gutentags_generate_on_missing| is set to 0. If you have a large project, you
 may want to know when Gutentags is generating tags: see
 |gutentags-status-line| to display an indicator in your status line.
@@ -327,7 +327,7 @@ g:gutentags_project_root
                         in the current file's directory and its parent
                         directories. If it finds any of those markers,
                         Gutentags will be enabled for the project, and a tags
-                        file named after |gutentags_ctags_tagfile| will be 
+                        file named after |gutentags_ctags_tagfile| will be
                         created at the project root.
                         Defaults to `[]` (an empty |List|).
                         A list of default markers will be appended to the
@@ -463,7 +463,7 @@ g:gutentags_resolve_symlinks
                         maybe not what you want if the symlink itself is
                         part of the project.
                         Defaults to 0.
-                        
+
                                             *gutentags_init_user_func*
 g:gutentags_init_user_func
                         When set to a non-empty string, it is expected to be
@@ -474,12 +474,29 @@ g:gutentags_init_user_func
 
                         You can use this to manually set buffer-local
                         settings:
-                        
+
                         * `b:gutentags_ctags_tagfile` (see |gutentags_ctags_tagfile|).
 
-                        This setting was previously called 
+                        This setting was previously called
                         `gutentags_enabled_user_func`. The old setting is
                         still used as a fallback.
+
+                        Defaults to "".
+
+                                            *g:gutentags_root_located_user_func*
+g:gutentags_root_located_user_func
+                        When set to a non-empty string, it is expected to be
+                        the name of a function that will be called when the
+                        project root has been located. The function gets passed
+                        the path of project root and a boolean value indicates
+                        whether this file will be enabled by Gutentags, and if
+                        it returns 0, Gutentags won't be enabled for that file.
+
+                        You can use this to manually set buffer-local
+                        settings or loading some custom configurations
+                        in the project root:
+
+                        * `b:gutentags_ctags_tagfile` (see |gutentags_ctags_tagfile|).
 
                         Defaults to "".
 
@@ -596,7 +613,7 @@ g:gutentags_ctags_exclude
                                                 *gutentags_ctags_exclude_wildignore*
 g:gutentags_ctags_exclude_wildignore
                         When 1, Gutentags will automatically pass your
-                        'wildignore' file patterns to the 
+                        'wildignore' file patterns to the
                         |gutentags_ctags_executable| so that they are ignored.
                         Set also |gutentags_ctags_exclude| to pass custom
                         patterns.

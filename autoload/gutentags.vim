@@ -1,7 +1,6 @@
 " gutentags.vim - Automatic ctags management for Vim
 
 " Utilities {{{
-
 function! gutentags#chdir(path)
     if has('nvim')
         let chdir = haslocaldir() ? 'lcd' : haslocaldir(-1, 0) ? 'tcd' : 'cd'
@@ -9,6 +8,15 @@ function! gutentags#chdir(path)
         let chdir = haslocaldir() ? ((haslocaldir() == 1) ? 'lcd' : 'tcd') : 'cd'
     endif
     execute chdir fnameescape(a:path)
+endfunction
+
+function! gutentags#root()
+    if !exists('b:gutentags_root')
+        " change directory to the current file if the project root not found
+        call gutentags#chdir('%:p:h')
+    endif
+
+    call gutentags#chdir(b:gutentags_root)
 endfunction
 
 " Throw an exception message.
@@ -112,7 +120,7 @@ else
             " Thanks Vimscript... you can use negative integers for strings
             " in the slice notation, but not for indexing characters :(
             let l:arglen = strlen(cmdarg)
-            if (cmdarg[0] == '"' && cmdarg[l:arglen - 1] == '"') || 
+            if (cmdarg[0] == '"' && cmdarg[l:arglen - 1] == '"') ||
                         \(cmdarg[0] == "'" && cmdarg[l:arglen - 1] == "'")
                 " This was quoted, so there are probably things to escape.
                 let l:escapedarg = cmdarg[1:-2] " substitute(cmdarg[1:-2], '\ ', '\\ ', 'g')
@@ -206,28 +214,30 @@ function! gutentags#default_get_project_root(path) abort
     endif
     while l:path != l:previous_path
         for root in l:markers
-            if !empty(globpath(l:path, root, 1))
-                let l:proj_dir = simplify(fnamemodify(l:path, ':p'))
-                let l:proj_dir = gutentags#stripslash(l:proj_dir)
-                if l:proj_dir == ''
-                    call gutentags#trace("Found project marker '" . root .
-                                \"' at the root of your file-system! " .
-                                \" That's probably wrong, disabling " .
-                                \"gutentags for this file...",
-                                \1)
-                    call gutentags#throw("Marker found at root, aborting.")
-                endif
-                for ign in g:gutentags_exclude_project_root
-                    if l:proj_dir == ign
-                        call gutentags#trace(
-                                    \"Ignoring project root '" . l:proj_dir .
-                                    \"' because it is in the list of ignored" .
-                                    \" projects.")
-                        call gutentags#throw("Ignore project: " . l:proj_dir)
-                    endif
-                endfor
-                return l:proj_dir
+            if empty(globpath(l:path, root, 1))
+                continue
             endif
+
+            let l:proj_dir = simplify(fnamemodify(l:path, ':p'))
+            let l:proj_dir = gutentags#stripslash(l:proj_dir)
+            if l:proj_dir == ''
+                call gutentags#trace("Found project marker '" . root .
+                            \"' at the root of your file-system! " .
+                            \" That's probably wrong, disabling " .
+                            \"gutentags for this file...",
+                            \1)
+                call gutentags#throw("Marker found at root, aborting.")
+            endif
+            for ign in g:gutentags_exclude_project_root
+                if l:proj_dir == ign
+                    call gutentags#trace(
+                                \"Ignoring project root '" . l:proj_dir .
+                                \"' because it is in the list of ignored" .
+                                \" projects.")
+                    call gutentags#throw("Ignore project: " . l:proj_dir)
+                endif
+            endfor
+            return l:proj_dir
         endfor
         let l:previous_path = l:path
         let l:path = fnamemodify(l:path, ':h')
@@ -241,6 +251,7 @@ function! gutentags#get_project_info(path) abort
 endfunction
 
 " Setup gutentags for the current buffer.
+
 function! gutentags#setup_gutentags() abort
     if exists('b:gutentags_files') && !g:gutentags_debug
         " This buffer already has gutentags support.
@@ -252,7 +263,7 @@ function! gutentags#setup_gutentags() abort
     "  other such things)
     " Also don't do anything for the default `[No Name]` buffer you get
     " after starting Vim.
-    if &buftype != '' || 
+    if &buftype != '' ||
           \(bufname('%') == '' && !g:gutentags_generate_on_empty_buffer)
         return
     endif
@@ -267,7 +278,7 @@ function! gutentags#setup_gutentags() abort
     if g:gutentags_init_user_func != '' &&
                 \!call(g:gutentags_init_user_func, [expand('%:p')])
         call gutentags#trace("Ignoring '" . bufname('%') . "' because of " .
-                    \"custom user function.")
+                    \"custom `init` user function.")
         return
     endif
 
@@ -279,14 +290,42 @@ function! gutentags#setup_gutentags() abort
             let l:buf_dir = fnamemodify(resolve(expand('%:p', 1)), ':p:h')
         endif
         if !exists('b:gutentags_root')
+            let b:has_located = 0
             let b:gutentags_root = gutentags#get_project_root(l:buf_dir)
+        else
+            let b:has_located = 1
         endif
+
         if !len(b:gutentags_root)
             call gutentags#trace("no valid project root.. no gutentags support.")
+            " Let the user do something in the buffer directory.
+            if !b:has_located && g:gutentags_root_located_user_func != '' &&
+                        \!call(g:gutentags_root_located_user_func, [l:buf_dir, 0])
+                call gutentags#trace("Ignoring '" . bufname('%') . "' because of " .
+                            \"custom `root_located` user function.")
+                return
+            endif
             return
         endif
+
         if filereadable(b:gutentags_root . '/.notags')
             call gutentags#trace("'.notags' file found... no gutentags support.")
+            " Let the user do something in the project root.
+            if !b:has_located && g:gutentags_root_located_user_func != '' &&
+                        \!call(g:gutentags_root_located_user_func, [b:gutentags_root, 0])
+                call gutentags#trace("Ignoring '" . bufname('%') . "' because of " .
+                            \"custom `root_located` user function.")
+                return
+            endif
+
+            return
+        endif
+
+        " Let the user do something in the project root.
+        if !b:has_located && g:gutentags_root_located_user_func != '' &&
+                    \!call(g:gutentags_root_located_user_func, [b:gutentags_root, 1])
+            call gutentags#trace("Ignoring '" . bufname('%') . "' because of " .
+                        \"custom `root_located` user function.")
             return
         endif
 
@@ -331,20 +370,27 @@ function! gutentags#setup_gutentags() abort
     " Add these tags files to the known tags files.
     for module in keys(b:gutentags_files)
         let l:tagfile = b:gutentags_files[module]
-        let l:found = index(s:known_files, l:tagfile)
-        if l:found < 0
-            call add(s:known_files, l:tagfile)
+        if index(s:known_files, l:tagfile) >= 0
+            " the tag file has been found
+            continue
+        endif
 
-            " Generate this new file depending on settings and stuff.
-            if g:gutentags_enabled
-                if g:gutentags_generate_on_missing && !filereadable(l:tagfile)
-                    call gutentags#trace("Generating missing tags file: " . l:tagfile)
-                    call s:update_tags(l:bn, module, 1, 1)
-                elseif g:gutentags_generate_on_new
-                    call gutentags#trace("Generating tags file: " . l:tagfile)
-                    call s:update_tags(l:bn, module, 1, 1)
-                endif
+        call add(s:known_files, l:tagfile)
+
+        " Generate this new file depending on settings and stuff.
+        if !g:gutentags_enabled
+            continue
+        endif
+
+        if !filereadable(l:tagfile)
+            if g:gutentags_generate_on_missing
+                call gutentags#trace("Generating missing tags file: " . l:tagfile)
+                call s:update_tags(l:bn, module, 1, 1)
             endif
+        elseif g:gutentags_generate_on_new
+            " Invariant: the tag file already exists and `gen_on_new` is true
+            call gutentags#trace("Updating tags file: " . l:tagfile)
+            call s:update_tags(l:bn, module, 1, 1)
         endif
     endfor
 endfunction
@@ -502,10 +548,10 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
                 endif
             endfor
             if l:needs_queuing
-                call add(s:update_queue[a:module], 
+                call add(s:update_queue[a:module],
                             \[l:tags_file, a:bufno, a:write_mode])
             endif
-            call gutentags#trace("Tag file '" . l:tags_file . 
+            call gutentags#trace("Tag file '" . l:tags_file .
                         \"' is already being updated. Queuing it up...")
         elseif a:queue_mode == 1
             call gutentags#trace("Tag file '" . l:tags_file .
@@ -544,7 +590,6 @@ endfunction
 " }}}
 
 " Utility Functions {{{
-
 function! gutentags#rescan(...)
     if exists('b:gutentags_files')
         unlet b:gutentags_files
