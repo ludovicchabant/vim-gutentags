@@ -334,6 +334,25 @@ g:gutentags_project_root
                         user-defined ones unless
                         |gutentags_add_default_project_roots| is set to 0.
 
+                                                *gutentags_project_config*
+g:gutentags_project_config
+                        A name of project-level vimrc configuration file. When
+                        a project root has been located, Gutentags will use
+                        this name to find the configuration file in the
+                        project root directory and |source| it if exists.
+                        This is useful if you want to define some plugin
+                        options for a project (e.g., |gutentags_file_list_command|).
+
+                        Note: A project configuration file is loaded after the
+                        project-root locating is completed.
+                        Note: For security reasons, a project configuration is
+                        sourced in |sandbox| unless
+                        |gutentags_project_config_in_sandbox| is set to 0.
+                        Note: This value will be appended to the default root
+                        markers if the value is not an empty |String|.
+
+                        Defaults to `'.gufig'`.
+
                                             *gutentags_add_default_project_roots*
 g:gutentags_add_default_project_roots
                         Defines whether Gutentags should always define some
@@ -342,6 +361,10 @@ g:gutentags_add_default_project_roots
                         when Gutentags searches for a project root.
                         The default markers are:
                         `['.git', '.hg', '.svn', '.bzr', '_darcs', '_darcs', '_FOSSIL_', '.fslckout']`
+
+                        Note: |gutentags_project_config| will be appended to
+                        the default markers if its value is not an empty
+                        |String|.
 
                                             *gutentags_add_ctrlp_root_markers*
 g:gutentags_add_ctrlp_root_markers
@@ -483,7 +506,7 @@ g:gutentags_init_user_func
 
                         Defaults to "".
 
-                                            *g:gutentags_root_located_user_func*
+                                            *gutentags_root_located_user_func*
 g:gutentags_root_located_user_func
                         When set to a non-empty string, it is expected to be
                         the name of a function that will be called when the
@@ -499,6 +522,13 @@ g:gutentags_root_located_user_func
                         * `b:gutentags_ctags_tagfile` (see |gutentags_ctags_tagfile|).
 
                         Defaults to "".
+
+                                            *gutentags_project_config_in_sandbox*
+g:gutentags_project_config_in_sandbox
+                        Defines whether Gutentags should |source| a project
+                        configuration file in |sandbox|.
+
+                        Defaults to `1`.
 
                                             *gutentags_define_advanced_commands*
 g:gutentags_define_advanced_commands

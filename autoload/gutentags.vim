@@ -172,6 +172,36 @@ function! s:cache_project_root(path) abort
     let s:known_projects[a:path] = l:result
 endfunction
 
+function! gutentags#load_project_config(path) abort
+    let l:pc_name = g:gutentags_project_config
+    if l:pc_name == ''
+        return
+    endif
+
+    let l:pc_path = fnameescape(a:path . '/' . l:pc_name)
+
+    if !filereadable(l:pc_path)
+        return
+    endif
+
+    let l:load_cmd = "source " . l:pc_path
+    if g:gutentags_project_config_in_sandbox
+        call gutentags#trace("Loading project config in sandbox...")
+        let l:load_cmd = "sandbox " . l:load_cmd
+    else
+        call gutentags#trace("Loading project config...")
+    endif
+
+    call gutentags#trace(l:load_cmd)
+    try
+        execute l:load_cmd
+        call gutentags#trace("The project config has been loaded successfully.")
+    catch
+        echom "Error while loading project config"
+        echom v:exception
+    endtry
+endfunction
+
 function! gutentags#get_project_file_list_cmd(path) abort
     if type(g:gutentags_file_list_command) == type("")
         return gutentags#validate_cmd(g:gutentags_file_list_command)
@@ -307,6 +337,8 @@ function! gutentags#setup_gutentags() abort
             endif
             return
         endif
+
+        call gutentags#load_project_config(b:gutentags_root)
 
         if filereadable(b:gutentags_root . '/.notags')
             call gutentags#trace("'.notags' file found... no gutentags support.")
@@ -461,21 +493,23 @@ function! gutentags#remove_job(module, job_idx) abort
             break
         endif
     endfor
-    if l:qu_idx >= 0
-        let l:qu_info = s:update_queue[a:module][l:qu_idx]
-        call remove(s:update_queue[a:module], l:qu_idx)
 
-        if bufexists(l:qu_info[1])
-            call gutentags#trace("Finished ".a:module." job, ".
-                        \"running queued update for '".l:tags_file."'.")
-            call s:update_tags(l:qu_info[1], a:module, l:qu_info[2], 2)
-        else
-            call gutentags#trace("Finished ".a:module." job, ".
-                        \"but skipping queued update for '".l:tags_file."' ".
-                        \"because originating buffer doesn't exist anymore.")
-        endif
-    else
+    if l:qu_idx < 0
         call gutentags#trace("Finished ".a:module." job.")
+        return
+    endif
+
+    let l:qu_info = s:update_queue[a:module][l:qu_idx]
+    call remove(s:update_queue[a:module], l:qu_idx)
+
+    if bufexists(l:qu_info[1])
+        call gutentags#trace("Finished ".a:module." job, ".
+                    \"running queued update for '".l:tags_file."'.")
+        call s:update_tags(l:qu_info[1], a:module, l:qu_info[2], 2)
+    else
+        call gutentags#trace("Finished ".a:module." job, ".
+                    \"but skipping queued update for '".l:tags_file."' ".
+                    \"because originating buffer doesn't exist anymore.")
     endif
 endfunction
 
