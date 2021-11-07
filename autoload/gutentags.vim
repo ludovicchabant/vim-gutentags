@@ -13,7 +13,8 @@ endfunction
 function! gutentags#root()
     if !exists('b:gutentags_root')
         " change directory to the current file if the project root not found
-        call gutentags#chdir('%:p:h')
+        call gutentags#chdir(expand('%:p:h'))
+        return
     endif
 
     call gutentags#chdir(b:gutentags_root)
@@ -320,16 +321,16 @@ function! gutentags#setup_gutentags() abort
             let l:buf_dir = fnamemodify(resolve(expand('%:p', 1)), ':p:h')
         endif
         if !exists('b:gutentags_root')
-            let b:has_located = 0
+            let l:has_located = 0
             let b:gutentags_root = gutentags#get_project_root(l:buf_dir)
         else
-            let b:has_located = 1
+            let l:has_located = 1
         endif
 
         if !len(b:gutentags_root)
             call gutentags#trace("no valid project root.. no gutentags support.")
             " Let the user do something in the buffer directory.
-            if !b:has_located && g:gutentags_root_located_user_func != '' &&
+            if !l:has_located && g:gutentags_root_located_user_func != '' &&
                         \!call(g:gutentags_root_located_user_func, [l:buf_dir, 0])
                 call gutentags#trace("Ignoring '" . bufname('%') . "' because of " .
                             \"custom `root_located` user function.")
@@ -343,7 +344,7 @@ function! gutentags#setup_gutentags() abort
         if filereadable(b:gutentags_root . '/.notags')
             call gutentags#trace("'.notags' file found... no gutentags support.")
             " Let the user do something in the project root.
-            if !b:has_located && g:gutentags_root_located_user_func != '' &&
+            if !l:has_located && g:gutentags_root_located_user_func != '' &&
                         \!call(g:gutentags_root_located_user_func, [b:gutentags_root, 0])
                 call gutentags#trace("Ignoring '" . bufname('%') . "' because of " .
                             \"custom `root_located` user function.")
@@ -354,7 +355,7 @@ function! gutentags#setup_gutentags() abort
         endif
 
         " Let the user do something in the project root.
-        if !b:has_located && g:gutentags_root_located_user_func != '' &&
+        if !l:has_located && g:gutentags_root_located_user_func != '' &&
                     \!call(g:gutentags_root_located_user_func, [b:gutentags_root, 1])
             call gutentags#trace("Ignoring '" . bufname('%') . "' because of " .
                         \"custom `root_located` user function.")
