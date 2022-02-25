@@ -111,12 +111,12 @@ if [ $INDEX_WHOLE_PROJECT -eq 1 ]; then
         if [ "${PROJECT_ROOT}" = "." ] || [ $FILE_LIST_CMD_IS_ABSOLUTE -eq 1 ]; then
             echo "Running file list command"
             echo "eval $FILE_LIST_CMD > \"${TAGS_FILE}.files\""
-            eval $FILE_LIST_CMD > "${TAGS_FILE}.files"
+            eval "$FILE_LIST_CMD" > "${TAGS_FILE}.files"
         else
             # If using a tags cache directory, use absolute paths
             echo "Running file list command, patching for absolute paths"
             echo "eval $FILE_LIST_CMD"
-            eval $FILE_LIST_CMD | while read -r l; do
+            eval "$FILE_LIST_CMD" | while read -r l; do
                 echo "${PROJECT_ROOT%/}/${l}"
             done > "${TAGS_FILE}.files"
         fi
