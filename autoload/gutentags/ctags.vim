@@ -214,11 +214,19 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
 endfunction
 
 function! gutentags#ctags#on_job_exit(job, exit_val) abort
-    call gutentags#remove_job_by_data('ctags', a:job)
+    let [l:tags_file, l:job_data] = gutentags#remove_job_by_data('ctags', a:job)
 
     if a:exit_val != 0 && !g:__gutentags_vim_is_leaving
         call gutentags#warning("ctags job failed, returned: ".
                     \string(a:exit_val))
+    endif
+    if has('win32') && g:__gutentags_vim_is_leaving
+        " The process got interrupted because Vim is quitting.
+        " Remove the tags and lock files on Windows because there's no `trap`
+        " statement in update script.
+        try | call delete(l:tags_file) | endtry
+        try | call delete(l:tags_file.'.temp') | endtry
+        try | call delete(l:tags_file.'.lock') | endtry
     endif
 endfunction
 

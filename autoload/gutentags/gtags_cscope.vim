@@ -117,6 +117,12 @@ function! gutentags#gtags_cscope#on_job_exit(job, exit_val) abort
                     \"gtags-cscope job failed, returned: ".
                     \string(a:exit_val))
     endif
+    if has('win32') && g:__gutentags_vim_is_leaving
+        " The process got interrupted because Vim is quitting.
+        " Remove the db file on Windows because there's no `trap`
+        " statement in the update script.
+        try | call delete(l:dbfile_path) | endtry
+    endif
 endfunction
 
 " }}}

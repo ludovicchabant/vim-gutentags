@@ -98,6 +98,7 @@ augroup gutentags_detect
     autocmd BufNewFile,BufReadPost *  call gutentags#setup_gutentags()
     autocmd VimEnter               *  if expand('<amatch>')==''|call gutentags#setup_gutentags()|endif
     autocmd VimLeavePre            *  call gutentags#on_vim_leave_pre()
+    autocmd VimLeave               *  call gutentags#on_vim_leave()
 augroup end
 
 " }}}

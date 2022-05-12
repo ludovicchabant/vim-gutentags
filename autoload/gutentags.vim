@@ -354,6 +354,24 @@ function! gutentags#on_vim_leave_pre() abort
     let g:__gutentags_vim_is_leaving = 1
 endfunction
 
+function! gutentags#on_vim_leave() abort
+    if has('win32') && !has('nvim')
+        " Vim8 doesn't seem to be killing child processes soon enough for
+        " us to clean things up inside this plugin, so do it ourselves.
+        " TODO: test other platforms and other vims
+        for module in g:gutentags_modules
+            for upd_info in s:update_in_progress[module]
+                let l:job = upd_info[1]
+                call job_stop(l:job, "term")
+                let l:status = job_status(l:job)
+                if l:status == "run"
+                    call job_stop(l:job, "kill")
+                endif
+            endfor
+        endfor
+    endif
+endfunction
+
 " }}}
 
 "  Job Management {{{
@@ -366,10 +384,14 @@ for module in g:gutentags_modules
     let s:update_in_progress[module] = []
 endfor
 
+" Adds a started job to the list of ongoing updates.
+" Must pass the tags file being created/updated, and the job data as
+" returned by the gutentags#start_job function
 function! gutentags#add_job(module, tags_file, data) abort
     call add(s:update_in_progress[a:module], [a:tags_file, a:data])
 endfunction
 
+" Finds an ongoing job by tags file
 function! gutentags#find_job_index_by_tags_file(module, tags_file) abort
     let l:idx = -1
     for upd_info in s:update_in_progress[a:module]
@@ -381,6 +403,7 @@ function! gutentags#find_job_index_by_tags_file(module, tags_file) abort
     return -1
 endfunction
 
+" Finds an ongoing job by job data
 function! gutentags#find_job_index_by_data(module, data) abort
     let l:idx = -1
     for upd_info in s:update_in_progress[a:module]
@@ -392,16 +415,19 @@ function! gutentags#find_job_index_by_data(module, data) abort
     return -1
 endfunction
 
+" Gets the tags file of a given job
 function! gutentags#get_job_tags_file(module, job_idx) abort
     return s:update_in_progress[a:module][a:job_idx][0]
 endfunction
 
+" Gets the job data of the i-th job
 function! gutentags#get_job_data(module, job_idx) abort
     return s:update_in_progress[a:module][a:job_idx][1]
 endfunction
 
+" Removes the i-th job from the ongoing jobs
 function! gutentags#remove_job(module, job_idx) abort
-    let l:tags_file = s:update_in_progress[a:module][a:job_idx][0]
+    let [l:tags_file, l:job_data] = s:update_in_progress[a:module][a:job_idx]
     call remove(s:update_in_progress[a:module], a:job_idx)
 
     " Run the user callback for finished jobs.
@@ -431,11 +457,14 @@ function! gutentags#remove_job(module, job_idx) abort
     else
         call gutentags#trace("Finished ".a:module." job.")
     endif
+
+    return [l:tags_file, l:job_data]
 endfunction
 
+" Removes the job from the ongoing jobs given its job data
 function! gutentags#remove_job_by_data(module, data) abort
     let l:idx = gutentags#find_job_index_by_data(a:module, a:data)
-    call gutentags#remove_job(a:module, l:idx)
+    return gutentags#remove_job(a:module, l:idx)
 endfunction
 
 " }}}
