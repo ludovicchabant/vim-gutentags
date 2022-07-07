@@ -70,7 +70,7 @@ function! gutentags#gtags_cscope#init(project_root) abort
     let $GTAGSDBPATH = l:db_path
     let $GTAGSROOT = a:project_root
 
-    if g:gutentags_auto_add_gtags_cscope && 
+    if g:gutentags_auto_add_gtags_cscope &&
                 \!has_key(s:added_db_files, l:db_file)
         let s:added_db_files[l:db_file] = 0
         call s:add_db(l:db_file)
@@ -120,7 +120,7 @@ function! gutentags#gtags_cscope#on_job_exit(job, exit_val) abort
         call s:add_db(l:dbfile_path)
     endif
 
-    if a:exit_val != 0 && !g:__gutentags_vim_is_leaving
+    if a:exit_val != 0 && g:__gutentags_vim_is_leaving
         call gutentags#warning(
                     \"gtags-cscope job failed, returned: ".
                     \string(a:exit_val))
