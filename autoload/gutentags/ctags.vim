@@ -247,9 +247,14 @@ endfunction
 
 function! s:generate_wildignore_options() abort
     if s:last_wildignores == &wildignore
-        " The 'wildignore' setting didn't change since last time we did this.
-        call gutentags#trace("Wildignore options file is up to date.")
-        return
+        " The 'wildignore' setting didn't change since last time we did this,
+        " but check if file still exist (could have been deleted if temp file)
+        if filereadable(s:wildignores_options_path)
+            call gutentags#trace("Wildignore options file is up to date.")
+            return
+        else
+            call gutentags#trace("Wildignore options file is not readable.")
+        endif
     endif
 
     if s:wildignores_options_path == ''
