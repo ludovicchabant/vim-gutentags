@@ -252,9 +252,8 @@ function! s:generate_wildignore_options() abort
         if filereadable(s:wildignores_options_path)
             call gutentags#trace("Wildignore options file is up to date.")
             return
-        else
-            call gutentags#trace("Wildignore options file is not readable.")
         endif
+        call gutentags#trace("Wildignore options file is not readable.")
     endif
 
     if s:wildignores_options_path == ''
