@@ -5,35 +5,41 @@ setlocal EnableExtensions EnableDelayedExpansion
 rem ==========================================
 rem PARSE ARGUMENTS
 rem ==========================================
-set GTAGS_EXE=gtags
-set GTAGS_ARGS=%~4
-set INCREMENTAL=
+set "GTAGS_EXE=gtags"
+set "GTAGS_ARGS="
+set "FILE_LIST_CMD="
+
+if [%1]==[] goto :Usage
 
 :ParseArgs
 if [%1]==[] goto :DoneParseArgs
 if [%1]==[-e] (
 	set GTAGS_EXE=%~2
-	shift
-	goto :LoopParseArgs
+	shift /1
+	shift /1
+	goto :ParseArgs
 )
-if [%1]==[--incremental] (
-	set INCREMENTAL=--incremental
-	shift
-	goto :LoopParseArgs
+if [%1]==[-L] (
+	set FILE_LIST_CMD=%~2
+	shift /1
+	shift /1
+	goto :ParseArgs
 )
-echo Invalid Argument: %1
-goto :Usage
-:LoopParseArgs
-shift
+set "GTAGS_ARGS=%GTAGS_ARGS% %1"
+shift /1
 goto :ParseArgs
 
 :DoneParseArgs
 rem ==========================================
-rem GENERATE TAGS
+rem GENERATE GTAGS
 rem ==========================================
+set "GTAGS_CMD=%GTAGS_EXE% %GTAGS_ARGS%"
+if /i not "%FILE_LIST_CMD%"=="" (
+	set "GTAGS_CMD=%FILE_LIST_CMD% | %GTAGS_EXE% -f- %GTAGS_ARGS%"
+)
 echo Running gtags:
-echo call %GTAGS_EXE% %INCREMENTAL% %GTAGS_ARGS%
-call %GTAGS_EXE% %INCREMENTAL% %GTAGS_ARGS%
+echo "%GTAGS_CMD%"
+call %GTAGS_CMD%
 echo Done.
 goto :EOF
 rem ==========================================
