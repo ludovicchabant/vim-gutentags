@@ -103,7 +103,11 @@ endfunction
 " into a list of unquoted arguments on Unix/Mac.
 if has('win32') || has('win64')
     function! gutentags#make_args(cmd) abort
-        return join(a:cmd, ' ')
+        if &shell == 'pwsh' || &shell == 'powershell'
+            return '& ' . join(a:cmd, ' ')
+        else
+            return join(a:cmd, ' ')
+        endif
     endfunction
 else
     function! gutentags#make_args(cmd) abort
