@@ -344,7 +344,7 @@ function! gutentags#setup_gutentags() abort
                 if g:gutentags_generate_on_missing && !filereadable(l:tagfile)
                     call gutentags#trace("Generating missing tags file: " . l:tagfile)
                     call s:update_tags(l:bn, module, 1, 1)
-                elseif g:gutentags_generate_on_new
+                elseif g:gutentags_generate_on_new && !filereadable(l:tagfile)
                     call gutentags#trace("Generating tags file: " . l:tagfile)
                     call s:update_tags(l:bn, module, 1, 1)
                 endif
