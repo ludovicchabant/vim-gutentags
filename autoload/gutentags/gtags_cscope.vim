@@ -82,6 +82,8 @@ function! gutentags#gtags_cscope#init(project_root) abort
 endfunction
 
 function! gutentags#gtags_cscope#generate(proj_dir, tags_file, gen_opts) abort
+    let l:write_mode = a:gen_opts['write_mode']
+
     let l:cmd = [s:runner_exe]
     let l:cmd += ['-e', '"' . g:gutentags_gtags_executable . '"']
 
@@ -103,6 +105,9 @@ function! gutentags#gtags_cscope#generate(proj_dir, tags_file, gen_opts) abort
 
     if g:gutentags_gtags_skip_symlink != ''
         let l:cmd += ['--skip-symlink='.g:gutentags_gtags_skip_symlink]
+    endif
+    if l:write_mode == 0 && has_key(a:gen_opts, 'file')
+        let l:cmd += ['--single-update', '"'.a:gen_opts['file'].'"']
     endif
     let l:cmd = gutentags#make_args(l:cmd)
 

@@ -564,6 +564,7 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
                     \[l:proj_dir, l:tags_file,
                     \ {
                     \   'write_mode': a:write_mode,
+                    \   'file': expand('#'.a:bufno.':p'),
                     \ }])
     catch /^gutentags\:/
         echom "Error while generating ".a:module." file:"
