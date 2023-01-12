@@ -23,6 +23,10 @@ if !exists('g:gutentags_gtags_cscope_executable')
     let g:gutentags_gtags_cscope_executable = 'gtags-cscope'
 endif
 
+if !exists('g:gutentags_gtags_skip_symlink')
+    let g:gutentags_gtags_skip_symlink = 'a'
+endif
+
 if !exists('g:gutentags_auto_add_gtags_cscope')
     let g:gutentags_auto_add_gtags_cscope = 1
 endif
@@ -97,6 +101,9 @@ function! gutentags#gtags_cscope#generate(proj_dir, tags_file, gen_opts) abort
     let l:db_path = fnamemodify(a:tags_file, ':p:h')
     let l:cmd += ['--incremental', '"'.l:db_path.'"']
 
+    if g:gutentags_gtags_skip_symlink != ''
+        let l:cmd += ['--skip-symlink='.g:gutentags_gtags_skip_symlink]
+    endif
     let l:cmd = gutentags#make_args(l:cmd)
 
     call gutentags#trace("Running: " . string(l:cmd))
