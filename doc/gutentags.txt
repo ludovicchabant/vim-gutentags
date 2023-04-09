@@ -730,7 +730,10 @@ following files present in the project root directory:
                                                 *gutentags-.gutctags*
 `.gutctags`: if this file exists, Ctags will be told to load additional
 command-line parameters by reading it line by line (see the Ctags
-documentation for more information).
+documentation for more information). This will override the default options
+file, which adds `--recurse=yes`, so unless you are using
+|gutentags_file_list_command| you will want to include `--recurse=yes` in your
+`.gutctags` file.
 
 Note that for complex reasons, Gutentags can't run `ctags` from the project
 root if you're using |gutentags_cache_dir|, so if the `.gutctags` file exists,
