@@ -320,6 +320,9 @@ g:gutentags_modules
                         - `gtags_cscope`: same as `cscope` but uses GNU's
                           `gtags` executable and database.
 
+                        - `cscope_maps`: same as `cscope`. Supports
+                        `cscope_maps.nvim`.
+
                         Defaults to `[ctags]`.
 
                                                 *gutentags_project_root*

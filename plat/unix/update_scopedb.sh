@@ -84,7 +84,9 @@ if [ -n "${FILE_LIST_CMD}" ]; then
         done > "${DB_FILE}.files"
     fi
 else
-    find . -type f ! -name ${DB_FILE} | while read -r l; do
+    find . -type f ! -name ${DB_FILE} \
+        \( ! -iname "cscope*"  ! -iname "ncscope*" ! -iname "*.patch" \) \
+        | while read -r l; do
         echo "\"${l}\""
     done > "${DB_FILE}.files"
 fi
