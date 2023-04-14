@@ -51,8 +51,11 @@ function! gutentags#cscope_maps#generate(proj_dir, tags_file, gen_opts) abort
     call gutentags#trace("Running: " . string(l:cmd))
     call gutentags#trace("In:      " . getcwd())
     if !g:gutentags_fake
-	let l:job_opts = gutentags#build_default_job_options('cscope_maps')
+        let l:job_opts = gutentags#build_default_job_options('cscope_maps')
         let l:job = gutentags#start_job(l:cmd, l:job_opts)
+        " Change cscope_maps db_file to gutentags' tags_file
+        " Useful for when g:gutentags_cache_dir is used.
+        let g:cscope_maps_db_file = a:tags_file
         call gutentags#add_job('cscope_maps', a:tags_file, l:job)
     else
         call gutentags#trace("(fake... not actually running)")
