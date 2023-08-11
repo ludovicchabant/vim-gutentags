@@ -1,8 +1,14 @@
 " gtags_cscope module for Gutentags
 
+let s:cscope_native = 1
+
 if !has('cscope')
-    throw "Can't enable the gtags-cscope module for Gutentags, "
-                \"this Vim has no support for cscope files."
+	if !has('nvim-0.9.0')
+		throw "Can't enable the gtags-cscope module for Gutentags, "
+					\"this Vim has no support for cscope files."
+	else
+		let s:cscope_native = 0
+	endif
 endif
 
 " Global Options {{{
@@ -36,12 +42,14 @@ let s:added_db_files = {}
 
 function! s:add_db(db_file) abort
     if filereadable(a:db_file)
-        call gutentags#trace(
-                    \"Adding cscope DB file: " . a:db_file)
-        set nocscopeverbose
-        execute 'cs add ' . fnameescape(a:db_file)
-        set cscopeverbose
-        let s:added_db_files[a:db_file] = 1
+		call gutentags#trace(
+					\"Adding cscope DB file: " . a:db_file)
+		if s:cscope_native
+			set nocscopeverbose
+			execute 'cs add ' . fnameescape(a:db_file)
+			set cscopeverbose
+		endif
+		let s:added_db_files[a:db_file] = 1
     else
         call gutentags#trace(
                     \"Not adding cscope DB file because it doesn't " .
@@ -62,7 +70,9 @@ function! gutentags#gtags_cscope#init(project_root) abort
 
     let b:gutentags_files['gtags_cscope'] = l:db_file
 
-    execute 'set cscopeprg=' . fnameescape(g:gutentags_gtags_cscope_executable)
+	if s:cscope_native
+		execute 'set cscopeprg=' . fnameescape(g:gutentags_gtags_cscope_executable)
+	endif
 
     " The combination of gtags-cscope, vim's cscope and global files is
     " a bit flaky. Environment variables are safer than vim passing
