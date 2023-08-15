@@ -9,6 +9,7 @@ let g:gutentags_ctags_auto_set_tags = get(g:, 'gutentags_ctags_auto_set_tags', 1
 let g:gutentags_ctags_options_file = get(g:, 'gutentags_ctags_options_file', '.gutctags')
 let g:gutentags_ctags_check_tagfile = get(g:, 'gutentags_ctags_check_tagfile', 0)
 let g:gutentags_ctags_extra_args = get(g:, 'gutentags_ctags_extra_args', [])
+let g:gutentags_ctags_extra_args_dict = get(g:, 'gutentags_ctags_extra_args_dict', {})
 let g:gutentags_ctags_post_process_cmd = get(g:, 'gutentags_ctags_post_process_cmd', '')
 
 let g:gutentags_ctags_exclude = get(g:, 'gutentags_ctags_exclude', [])
@@ -240,6 +241,8 @@ function! s:get_ctags_executable(proj_dir) abort
     let l:ftype = get(split(&filetype, '\.'), 0, '')
     let l:proj_info = gutentags#get_project_info(a:proj_dir)
     let l:type = get(l:proj_info, 'type', l:ftype)
+    let g:gutentags_ctags_extra_args = get(g:gutentags_ctags_extra_args_dict,
+                \ l:type, g:gutentags_ctags_extra_args)
     let exepath = exists('g:gutentags_ctags_executable_{l:type}')
         \ ? g:gutentags_ctags_executable_{l:type} : g:gutentags_ctags_executable
     return expand(exepath, 1)
