@@ -9,7 +9,6 @@ let g:gutentags_ctags_auto_set_tags = get(g:, 'gutentags_ctags_auto_set_tags', 1
 let g:gutentags_ctags_options_file = get(g:, 'gutentags_ctags_options_file', '.gutctags')
 let g:gutentags_ctags_check_tagfile = get(g:, 'gutentags_ctags_check_tagfile', 0)
 let g:gutentags_ctags_extra_args = get(g:, 'gutentags_ctags_extra_args', [])
-let b:gutentags_ctags_extra_args = getbufvar("", "gutentags_ctags_extra_args", [])
 let g:gutentags_ctags_post_process_cmd = get(g:, 'gutentags_ctags_post_process_cmd', '')
 
 let g:gutentags_ctags_exclude = get(g:, 'gutentags_ctags_exclude', [])
@@ -173,7 +172,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
     if l:use_tag_relative_opt
         let l:cmd += ['-O', shellescape("--tag-relative=yes")]
     endif
-    for extra_arg in g:gutentags_ctags_extra_args + b:gutentags_ctags_extra_args
+    for extra_arg in g:gutentags_ctags_extra_args + getbufvar("", "gutentags_ctags_extra_args", [])
         let l:cmd += ['-O', shellescape(extra_arg)]
     endfor
     if !empty(g:gutentags_ctags_post_process_cmd)
