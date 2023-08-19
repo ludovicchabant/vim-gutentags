@@ -98,10 +98,15 @@ let g:__gutentags_vim_is_leaving = 0
 augroup gutentags_detect
     autocmd!
     autocmd BufNewFile,BufReadPost *  call gutentags#setup_gutentags()
-    autocmd VimEnter               *  if expand('<amatch>')==''|call gutentags#setup_gutentags()|endif
+    autocmd VimEnter               *  call gutentags#setup_gutentags()
     autocmd VimLeavePre            *  call gutentags#on_vim_leave_pre()
     autocmd VimLeave               *  call gutentags#on_vim_leave()
 augroup end
+
+" If vim-gutentags lazy-loaded:
+if v:vim_did_enter
+    call gutentags#setup_gutentags()
+endif
 
 " }}}
 
