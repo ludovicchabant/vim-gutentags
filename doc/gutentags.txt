@@ -697,6 +697,15 @@ g:gutentags_gtags_cscope_executable
                         executable to use to generate the code database.
                         Defaults to `"gtags-cscope"`.
 
+	                                        *gutentags_gtags_skip_symlink*
+g:gutentags_gtags_skip_symlink
+			When set to `""`, Gutentags will remove --skip-symlink
+			flag in gtags generation command, options:
+			- 'a' then skip all symbolic links
+			- 'f' then skip only symbolic links for file
+			- 'd' then skip only symbolic links for directory.
+                        Defaults to `"a"`.
+
                                                 *gutentags_gtags_dbpath*
 g:gutentags_gtags_dbpath
                         Path from the cache directory (|gutentags_cache_dir|

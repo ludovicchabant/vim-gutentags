@@ -344,7 +344,7 @@ function! gutentags#setup_gutentags() abort
                 if g:gutentags_generate_on_missing && !filereadable(l:tagfile)
                     call gutentags#trace("Generating missing tags file: " . l:tagfile)
                     call s:update_tags(l:bn, module, 1, 1)
-                elseif g:gutentags_generate_on_new
+                elseif g:gutentags_generate_on_new && !filereadable(l:tagfile)
                     call gutentags#trace("Generating tags file: " . l:tagfile)
                     call s:update_tags(l:bn, module, 1, 1)
                 endif
@@ -564,6 +564,7 @@ function! s:update_tags(bufno, module, write_mode, queue_mode) abort
                     \[l:proj_dir, l:tags_file,
                     \ {
                     \   'write_mode': a:write_mode,
+                    \   'file': expand('#'.a:bufno.':p'),
                     \ }])
     catch /^gutentags\:/
         echom "Error while generating ".a:module." file:"
