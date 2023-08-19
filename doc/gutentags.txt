@@ -625,6 +625,11 @@ g:gutentags_ctags_extra_args
                         A list of arguments to pass to `ctags`.
                         Defaults to `[]`.
 
+b:gutentags_ctags_extra_args
+                        Like g:gutentags_ctags_extra_args but only valid for
+                        the current buffer.
+                        Defaults to `[]`.
+
                                                 *gutentags_ctags_post_process_cmd*
 g:gutentags_ctags_post_process_cmd
                         If defined, the tags generation script will run the
