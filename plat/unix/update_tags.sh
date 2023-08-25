@@ -100,11 +100,12 @@ if [ -f "$TAGS_FILE" ]; then
         echo "Removing references to: $UPDATED_SOURCE"
         tab="	"
         # use ripgrep if available
-        if which rg; then
-            cmd="rg --text -ev '^[^$tab]+$tab$UPDATED_SOURCE$tab' '$TAGS_FILE' > '$TAGS_FILE.temp'"
+        if command -v rg > /dev/null 2>&1; then
+            GREP_CMD="rg --noconfig"
         else 
-            cmd="grep --text -Ev '^[^$tab]+$tab$UPDATED_SOURCE$tab' '$TAGS_FILE' > '$TAGS_FILE.temp'"
+            GREP_CMD="grep -E"
         fi
+        cmd="${GREP_CMD} --text -v '^[^$tab]+$tab$UPDATED_SOURCE$tab' '$TAGS_FILE' > '$TAGS_FILE.temp'"
         echo "$cmd"
         eval "$cmd" || true
         INDEX_WHOLE_PROJECT=0
