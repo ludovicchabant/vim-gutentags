@@ -101,7 +101,7 @@ if [ -f "$TAGS_FILE" ]; then
         tab="	"
         # use ripgrep if available
         if command -v rg > /dev/null 2>&1; then
-            GREP_CMD="rg --noconfig"
+            GREP_CMD="rg --no-config"
         else 
             GREP_CMD="grep -E"
         fi
