@@ -7,8 +7,7 @@ quite honoured! Here's what you need to know.
 
 ## Writing
 
-Clone the repository from either [BitBucket][] (if you're into Mercurial) or
-[GitHub][] (if you're into Git).
+Clone the repository from [GitHub][].
 
 Next, create a branch for your work -- don't work directly on the `defaut` or
 `master` branch. Instead, in Mercurial:
@@ -55,6 +54,5 @@ limited free time on.
 That's it for now! And thanks a lot for contributing!
 
 
-[bitbucket]: https://bitbucket.org/ludovicchabant/vim-gutentags
 [github]: https://github.com/ludovicchabant/vim-gutentags
 
