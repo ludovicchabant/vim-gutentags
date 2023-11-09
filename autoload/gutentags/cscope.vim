@@ -83,9 +83,9 @@ function! gutentags#cscope#on_job_exit(job, exit_val) abort
             silent! execute 'cs reset'
         endif
     elseif !g:__gutentags_vim_is_leaving
-        call gutentags#warning(
-                    \"cscope job failed, returned: ".
-                    \string(a:exit_val))
+        " call gutentags#warning(
+        "             \"cscope job failed, returned: ".
+        "             \string(a:exit_val))
     endif
     if has('win32') && g:__gutentags_vim_is_leaving
         " The process got interrupted because Vim is quitting.
