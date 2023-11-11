@@ -67,13 +67,13 @@ function! gutentags#cscope_maps#on_job_exit(job, exit_val) abort
     let l:dbfile_path = gutentags#get_job_tags_file('cscope_maps', l:job_idx)
     call gutentags#remove_job('cscope_maps', l:job_idx)
 
-    if a:exit_val == 0
-        call gutentags#trace("NOOP! cscope_maps does not need add or reset command")
-    elseif !g:__gutentags_vim_is_leaving
-        call gutentags#warning(
-                    \"cscope job failed, returned: ".
-                    \string(a:exit_val))
-    endif
+    " if a:exit_val == 0
+    "     call gutentags#trace("NOOP! cscope_maps does not need add or reset command")
+    " elseif !g:__gutentags_vim_is_leaving
+    "     call gutentags#warning(
+    "                 \"cscope job failed, returned: ".
+    "                 \string(a:exit_val))
+    " endif
 endfunction
 
 " }}}

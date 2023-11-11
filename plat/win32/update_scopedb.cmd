@@ -64,15 +64,15 @@ echo locked > "%DB_FILE%.lock"
 
 echo Running cscope >> %LOG_FILE%
 if NOT ["%FILE_LIST_CMD%"]==[""] (
-    if ["%PROJECT_ROOT%"]==["."] (
-        for /F "usebackq delims=" %%F in (`%FILE_LIST_CMD%`) do @echo "%%F">%DB_FILE%.files
+    if ["%PROJECT_ROOT%"]==[""] (
+        for /F "usebackq delims=" %%F in (`%FILE_LIST_CMD%`) do @echo ".\%%F">>%DB_FILE%.files
     ) else (
         rem Potentially useful:
         rem http://stackoverflow.com/questions/9749071/cmd-iterate-stdin-piped-from-another-command
-        for /F "usebackq delims=" %%F in (`%FILE_LIST_CMD%`) do @echo "%PROJECT_ROOT%\%%F">%DB_FILE%.files
+        for /F "usebackq delims=" %%F in (`%FILE_LIST_CMD%`) do @echo "%PROJECT_ROOT%\%%F">>%DB_FILE%.files
     )
 ) ELSE (
-    for /F "usebackq delims=" %%F in (`dir /S /B /A-D .`) do @echo "%%F">%DB_FILE%.files
+    for /F "usebackq delims=" %%F in (`dir /S /B /A-D .`) do @echo "%%F">>%DB_FILE%.files
 )
 
 set FILESIZE=0
