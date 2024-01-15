@@ -46,6 +46,7 @@ if g:gutentags_add_default_project_roots
 endif
 
 let g:gutentags_project_root_finder = get(g:, 'gutentags_project_root_finder', '')
+let g:gutentags_always_absolute = get(g:, 'gutentags_always_absolute', 0)
 
 let g:gutentags_project_info = get(g:, 'gutentags_project_info', [])
 call add(g:gutentags_project_info, {'type': 'python', 'file': 'setup.py'})

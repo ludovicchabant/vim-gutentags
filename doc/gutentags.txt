@@ -396,6 +396,12 @@ g:gutentags_project_root_finder
                         behaviour by calling
                         `gutentags#default_get_project_root`.
 
+                                                *gutentags_always_absolute*
+g:gutentags_always_absolute
+                        Always resolve tags file as absolute, even if tags
+                        file is local.
+                        Defaults to 0.
+
                                                 *gutentags_generate_on_missing*
 g:gutentags_generate_on_missing
                         If set to 1, Gutentags will start generating an initial

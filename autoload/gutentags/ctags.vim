@@ -92,16 +92,23 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
         endif
     endif
 
-    " Get a tags file path relative to the current directory, which 
-    " happens to be the project root in this case.
-    " Since the given tags file path is absolute, and since Vim won't
-    " change the path if it is not inside the current directory, we
-    " know that the tags file is "local" (i.e. inside the project)
-    " if the path was shortened (an absolute path will always be
-    " longer than a true relative path).
-    let l:tags_file_relative = fnamemodify(a:tags_file, ':.')
-    let l:tags_file_is_local = len(l:tags_file_relative) < len(a:tags_file)
-    let l:use_tag_relative_opt = 0
+
+    if (g:gutentags_always_absolute)
+        let l:tags_file_relative = a:tags_file
+        let l:tags_file_is_local = 2 > 1 "True
+        let l:use_tag_relative_opt = 0
+    else
+        " Get a tags file path relative to the current directory, which 
+        " happens to be the project root in this case.
+        " Since the given tags file path is absolute, and since Vim won't
+        " change the path if it is not inside the current directory, we
+        " know that the tags file is "local" (i.e. inside the project)
+        " if the path was shortened (an absolute path will always be
+        " longer than a true relative path).
+        let l:tags_file_relative = fnamemodify(a:tags_file, ':.')
+        let l:tags_file_is_local = len(l:tags_file_relative) < len(a:tags_file)
+        let l:use_tag_relative_opt = 0
+    endif
 
     if empty(g:gutentags_cache_dir) && l:tags_file_is_local
         " If we don't use the cache directory, we can pass relative paths
@@ -169,8 +176,12 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
         " Omit --recursive if this project uses a file list command.
         let l:cmd += ['-o', '"' . gutentags#get_res_file('ctags_recursive.options') . '"']
     endif
-    if l:use_tag_relative_opt
-        let l:cmd += ['-O', shellescape("--tag-relative=yes")]
+    if (g:gutentags_always_absolute)
+        let l:cmd += ['-O', shellescape("--tag-relative=never")]
+    else
+        if l:use_tag_relative_opt
+            let l:cmd += ['-O', shellescape("--tag-relative=yes")]
+        endif
     endif
     for extra_arg in g:gutentags_ctags_extra_args
         let l:cmd += ['-O', shellescape(extra_arg)]
