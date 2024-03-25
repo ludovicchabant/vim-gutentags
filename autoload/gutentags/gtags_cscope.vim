@@ -95,6 +95,21 @@ function! gutentags#gtags_cscope#generate(proj_dir, tags_file, gen_opts) abort
     " gtags doesn't honour GTAGSDBPATH and GTAGSROOT, so PWD and dbpath
     " have to be set
     let l:db_path = fnamemodify(a:tags_file, ':p:h')
+
+    " In order to prevent errors caused by quitting in the middle of gtag
+    " generation(because when we exit prematurely, no information has been
+    " written to the gtags file, and the file size is 0. If we use the
+    " `gtags --incremental path` command at this time, the error
+    " "GTAGS seems to be corrupted" will be reported.), we need to
+    " automatically delete empty gtags files.
+    let files = split(globpath(l:db_path, '*'), '\n')
+    for file in files
+        let file_size = getfsize(file)
+        if file_size == 0
+            try | call delete(file) | endtry
+        endif
+    endfor
+
     let l:cmd += ['--incremental', '"'.l:db_path.'"']
 
     let l:cmd = gutentags#make_args(l:cmd)
